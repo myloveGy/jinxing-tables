@@ -6,7 +6,7 @@
  * Time: 17:42
  */
 
-class Pdo
+class PdoObject
 {
     private static $pdo = null;
 
@@ -27,9 +27,8 @@ class Pdo
     }
 
     /**
-     * getInstance() 获取redis信息
      * @param array $options
-     * @return null|\Redis
+     * @return null|PDO
      */
     public static function getInstance($options = [])
     {
@@ -55,6 +54,6 @@ class Pdo
             }
         }
 
-        // return self::$pdo;
+         return self::$pdo;
     }
 }

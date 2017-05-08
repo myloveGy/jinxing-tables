@@ -2,15 +2,14 @@
 // 设置头信息
 header('Content-Type:text/html; charset=UTF-8');
 
-include './includes/Pdo.php';
+include './includes/PdoObject.php';
 
-$mysql = Pdo::getInstance([
+$mysql = PdoObject::getInstance([
     'user' => 'root',
     'password' => 'gongyan',
-    'dbname' => 'yii2'
+    'dbname' => 'test'
 ]);
 
-var_dump($mysql);
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
