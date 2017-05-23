@@ -39,19 +39,14 @@ class PdoObject
             if (empty(self::$options['dns'])) {
                 switch (self::$options['type']) {
                     case 'mysql':
-                        self::$options['dns'] = self::$options['type'].':host='.self::$options['host'].';port='.self::$options['port'].';dbname='.self::$options['dbname'];
+                        self::$options['dns'] = self::$options['type'].':host='.self::$options['host'].';port='.self::$options['port'].';dbname='.self::$options['dbname'].';charset='.self::$options['charset'];
                         break;
                     default:
                 }
             }
 
-            var_dump(self::$options);
-
             // 实例化对象
             self::$pdo = new \PDO(self::$options['dns'], self::$options['user'], self::$options['password']);
-            if (self::$options['type'] == 'mysql') {
-                self::$pdo->exec('SET NAMES '.self::$options['charset']);
-            }
         }
 
          return self::$pdo;

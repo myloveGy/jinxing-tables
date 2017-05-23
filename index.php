@@ -84,7 +84,7 @@ if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search'
     <link href="./public/css/bootstrap.min.css" rel="stylesheet">
     <link href="./public/css/font-awesome.min.css" rel="stylesheet">
     <style type="text/css">
-        div.main {margin-top:70px;}
+        div.main {margin-top:50px;}
         p.bg-success {padding:10px;}
         .m-coll {margin-top:3px;}
         .isHide {display:none}
@@ -123,7 +123,7 @@ if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search'
         </div>
     </div>
 </div>
-
+<!-- 加载公共js -->
 <script src="./public/js/jquery.min.js"></script>
 <script src="./public/js/bootstrap.min.js"></script>
 <script src="./public/js/jquery.dataTables.min.js"></script>

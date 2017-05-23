@@ -41,7 +41,7 @@ var mt = meTables({
 <table class="table table-striped table-bordered table-hover" id="show-table"></table>
 ```
 #### 生成视图
-![试图文件](../../images/desc5.png)
+![试图文件](./public/images/desc5.png)
 
 #### 服务器返回数据说明
 * 查询返回json
