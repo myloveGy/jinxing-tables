@@ -41,6 +41,10 @@ var m = meTables({
         ]
     }
 });
+
+$(window).ready(function(){
+    m.init();
+});
 </script>
 ```
 
