@@ -13,9 +13,16 @@ meTables.js 基于 jquery.dataTables.js 表格
 * jQuery Validation Plugin - v1.14.0
 
 ### 简单使用
-#### js 
-```js
-var mt = meTables({
+#### html
+```html
+<!-- 按钮信息 -->
+<p id="me-table-buttons"></p>
+
+<!-- 表格数据 -->
+<table class="table table-striped table-bordered table-hover" id="show-table"></table>
+
+<script>
+var m = meTables({
     title: "地址信息",
     table: {
         "aoColumns":[
@@ -34,12 +41,9 @@ var mt = meTables({
         ]
     }
 });
+</script>
 ```
-#### html
-```html
-<p id="me-table-buttons"></p>
-<table class="table table-striped table-bordered table-hover" id="show-table"></table>
-```
+
 #### 生成视图
 ![试图文件](./public/images/desc5.png)
 
