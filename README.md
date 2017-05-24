@@ -3,7 +3,7 @@ meTables.js 基于 jquery.dataTables.js 表格
 
 ### 简介
 
-因为jquery.dataTables.js 只是显示数据，没有自带的编辑、新增、删除数据的功能，需要依靠扩展实现，所以自己写了一个编辑、新增、删除数据的个功能
+因为jquery.dataTables.js 只是显示数据，没有自带的编辑、新增、删除数据的功能，需要依靠扩展实现，所以自己写了一个编辑、新增、删除数据的功能
 
 ### 依赖声明
 * jQuery v2.1.1 
@@ -22,6 +22,22 @@ meTables.js 基于 jquery.dataTables.js 表格
 <table class="table table-striped table-bordered table-hover" id="show-table"></table>
 
 <script>
+/**
+ * 简单配置说明
+ * title 配置表格名称
+ * table DataTables 的配置 
+ * --- aoColumns 中的 value, search, edit, defaultOrder, isHide 是 meTables 的配置
+ * ------ value 为编辑表单radio、select, checkbox， 搜索的表单的select 提供数据源,格式为一个对象 {"值": "显示信息"}
+ * ------ search 搜索表单配置(不配置不会生成查询表单), type 类型支持 text, select 其他可以自行扩展
+ * ------ edit 编辑表单配置（不配置不会生成编辑表单）, 
+ * --------- type 类型支持hidden, text, password, file, radio, select, checkbox, textarea 等等 
+ * --------- meTable.inputCreate 等后缀函数为其生成表单元素，可以自行扩展
+ * --------- 除了表单元素自带属性，比如 required: true, number: true 等为 jquery.validate.js 的验证配置
+ * --------- 最终生成表单元素 <input name="name" required="true" number="true" />
+ * ------ defaultOrder 设置默认排序的方式(有"ace", "desc")
+ * ------ isHide 该列是否需要隐藏 true 隐藏
+ * 其他配置查看 meTables 配置
+ */
 var m = meTables({
     title: "地址信息",
     table: {
@@ -50,6 +66,137 @@ $(window).ready(function(){
 
 #### 生成视图
 ![试图文件](./public/images/desc5.png)
+
+#### 关于搜索条件和排序字段的处理
+
+搜索表单的查询信息以及排序条件都会拼接到dataTables 提交数据中
+
+```js
+
+    meTables.fnServerData = function(sSource, aoData, fnCallback) {
+        var attributes = aoData[2].value.split(","),
+            mSort 	   = (attributes.length + 1) * 5 + 2;
+
+        // 添加查询条件
+        var data = $(meTables.fn.options.searchForm).serializeArray();
+        for (i in data) {
+            if (!meTables.empty(data[i]["value"]) && data[i]["value"] != "All") {
+                aoData.push({"name": "params[" + data[i]['name'] + "]", "value": data[i]["value"]});
+            }
+        }
+
+        // 添加排序字段信息
+        meTables.fn.push(aoData, {"orderBy": attributes[parseInt(aoData[mSort].value)]}, "params");
+
+        // 添加其他字段信息
+        meTables.fn.push(aoData, meTables.fn.options.params, "params");
+
+        // ajax请求
+        meTables.ajax({
+            url: sSource,
+            data: aoData,
+            type: meTables.fn.options.sMethod,
+            dataType: 'json'
+        }).done(function(data){
+            if (data.errCode != 0) {
+                return layer.msg(meTables.fn.getLanguage("sAppearError") + data.errMsg, {
+                    time:2000,
+                    icon:5
+                });
+            }
+
+            fnCallback(data.data);
+        });
+    };
+
+```
+
+#### 服务器数据的处理(PHP代码)
+
+```php
+// 默认使用的POST提交的数据
+
+// 请求次数
+$intEcho = isset($_POST['sEcho']) ? (int)$_POST['sEcho'] : 0;
+
+// 查询参数(查询条件排序字段)
+$params = isset($_POST['params']) ? $_POST['params'] : [];
+
+// 查询开始位置(分页启始位置)
+$intStart = isset($_POST['iDisplayStart']) ? (int)$_POST['iDisplayStart'] : 0; 
+
+// 查询数据条数
+$intLength = isset($_POST['iDisplayLength']) ? (int)$_POST['iDisplayLength'] : 10;
+
+// 排序的方式
+$sort = isset($_POST['sSortDir_0']) ? trim($_POST['sSortDir_0']) : 'desc';
+
+// 处理排序字段
+if (isset($params['orderBy']) && !empty($params['orderBy'])) {
+    $field = trim($params['orderBy']);
+    unset($params['orderBy']);
+} else {
+    $field = 'id';
+}
+
+// 处理查询条件
+if (!empty($params)) {
+
+    /**
+     * 这里的$params 其实就是前台搜索表单中的数据(查询字段对应值的一个数组)
+     * ['id' => '1', 'name' => '湖南']
+     */
+     
+    $arrWhere = $bindParams = [];
+    foreach ($params as $key => $value) {
+        // 具体对应查询条件根据实际情况处理，我这里使用最简单的处理方式('=')
+        $arrWhere[] = '`'.$key.'` = ?';
+        $bindParams[] = trim($value);
+    }
+     
+    $where = ' WHERE '.implode(' AND ', $arrWhere);
+} else {
+    $where = '';
+    $bindParams = [];
+}
+
+// 实例化PDO类
+$pdo = new PDO('mysql:host=127.0.0.1;port=3306;dbname=yii2;charset=utf8', 'root', 'gongyan');
+
+// 查询数据总条数
+$intTotal = 0;
+$strCount = 'SELECT COUNT(*) AS `total` FROM `yii2_admin` ' . $where;
+$stem = $pdo->prepare($strCount);
+if ($stem->execute($bindParams)) {
+	$array = $stem->fetch(PDO::FETCH_ASSOC);
+	$intTotal = (int)$array['total'];
+}
+
+// 查询具体数据
+if ($intTotal > 0) {
+	$strSql = 'SELECT * FROM `yii2_admin` ' . $where . ' ORDER BY `' . $field . '` ' . $sort . ' LIMIT '.$intStart.','.$intLength;
+	$stem = $pdo->prepare($strSql);
+	if ($stem->execute($bindParams)) {
+		$data = $stem->fetchAll(PDO::FETCH_ASSOC);
+	}
+} else {
+	$data = [];
+}
+
+// 返回json数据
+header('application/json; charset=utf-8');
+exit(json_encode([
+	'errCode' => 0,
+	'errMsg' => 'success',
+	'data' => [
+		'sEcho' => $intEcho,  					// 请求次数
+        'iTotalRecords' => count($data),        // 当前页条数
+        'iTotalDisplayRecords' => $intTotal,  	// 数据总条数
+        'aaData' => $data,						// 数据信息
+    ]  
+], 320));
+
+```
 
 #### 服务器返回数据说明
 * 查询返回json
