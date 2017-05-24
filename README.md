@@ -161,35 +161,37 @@ if (!empty($params)) {
 }
 
 // 实例化PDO类
-$pdo = new PDO('mysql:host=127.0.0.1;port=3306;dbname=yii2;charset=utf8', 'root', 'gongyan');
+$pdo = new PDO('mysql:host=127.0.0.1;port=3306;dbname=test;charset=utf8', 'user', 'password');
+
+$table = 'china';
 
 // 查询数据总条数
 $intTotal = 0;
-$strCount = 'SELECT COUNT(*) AS `total` FROM `yii2_admin` ' . $where;
+$strCount = 'SELECT COUNT(*) AS `total` FROM `' . $table . '` ' . $where;
 $stem = $pdo->prepare($strCount);
 if ($stem->execute($bindParams)) {
-	$array = $stem->fetch(PDO::FETCH_ASSOC);
-	$intTotal = (int)$array['total'];
+    $array = $stem->fetch(PDO::FETCH_ASSOC);
+    $intTotal = (int)$array['total'];
 }
 
 // 查询具体数据
 if ($intTotal > 0) {
-	$strSql = 'SELECT * FROM `yii2_admin` ' . $where . ' ORDER BY `' . $field . '` ' . $sort . ' LIMIT '.$intStart.','.$intLength;
-	$stem = $pdo->prepare($strSql);
-	if ($stem->execute($bindParams)) {
-		$data = $stem->fetchAll(PDO::FETCH_ASSOC);
-	}
+    $strSql = 'SELECT * FROM `' . $table . '` ' . $where . ' ORDER BY `' . $field . '` ' . $sort . ' LIMIT '.$intStart.','.$intLength;
+    $stem = $pdo->prepare($strSql);
+    if ($stem->execute($bindParams)) {
+        $data = $stem->fetchAll(PDO::FETCH_ASSOC);
+    }
 } else {
-	$data = [];
+    $data = [];
 }
 
 // 返回json数据
 header('application/json; charset=utf-8');
 exit(json_encode([
-	'errCode' => 0,
-	'errMsg' => 'success',
-	'data' => [
-		'sEcho' => $intEcho,  					// 请求次数
+    'errCode' => 0,
+    'errMsg' => 'success',
+    'data' => [
+        'sEcho' => $intEcho,  					// 请求次数
         'iTotalRecords' => count($data),        // 当前页条数
         'iTotalDisplayRecords' => $intTotal,  	// 数据总条数
         'aaData' => $data,						// 数据信息
