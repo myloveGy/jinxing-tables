@@ -38,6 +38,29 @@ meTables.js 基于 jquery.dataTables.js 表格
  * ------ isHide 该列是否需要隐藏 true 隐藏
  * 其他配置查看 meTables 配置
  */
+
+// 自定义表单处理方式
+meTables.extend({
+    /**
+     * 定义编辑表单(函数后缀名Create)
+     * 使用配置 edit: {"type": "email", "id": "user-email"}
+     * edit 里面配置的信息都通过 params 传递给函数
+     */
+    "emailCreate": function(params) {
+        return '<input type="email" name="' + params.name + '"/>';
+    },
+    
+    /**
+     * 定义搜索表达(函数后缀名SearchCreate)
+     * 使用配置 search: {"type": "email", "id": "search-email"}
+     * search 里面配置的信息都通过 params 传递给函数
+     */
+    "emailSearchCreate": function(prams) {
+        return '<input type="text" name="' + params.name +'">';
+    }
+});
+
+
 var m = meTables({
     title: "地址信息",
     table: {
