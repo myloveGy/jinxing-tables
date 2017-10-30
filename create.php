@@ -3,6 +3,7 @@
 header('Content-Type:text/html; charset=UTF-8');
 
 $arrConfig = [
+    'host' => 'localhost',
     'user' => 'root',
     'password' => 'gongyan',
     'dbname' => 'test',
@@ -265,6 +266,10 @@ if (isset($_GET) && isset($_GET['action'])) {
                 <div role="tabpanel" class="tab-pane active" id="db-div">
                     <div class="col-md-12 mt20">
                         <form action="./create.php?action=table" method="post" id="db-form">
+                            <div class="form-group">
+                                <label for="db-host">数据库地址</label>
+                                <input type="text" required="true" rangelength="[2, 20]" name="host" class="form-control" value="<?=$arrConfig['host']?>" id="db-host" placeholder="数据库地址">
+                            </div>
                             <div class="form-group">
                                 <label for="db-user">数据库用户名</label>
                                 <input type="text" required="true" rangelength="[2, 20]" name="user" class="form-control" value="<?=$arrConfig['user']?>" id="db-user" placeholder="用户名">
