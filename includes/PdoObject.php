@@ -44,7 +44,7 @@ class PdoObject
                     default:
                 }
             }
-
+			
             // 实例化对象
             self::$pdo = new \PDO(self::$options['dns'], self::$options['user'], self::$options['password']);
         }

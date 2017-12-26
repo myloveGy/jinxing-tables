@@ -7,6 +7,7 @@ $arrConfig = [
     'user' => 'root',
     'password' => 'gongyan',
     'dbname' => 'test',
+	'port' => 3306
 ];
 
 /**
@@ -269,6 +270,10 @@ if (isset($_GET) && isset($_GET['action'])) {
                             <div class="form-group">
                                 <label for="db-host">数据库地址</label>
                                 <input type="text" required="true" rangelength="[2, 20]" name="host" class="form-control" value="<?=$arrConfig['host']?>" id="db-host" placeholder="数据库地址">
+                            </div>
+							<div class="form-group">
+                                <label for="db-host">数据库端口</label>
+                                <input type="text" required="true" rangelength="[2, 20]" name="port" number="true" class="form-control" value="<?=$arrConfig['port']?>" id="db-port" placeholder="数据库端口">
                             </div>
                             <div class="form-group">
                                 <label for="db-user">数据库用户名</label>
