@@ -209,7 +209,7 @@ if ($intTotal > 0) {
 }
 
 // 返回json数据
-header('application/json; charset=utf-8');
+header('Content-Type: application/json; charset=utf-8');
 exit(json_encode([
     'errCode' => 0,
     'errMsg' => 'success',
