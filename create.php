@@ -3,30 +3,31 @@
 header('Content-Type:text/html; charset=UTF-8');
 
 $arrConfig = [
-    'host' => 'localhost',
-    'user' => 'root',
+    'host'     => 'localhost',
+    'user'     => 'root',
     'password' => 'gongyan',
-    'dbname' => 'test',
-	'port' => 3306
+    'dbname'   => 'test',
+    'port'     => 3306
 ];
 
 /**
  * createForm() 生成表格配置表单信息
  * @access private
- * @param  array  $array  数据表信息
- * return  string 返回HTML
+ *
+ * @param  array $array 数据表信息
+ *                      return  string 返回HTML
  */
 function createForm($array)
 {
     $strHtml = '';
     foreach ($array as $value) {
         $key     = $value['Field'];
-        $sTitle  = isset($value['Comment']) && ! empty($value['Comment']) ? $value['Comment'] : $value['Field'];
+        $sTitle  = isset($value['Comment']) && !empty($value['Comment']) ? $value['Comment'] : $value['Field'];
         $sOption = isset($value['Null']) && $value['Null'] == 'NO' ? '"required": true,' : '';
         if (stripos($value['Type'], 'int(') !== false) $sOption .= '"number": true,';
         if (stripos($value['Type'], 'varchar(') !== false) {
-            $sLen = trim(str_replace('varchar(', '', $value['Type']), ')');
-            $sOption .= '"rangelength": "[2, '.$sLen.']"';
+            $sLen    = trim(str_replace('varchar(', '', $value['Type']), ')');
+            $sOption .= '"rangelength": "[2, ' . $sLen . ']"';
         }
 
         $sOther = stripos($value['Field'], '_at') !== false ? 'mt.dateTimeString' : '';
@@ -70,9 +71,11 @@ HTML;
 
 /**
  * createHtml() 生成预览HTML文件
+ *
  * @param  array  $array 接收表单配置文件
  * @param  string $title 标题信息
  * @param  string $path  文件地址
+ *
  * @return string 返回 字符串
  */
 function createHtml($array, $title)
@@ -80,7 +83,7 @@ function createHtml($array, $title)
     $strHtml = '';
     if ($array) {
         foreach ($array as $key => $value) {
-            $html = "\t\t\t{\"title\": \"{$value['title']}\", \"data\": \"{$key}\", \"sName\": \"{$key}\", ";
+            $html = "\t\t\t{\"title\": \"{$value['title']}\", \"data\": \"{$key}\", ";
 
             // 编辑
             if ($value['edit'] == 1) $html .= "\"edit\": {\"type\": \"{$value['type']}\", " . trim($value['options'], ',') . "}, ";
@@ -94,13 +97,15 @@ function createHtml($array, $title)
             if ($value['bSortable'] == 0) $html .= '"bSortable": false, ';
 
             // 回调
-            if (!empty($value['createdCell'])) $html .= '"createdCell" : '.$value['createdCell'].', ';
+            if (!empty($value['createdCell'])) $html .= '"createdCell" : ' . $value['createdCell'] . ', ';
 
-            $strHtml .= trim($html, ', ')."}, \n";
+            $strHtml .= trim($html, ', ') . "}, \n";
         }
+
+        $strHtml = trim($strHtml, ", \n");
     }
 
-$strHtml =  <<<html
+    $strHtml = <<<html
     <!-- 表格按钮 -->
     <p id="me-table-buttons"></p>
     <!-- 表格数据 -->
@@ -150,8 +155,8 @@ html;
 if (isset($_GET) && isset($_GET['action'])) {
     $arrReturn = [
         'errCode' => 1,
-        'errMsg' => '请求参数为空',
-        'data' => null,
+        'errMsg'  => '请求参数为空',
+        'data'    => null,
     ];
 
     switch ($_GET['action']) {
@@ -160,10 +165,10 @@ if (isset($_GET) && isset($_GET['action'])) {
             if (isset($_POST) && $_POST && isset($_POST['table']) && !empty($_POST['table'])) {
                 $strTable = trim($_POST['table']);
                 unset($_POST['table']);
-                $params = array_merge($arrConfig, $_POST);
-                $mysql = PdoObject::getInstance($params);
-                $pdoStatement = $mysql->query('SHOW TABLES');
-                $array = $pdoStatement->fetchAll(PDO::FETCH_NUM);
+                $params              = array_merge($arrConfig, $_POST);
+                $mysql               = PdoObject::getInstance($params);
+                $pdoStatement        = $mysql->query('SHOW TABLES');
+                $array               = $pdoStatement->fetchAll(PDO::FETCH_NUM);
                 $arrReturn['errMsg'] = '数据表不存在';
                 if ($array) {
                     $isHave = false;
@@ -175,11 +180,11 @@ if (isset($_GET) && isset($_GET['action'])) {
                     }
 
                     if ($isHave) {
-                        $pdoStatement = $mysql->query('SHOW FULL COLUMNS FROM `'.$strTable.'`');
-                        $array = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+                        $pdoStatement         = $mysql->query('SHOW FULL COLUMNS FROM `' . $strTable . '`');
+                        $array                = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
                         $arrReturn['errCode'] = 0;
-                        $arrReturn['errMsg'] = 'success';
-                        $arrReturn['data'] = createForm($array);
+                        $arrReturn['errMsg']  = 'success';
+                        $arrReturn['data']    = createForm($array);
                     }
                 }
             }
@@ -189,8 +194,8 @@ if (isset($_GET) && isset($_GET['action'])) {
             if (isset($_POST) && $_POST && isset($_POST['title']) && !empty($_POST['title'])) {
                 $arrReturn = [
                     'errCode' => 0,
-                    'errMsg' => 'success',
-                    'data' => highlight_string(createHtml($_POST['attr'], $_POST['title']), true),
+                    'errMsg'  => 'success',
+                    'data'    => highlight_string(createHtml($_POST['attr'], $_POST['title']), true),
                 ];
             }
 
@@ -217,11 +222,25 @@ if (isset($_GET) && isset($_GET['action'])) {
     <link href="./public/css/bootstrap.min.css" rel="stylesheet">
     <link href="./public/css/font-awesome.min.css" rel="stylesheet">
     <style type="text/css">
-        div.main {margin-top:70px;}
-        .mt20 {margin-top:20px}
-        p.bg-success {padding:10px;}
-        .m-coll {margin-top:3px;}
-        .isHide {display:none}
+        div.main {
+            margin-top: 70px;
+        }
+
+        .mt20 {
+            margin-top: 20px
+        }
+
+        p.bg-success {
+            padding: 10px;
+        }
+
+        .m-coll {
+            margin-top: 3px;
+        }
+
+        .isHide {
+            display: none
+        }
     </style>
 </head>
 <body role="document">
@@ -229,7 +248,8 @@ if (isset($_GET) && isset($_GET['action'])) {
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -255,7 +275,8 @@ if (isset($_GET) && isset($_GET['action'])) {
                     <a href="#db-div" aria-controls="db-div" role="tab" data-toggle="tab">数据库配置</a>
                 </li>
                 <li role="presentation">
-                    <a href="#view-edit" aria-controls="view-edit" role="tab" data-toggle="tab" id="tab-view-edit">视图编辑</a>
+                    <a href="#view-edit" aria-controls="view-edit" role="tab" data-toggle="tab"
+                       id="tab-view-edit">视图编辑</a>
                 </li>
                 <li role="presentation">
                     <a href="#view" aria-controls="view" role="tab" data-toggle="tab" id="tab-view">生成视图文件</a>
@@ -269,27 +290,37 @@ if (isset($_GET) && isset($_GET['action'])) {
                         <form action="./create.php?action=table" method="post" id="db-form">
                             <div class="form-group">
                                 <label for="db-host">数据库地址</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="host" class="form-control" value="<?=$arrConfig['host']?>" id="db-host" placeholder="数据库地址">
+                                <input type="text" required="true" rangelength="[2, 20]" name="host"
+                                       class="form-control" value="<?= $arrConfig['host'] ?>" id="db-host"
+                                       placeholder="数据库地址">
                             </div>
-							<div class="form-group">
+                            <div class="form-group">
                                 <label for="db-host">数据库端口</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="port" number="true" class="form-control" value="<?=$arrConfig['port']?>" id="db-port" placeholder="数据库端口">
+                                <input type="text" required="true" rangelength="[2, 20]" name="port" number="true"
+                                       class="form-control" value="<?= $arrConfig['port'] ?>" id="db-port"
+                                       placeholder="数据库端口">
                             </div>
                             <div class="form-group">
                                 <label for="db-user">数据库用户名</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="user" class="form-control" value="<?=$arrConfig['user']?>" id="db-user" placeholder="用户名">
+                                <input type="text" required="true" rangelength="[2, 20]" name="user"
+                                       class="form-control" value="<?= $arrConfig['user'] ?>" id="db-user"
+                                       placeholder="用户名">
                             </div>
                             <div class="form-group">
                                 <label for="db-password">数据库密码</label>
-                                <input type="password" required="true" rangelength="[2, 20]" name="password" class="form-control" value="<?=$arrConfig['password']?>" id="db-password" placeholder="密码">
+                                <input type="password" rangelength="[1, 100]" name="password" class="form-control"
+                                       value="<?= $arrConfig['password'] ?>" id="db-password" placeholder="密码">
                             </div>
                             <div class="form-group">
                                 <label for="db-name">数据库名称</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="dbname" class="form-control" value="<?=$arrConfig['dbname']?>" id="db-name" placeholder="数据库名称">
+                                <input type="text" required="true" rangelength="[2, 20]" name="dbname"
+                                       class="form-control" value="<?= $arrConfig['dbname'] ?>" id="db-name"
+                                       placeholder="数据库名称">
                             </div>
                             <div class="form-group">
                                 <label for="db-table">数据表名称</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="table" class="form-control" id="db-table" placeholder="数据表名称">
+                                <input type="text" required="true" rangelength="[2, 20]" name="table"
+                                       class="form-control" id="db-table" placeholder="数据表名称">
                             </div>
                             <button type="submit" class="btn btn-success">提交</button>
                         </form>
@@ -319,9 +350,9 @@ if (isset($_GET) && isset($_GET['action'])) {
 <script src="./public/js/meTables.js"></script>
 <script src="./public/js/layer/layer.js"></script>
 <script type="text/javascript">
-    $(function(){
+    $(function () {
         // 查询数据库
-        $("#db-form").submit(function(evt){
+        $("#db-form").submit(function (evt) {
             var $fm = $(this);
             evt.preventDefault();
             if ($(this).validate().form()) {
@@ -330,7 +361,7 @@ if (isset($_GET) && isset($_GET['action'])) {
                     data: $fm.serialize(),
                     type: $fm.prop("method"),
                     dataType: "json"
-                }).done(function(json){
+                }).done(function (json) {
                     if (json.errCode === 0) {
                         $("#edit-form").html(json.data + '<div class="form-group">\
                         <label for="db-name">标题</label>\
@@ -338,14 +369,15 @@ if (isset($_GET) && isset($_GET['action'])) {
                             </div><button type="submit" class="btn btn-success">提交</button>');
                         $("#tab-view-edit").trigger("click");
                     } else {
-                        layer.msg(json.errMsg, {icon:5})
+                        layer.msg(json.errMsg, {icon: 5})
                     }
                 });
-            };
+            }
+            ;
         });
 
         // 生成试图文件
-        $("#edit-form").submit(function(evt){
+        $("#edit-form").submit(function (evt) {
             var $fm = $(this);
             evt.preventDefault();
             mt.ajax({
@@ -353,12 +385,12 @@ if (isset($_GET) && isset($_GET['action'])) {
                 data: $fm.serialize(),
                 type: $fm.prop("method"),
                 dataType: "json"
-            }).done(function(json){
+            }).done(function (json) {
                 if (json.errCode === 0) {
                     $("#view-code").html(json.data);
                     $("#tab-view").trigger("click");
                 } else {
-                    layer.msg(json.errMsg, {icon:5})
+                    layer.msg(json.errMsg, {icon: 5})
                 }
             });
         });
