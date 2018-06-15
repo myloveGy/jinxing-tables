@@ -6,7 +6,14 @@
  * Time: 17:03
  */
 
-function find($data, $id) {
+/**
+ * @param $data
+ * @param $id
+ *
+ * @return bool|int|string
+ */
+function find($data, $id)
+{
     $mixReturn = false;
     foreach ($data as $key => $value) {
         if ($value['id'] == $id) {
@@ -18,13 +25,15 @@ function find($data, $id) {
     return $mixReturn;
 }
 
-function dataCreate(&$data, $update) {
+function dataCreate(&$data, $update)
+{
     $update['id'] = mt_rand(10000, 99999);
     array_push($data, $update);
     return $data;
 }
 
-function dataUpdate($data, $id, $update) {
+function dataUpdate($data, $id, $update)
+{
     $key = find($data, $id);
     if ($key !== false) {
         $data[$key] = $update;
@@ -33,7 +42,8 @@ function dataUpdate($data, $id, $update) {
     return $data;
 }
 
-function dataDelete($data, $id) {
+function dataDelete($data, $id)
+{
     $key = find($data, $id);
     if ($key !== false) {
         unset($data[$key]);
