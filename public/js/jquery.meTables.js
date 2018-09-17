@@ -40,7 +40,7 @@
                 url: self.getUrl("search"),
                 dataSrc: function (json) {
                     console.info(json);
-                    return json.data;
+                    return json.data.data;
                 },
                 data: function (d) {
                     // 第一步：分页必须的参数
