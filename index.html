@@ -1,56 +1,9 @@
-<?php
-// 设置头信息
-header('Content-Type:text/html; charset=UTF-8');
-session_start();
-
-include './includes/data.php';
-include './includes/functions.php';
-
-if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'delete'])) {
-    $array = [
-        'errCode' => 1,
-        'errMsg'  => '请求参数错误问题',
-        'data'    => null,
-    ];
-
-    switch ($type) {
-        case 'search':
-            $offset  = (int)get('offset', 0); // 查询开始位置
-            $limit   = (int)get('limit', 10); // 查询长度
-            $draw    = (int)get('draw', 0);   // 请求次数
-            $data    = get_data();
-            $arrData = array_splice($data, $offset, $limit);
-            success([
-                'draw'            => $draw,
-                'recordsTotal'    => count($data),
-                'recordsFiltered' => count($data),
-                'data'            => $arrData
-            ]);
-            break;
-        case 'create':
-            $_SESSION['data'] = dataCreate($_SESSION['data'], $_POST);
-            success($_POST);
-            break;
-        case 'update':
-            $_SESSION['data'] = dataUpdate($_SESSION['data'], $_POST['id'], $_POST);
-            success($_POST);
-            break;
-        case 'delete':
-            $_SESSION['data'] = dataDelete($_SESSION['data'], $_POST['id']);
-            success($_POST);
-            break;
-    }
-
-    error(405, '请求失败');
-}
-?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
     <meta name="description" content="">
     <meta name="author" content="">
@@ -58,6 +11,7 @@ if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'del
     <!-- Bootstrap core CSS -->
     <link href="./public/css/bootstrap.min.css" rel="stylesheet">
     <link href="./public/css/font-awesome.min.css" rel="stylesheet">
+    <link href="./public/css/dataTables.bootstrap.css" rel="stylesheet">
     <style type="text/css">
         div.main {
             margin-top: 50px;
@@ -119,26 +73,35 @@ if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'del
 <script src="./public/js/layer/layer.js"></script>
 <script src="./public/js/jquery.meTables.js"></script>
 <script type="text/javascript">
+    var m = null;
     $(function () {
-        $("#show-table").meTables({
+        m = $("#show-table").meTables({
             title: "示例",
+            params: {
+                url: 123,
+                love: 456,
+            },
             url: {
-                search: "./index.php?type=search",
-                create: "./index.php?type=create",
-                update: "./index.php?type=update",
-                delete: "./index.php?type=delete"
+                search: "./action.php?type=search",
+                create: "./action.php?type=create",
+                update: "./action.php?type=update",
+                delete: "./action.php?type=delete"
             },
             table: {
                 "columns": [
                     {
-                        "title": "id", "data": "id", "sName": "id", "defaultOrder": "desc",
-                        "edit": {"type": "hidden"}
+                        title: "id", data: "id",
+                        defaultOrder: "desc",
+                        edit: {type: "hidden"}
                     },
                     {
-                        "title": "名称", "data": "name", "sName": "name",
-                        "edit": {"type": "text", "required": true, "rangelength": "[2, 40]"},
-                        "search": {"type": "text"},
-                        "bSortable": false
+                        title: "名称", data: "name",
+                        edit: {
+                            required: true,
+                            rangelength: "[2, 40]"
+                        },
+                        search: {type: "text"},
+                        sortable: false
                     }
                 ]
             }

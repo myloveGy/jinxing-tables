@@ -24,6 +24,23 @@
         return fmt;
     };
 
+    // 获取数组信息
+    $.getValue = function (arrValue, key, defaultValue) {
+        if (key in arrValue) {
+            return arrValue[key];
+        }
+
+        if (typeof key === "string") {
+            var index = key.lastIndexOf(".");
+            if (key.lastIndexOf(".") !== -1) {
+                arrValue = $.getValue(arrValue, key.substr(0, index), defaultValue);
+                key = key.substr(index + 1);
+            }
+        }
+
+        return arrValue[key] ? arrValue[key] : defaultValue;
+    };
+
     // 初始化处理
     var MeTables = function (options) {
         // 获取地址
@@ -38,10 +55,6 @@
             var self = this;
             this.options.table.ajax = {
                 url: self.getUrl("search"),
-                dataSrc: function (json) {
-                    console.info(json);
-                    return json.data.data;
-                },
                 data: function (d) {
                     // 第一步：分页必须的参数
                     var return_object = [];
@@ -78,9 +91,26 @@
                         }
                     });
 
+                    // 第五步：添加附加数据
+                    if (self.options.params) {
+                        for (var i in self.options.params) {
+                            return_object.push({name: i, value: self.options.params[i]});
+                        }
+                    }
+
                     return return_object;
                 }
             }
+        }
+
+        // 操作按钮
+        if (this.options.operations) {
+            this.options.table.columns.push(this.options.operations);
+        }
+
+        // 多选项
+        if (this.options.checkbox) {
+            this.options.table.columns.unshift(this.options.checkbox);
         }
 
         // 初始化主要表格
@@ -156,8 +186,20 @@
         modalSelector: "#table-modal",  // 编辑Modal选择器
         formSelector: "#edit-form",	    // 编辑表单选择器
         method: "POST",			        // 查询数据的请求方式
-        checkbox: true,			        // 需要多选框
-        checkboxWidth: "auto",          // 设置宽度
+        checkbox: {
+            data: null,
+            sortable: false,
+            class: "center",
+            title: "<label class=\"position-relative\">" +
+                "<input type=\"checkbox\" class=\"ace\" /><span class=\"lbl\"></span></label>",
+            view: false,
+            createdCell: function (td, data, array, row) {
+                $(td).html('<label class="position-relative">' +
+                    '<input type="checkbox" class="ace" data-row="' + row + '" />' +
+                    '<span class="lbl"></span>' +
+                    '</label>');
+            }
+        },			        // 需要多选框
         params: null,				    // 请求携带参数
         ajaxRequest: false,             // ajax一次性获取数据
         searchHtml: "",				    // 搜索信息额外HTML
@@ -247,7 +289,8 @@
             autoWidth: false,
             processing: true,
             serverSide: true,
-            paginationType: "full_numbers"
+            paginationType: "full_numbers",
+            language: $.getValue(MeTables.language, "dataTables"),
         },
 
         // 子表格配置信息
@@ -328,9 +371,10 @@
 
         // 操作选项
         , operations: {
-            bOpen: true,
             width: "120px",
             defaultContent: "",
+            title: $.getValue(MeTables.language, "meTables.operations"),
+            sortable: false,
             buttons: {
                 see: {
                     show: true,
@@ -361,23 +405,6 @@
             email: "jinxing.liu@qq.com",
             github: "https://github.com/myloveGy"
         }
-    };
-
-    // 获取数组信息
-    $.getValue = function (arrValue, key, defaultValue) {
-        if (key in arrValue) {
-            return arrValue[key];
-        }
-
-        if (typeof key === "string") {
-            var index = key.lastIndexOf(".");
-            if (key.lastIndexOf(".") !== -1) {
-                arrValue = $.getValue(arrValue, key.substr(0, index), defaultValue);
-                key = key.substr(index + 1);
-            }
-        }
-
-        return arrValue[key] ? arrValue[key] : defaultValue;
     };
 
     // 辅助函数
