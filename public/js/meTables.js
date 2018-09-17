@@ -71,7 +71,7 @@
                     this.options.table.bServerSide = false;
                     this.options.table.lengthMenu = [100, 200, 300, 500, 1000];
                     this.options.table.pageLength = 100;
-                    this.options.operations.isOpen = false;
+                    this.options.operations.bOpen = false;
                     this.options.buttons = this.extend(this.options.buttons, {
                         "create": {bShow: false},
                         "updateAll": {bShow: false}
@@ -103,6 +103,7 @@
                     "class": "center",
                     "title": '<label class="position-relative"><input type="checkbox" class="ace" /><span class="lbl"></span></label>',
                     "bViews": false,
+                    "width": this.options.checkboxWidth,
                     "createdCell": function (td, data, array, row, col) {
                         $(td).html('<label class="position-relative"><input type="checkbox" value="' + row + '" class="ace" table-data="' + row + '" /><span class="lbl"></span></label>');
                     }
@@ -110,7 +111,7 @@
             }
 
             // 判断添加数据(操作选项)
-            if (this.options.operations.isOpen) {
+            if (this.options.operations.bOpen) {
                 for (var s in this.options.operations.buttons) {
                     if (this.options.operations.buttons[s]["bShow"] === false) {
                         delete this.options.operations.buttons[s];
@@ -335,7 +336,7 @@
 
             // 判断开启editTable
             if (this.options.editable) {
-                // $.fn.editable.defaults.mode = 'inline';
+                $.fn.editable.defaults.mode = this.options.editableMode || 'inline';
                 $.fn.editableform.loading = "<div class='editableform-loading'><i class='ace-icon fa fa-spinner fa-spin fa-2x light-blue'></i></div>";
                 $.fn.editableform.buttons = '<button type="submit" class="btn btn-info editable-submit"><i class="ace-icon fa fa-check"></i></button>' +
                     '<button type="button" class="btn editable-cancel"><i class="ace-icon fa fa-times"></i></button>';
@@ -590,7 +591,7 @@
 
             // 添加字段信息
             this.options.table.aoColumns.forEach(function (k, v) {
-                if (k.data && (k.isExport === undefined)) {
+                if (k.data && (k.isExport !== true || k.bExport !== true)) {
                     html += '<input type="hidden" name="fields[' + k.data + ']" value="' + k.title + '"/>';
                 }
             });
@@ -669,7 +670,7 @@
                 if (k.edit !== undefined) form += meTables.formCreate(k, self.options.editFormParams);	// 编辑表单信息
                 if (k.search !== undefined) self.options.searchHtml += meTables.searchInputCreate(k, v, self.options.searchType);  // 搜索信息
                 if (k.defaultOrder) aOrders.push([v, k.defaultOrder]);							// 默认排序
-                if (k.isHide) aTargets.push(v);													// 是否隐藏
+                if (k.isHide || k.bHide) aTargets.push(v);													// 是否隐藏
 
                 // 判断行内编辑
                 if (self.options.editable && k.editable !== undefined) {
@@ -1298,13 +1299,13 @@
                     html += '<tr>';
                 }
 
-                html += '<td width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td>';
+                html += '<td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td>';
 
                 if (aParams.iColsLength > 1 && iKey % aParams.iColsLength === (aParams.iColsLength - 1)) {
                     html += '</tr>';
                 }
             } else {
-                html += '<tr><td width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td></tr>';
+                html += '<tr><td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td></tr>';
             }
 
             return html;
@@ -1370,6 +1371,7 @@
             sFormId: "#edit-form",		// 编辑表单选择器
             sMethod: "POST",			// 查询数据的请求方式
             bCheckbox: true,			// 需要多选框
+            checkboxWidth: "auto",      // 设置宽度
             params: null,				// 请求携带参数
             ajaxRequest: false,         // ajax一次性获取数据
 
@@ -1510,6 +1512,7 @@
 
             // 开启行处理
             editable: null,
+            editableMode: "inline",
 
             // 默认按钮信息
             buttonHtml: "",
@@ -1548,7 +1551,7 @@
 
             // 操作选项
             , operations: {
-                isOpen: true,
+                bOpen: true,
                 width: "120px",
                 // title: meTables.fn.getLanguage("sOperation"),
                 defaultContent: "",
