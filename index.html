@@ -77,6 +77,7 @@
     $(function () {
         m = $("#show-table").meTables({
             title: "示例",
+            number: false,
             params: {
                 url: 123,
                 love: 456,
@@ -87,8 +88,9 @@
                 update: "./action.php?type=update",
                 delete: "./action.php?type=delete"
             },
+
             table: {
-                "columns": [
+                columns: [
                     {
                         title: "id", data: "id",
                         defaultOrder: "desc",

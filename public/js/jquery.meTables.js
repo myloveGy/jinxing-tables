@@ -113,6 +113,11 @@
             this.options.table.columns.unshift(this.options.checkbox);
         }
 
+        // 序号
+        if (this.options.number) {
+            this.options.table.columns.unshift(this.options.number);
+        }
+
         // 初始化主要表格
         this.table = $(this).DataTable(this.options.table);
         return this;
@@ -122,59 +127,60 @@
     MeTables.language = {
         // 我的信息
         meTables: {
-            "operations": "操作",
-            "operationsSee": "查看",
-            "operationsUpdate": "编辑",
-            "operationsDelete": "删除",
-            "btnCancel": "取消",
-            "btnSubmit": "确定",
-            "selectAll": "选择全部",
-            "info": "详情",
-            "insert": "新增",
-            "update": "编辑",
-            "exporting": "数据正在导出, 请稍候...",
-            "appearError": "出现错误",
-            "serverError": "服务器繁忙,请稍候再试...",
-            "determine": "确定",
-            "cancel": "取消",
-            "confirm": "您确定需要删除这_LENGTH_条数据吗?",
-            "confirmOperation": "确认操作",
-            "cancelOperation": "您取消了删除操作!",
-            "noSelect": "没有选择需要操作的数据",
-            "operationError": "操作有误",
-            "search": "搜索",
-            "create": "添加",
-            "updateAll": "修改",
-            "deleteAll": "删除",
-            "refresh": "刷新",
-            "export": "导出",
-            "pleaseInput": "请输入",
-            "all": "全部"
+            number: "序号",
+            operations: "操作",
+            operationsSee: "查看",
+            operationsUpdate: "编辑",
+            operationsDelete: "删除",
+            btnCancel: "取消",
+            btnSubmit: "确定",
+            selectAll: "选择全部",
+            info: "详情",
+            insert: "新增",
+            update: "编辑",
+            exporting: "数据正在导出, 请稍候...",
+            appearError: "出现错误",
+            serverError: "服务器繁忙,请稍候再试...",
+            determine: "确定",
+            cancel: "取消",
+            confirm: "您确定需要删除这_LENGTH_条数据吗?",
+            confirmOperation: "确认操作",
+            cancelOperation: "您取消了删除操作!",
+            noSelect: "没有选择需要操作的数据",
+            operationError: "操作有误",
+            search: "搜索",
+            create: "添加",
+            updateAll: "修改",
+            deleteAll: "删除",
+            refresh: "刷新",
+            export: "导出",
+            pleaseInput: "请输入",
+            all: "全部"
         },
 
         // dataTables 表格
         dataTables: {
-            "decimal": "",
-            "emptyTable": "没有数据呢 ^.^",
-            "info": "显示 _START_ 到 _END_ 共有 _TOTAL_ 条数据",
-            "infoEmpty": "无记录",
-            "infoFiltered": "(从 _MAX_ 条记录过滤)",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "每页 _MENU_ 条记录",
-            "loadingRecords": "加载中...",
-            "processing": "处理中...",
-            "search": "搜索:",
-            "zeroRecords": "没有找到记录",
-            "paginate": {
-                "first": "首页",
-                "last": "尾页",
-                "next": "下一页",
-                "previous": "上一页"
+            decimal: "",
+            emptyTable: "没有数据呢 ^.^",
+            info: "显示 _START_ 到 _END_ 共有 _TOTAL_ 条数据",
+            infoEmpty: "无记录",
+            infoFiltered: "(从 _MAX_ 条记录过滤)",
+            infoPostFix: "",
+            thousands: ",",
+            lengthMenu: "每页 _MENU_ 条记录",
+            loadingRecords: "加载中...",
+            processing: "处理中...",
+            search: "搜索:",
+            zeroRecords: "没有找到记录",
+            paginate: {
+                first: "首页",
+                last: "尾页",
+                next: "下一页",
+                previous: "上一页"
             },
-            "aria": {
-                "sortAscending": ": 正在进行正序排序",
-                "sortDescending": ": 正在进行倒序排序"
+            aria: {
+                sortAscending: ": 正在进行正序排序",
+                sortDescending: ": 正在进行倒序排序"
             }
         }
     };
@@ -185,23 +191,7 @@
         pk: "id",		                // 行内编辑pk索引值
         modalSelector: "#table-modal",  // 编辑Modal选择器
         formSelector: "#edit-form",	    // 编辑表单选择器
-        method: "POST",			        // 查询数据的请求方式
-        checkbox: {
-            data: null,
-            sortable: false,
-            class: "center",
-            title: "<label class=\"position-relative\">" +
-                "<input type=\"checkbox\" class=\"ace\" /><span class=\"lbl\"></span></label>",
-            view: false,
-            createdCell: function (td, data, array, row) {
-                $(td).html('<label class="position-relative">' +
-                    '<input type="checkbox" class="ace" data-row="' + row + '" />' +
-                    '<span class="lbl"></span>' +
-                    '</label>');
-            }
-        },			        // 需要多选框
         params: null,				    // 请求携带参数
-        ajaxRequest: false,             // ajax一次性获取数据
         searchHtml: "",				    // 搜索信息额外HTML
         searchType: "middle",		    // 搜索表单位置
         searchForm: "#search-form",	    // 搜索表单选择器
@@ -369,6 +359,32 @@
             }
         }
 
+        // 需要序号
+        ,number: {
+            title: $.getValue(MeTables.language, "meTables.number"),
+            data: null,
+            render: function (data, type, row, meta) {
+                console.info(meta);
+                return meta.row + 1 + meta.settings._iDisplayStart;
+            },
+            sortable: false
+        }
+
+        // 需要多选框
+        , checkbox: {
+            data: null,
+            sortable: false,
+            class: "center",
+            title: "<label class=\"position-relative\">" +
+                "<input type=\"checkbox\" class=\"ace\" /><span class=\"lbl\"></span></label>",
+            view: false,
+            createdCell: function (td, data, array, row) {
+                $(td).html('<label class="position-relative">' +
+                    '<input type="checkbox" class="ace" data-row="' + row + '" />' +
+                    '<span class="lbl"></span>' +
+                    '</label>');
+            }
+        }
         // 操作选项
         , operations: {
             width: "120px",
