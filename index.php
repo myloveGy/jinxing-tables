@@ -131,6 +131,7 @@ if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search'
 <script src="./public/js/jquery.validate.min.js"></script>
 <script src="./public/js/meTables.js"></script>
 <script src="./public/js/layer/layer.js"></script>
+<script src="./public/js/tables.js"></script>
 <script type="text/javascript">
     var m = meTables({
         title: "示例",
