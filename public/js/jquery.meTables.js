@@ -26,12 +26,70 @@
 
     // 初始化处理
     var MeTables = function (options) {
+        // 获取地址
+        this.getUrl = function (strType) {
+            return this.options.urlPrefix + this.options.url[strType] + this.options.urlSuffix;
+        };
+
+        // 配置覆盖
         this.options = $.extend(true, {}, MeTables.defaults, options);
+        // 没有配置地址
+        if (!this.options.table.ajax) {
+            var self = this;
+            this.options.table.ajax = {
+                url: self.getUrl("search"),
+                dataSrc: function (json) {
+                    console.info(json);
+                    return json.data;
+                },
+                data: function (d) {
+                    // 第一步：分页必须的参数
+                    var return_object = [];
+                    return_object.push({name: "offset", value: d.start});
+                    return_object.push({name: "limit", value: d.length});
+                    return_object.push({name: "draw", value: d.draw});
+
+                    // 第二步：查询的字段信息
+                    for (var i in d.columns) {
+                        if (d.columns[i].data) {
+                            return_object.push({name: "columns[]", value: d.columns[i].data});
+                        }
+                    }
+
+                    // 第三步：排序处理
+                    var order = [];
+                    for (var i in d.order) {
+                        var index = d.order[i]["column"];
+                        if (d.columns[index] && d.columns[index]["data"]) {
+                            order.push(d.columns[index]["data"] + " " + d.order[i]["dir"]);
+                        }
+                    }
+
+                    if (order.length > 0) {
+                        return_object.push({name: "orderBy", value: order.join(",")});
+                    }
+
+
+                    // 第四步：表单的数据
+                    var from_data = $(self.options.searchForm).serializeArray();
+                    from_data.forEach(function (value) {
+                        if (value.value !== "") {
+                            return_object.push(value);
+                        }
+                    });
+
+                    return return_object;
+                }
+            }
+        }
+
+        // 初始化主要表格
+        this.table = $(this).DataTable(this.options.table);
         return this;
     };
 
     // 语言配置
-    meTables.language = {
+    MeTables.language = {
         // 我的信息
         meTables: {
             "operations": "操作",
@@ -93,22 +151,21 @@
 
     //  默认配置信息
     MeTables.defaults = {
-        title: "",                  // 表格的标题
-        pk: "id",		            // 行内编辑pk索引值
-        modalId: "#table-modal",     // 编辑Modal选择器
-        tableId: "#show-table", 	// 显示表格选择器
-        formId: "#edit-form",		// 编辑表单选择器
-        method: "POST",			// 查询数据的请求方式
-        checkbox: true,			// 需要多选框
-        checkboxWidth: "auto",      // 设置宽度
-        params: null,				// 请求携带参数
-        ajaxRequest: false,         // ajax一次性获取数据
-        searchHtml: "",				// 搜索信息额外HTML
-        searchType: "middle",		// 搜索表单位置
-        searchForm: "#search-form",	// 搜索表单选择器
-        event: true,               // 是否监听事件
-        searchInputEvent: "blur",   // 搜索表单input事件
-        searchSelectEvent: "change",// 搜索表单select事件
+        title: "",                      // 表格的标题
+        pk: "id",		                // 行内编辑pk索引值
+        modalSelector: "#table-modal",  // 编辑Modal选择器
+        formSelector: "#edit-form",	    // 编辑表单选择器
+        method: "POST",			        // 查询数据的请求方式
+        checkbox: true,			        // 需要多选框
+        checkboxWidth: "auto",          // 设置宽度
+        params: null,				    // 请求携带参数
+        ajaxRequest: false,             // ajax一次性获取数据
+        searchHtml: "",				    // 搜索信息额外HTML
+        searchType: "middle",		    // 搜索表单位置
+        searchForm: "#search-form",	    // 搜索表单选择器
+        event: true,                    // 是否监听事件
+        searchInputEvent: "blur",       // 搜索表单input事件
+        searchSelectEvent: "change",    // 搜索表单select事件
         // 搜索信息(只对searchType !== "middle") 情况
         search: {
             render: true,

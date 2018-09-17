@@ -51,3 +51,21 @@ function dataDelete($data, $id)
 
     return $data;
 }
+
+function get_data($key = 'data')
+{
+    // 写入数据到SESSION
+    if (!isset($_SESSION[$key])) {
+        $data = [];
+        for ($i = 1; $i < 100; $i++) {
+            $data[] = [
+                'id'   => $i,
+                'name' => 'Test -- ' . mt_rand(1000, 9999)
+            ];
+        }
+
+        $_SESSION[$key] = $data;
+    }
+
+    return $_SESSION[$key];
+}

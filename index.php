@@ -4,64 +4,52 @@ header('Content-Type:text/html; charset=UTF-8');
 session_start();
 
 include './includes/data.php';
-
-// 写入数据到SESSION
-if (!isset($_SESSION['data'])) {
-    $data = [];
-    for ($i = 1; $i < 100; $i ++) {
-        $data[] = [
-            'id' => $i,
-            'name' => 'Test -- '.mt_rand(1000, 9999)
-        ];
-    }
-
-    $_SESSION['data'] = $data;
-}
+include './includes/functions.php';
 
 if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search', 'update', 'delete'])) {
     $array = [
         'errCode' => 1,
-        'errMsg' => '请求参数错误问题',
-        'data' => null,
+        'errMsg'  => '请求参数错误问题',
+        'data'    => null,
     ];
 
     switch ($_GET['type']) {
         case 'search':
-            $intEcho = isset($_POST['sEcho']) ? (int)$_POST['sEcho'] : 0; // 请求次数
-            $intStart = isset($_POST['iDisplayStart']) ? (int)$_POST['iDisplayStart'] : 0;     // 分页开始位置
-            $intLength = isset($_POST['iDisplayLength']) ? (int)$_POST['iDisplayLength'] : 10; // 分页长度
-            $data = isset($_SESSION['data']) ? $_SESSION['data'] : [];
-            $arrData = array_splice($data, $intStart, $intLength);
-            $array = [
-                'errCode' => 0,
-                'errMsg' => 'SUCCESS',
+            $offset  = (int)get('offset', 0); // 查询开始位置
+            $limit   = (int)get('limit', 10); // 查询长度
+            $draw    = (int)get('draw', 0);   // 请求次数
+            $data    = get_data();
+            $arrData = array_splice($data, $offset, $limit);
+            $array   = [
+                'code' => 200,
+                'msg'  => 'SUCCESS',
                 'data' => [
-                    'sEcho' => (int)$_POST['sEcho'],
-                    'iTotalRecords' => count($arrData),
-                    'iTotalDisplayRecords' => count($data),
-                    'aaData' => $arrData
+                    'draw'            => $draw,
+                    'recordsTotal'    => count($data),
+                    'recordsFiltered' => count($data),
+                    'data'            => $arrData
                 ],
             ];
             break;
         case 'create':
             $_SESSION['data'] = dataCreate($_SESSION['data'], $_POST);
-            $array = [
+            $array            = [
                 'errCode' => 0,
-                'errMsg' => 'SUCCESS'
+                'errMsg'  => 'SUCCESS'
             ];
             break;
         case 'update':
             $_SESSION['data'] = dataUpdate($_SESSION['data'], $_POST['id'], $_POST);
-            $array = [
+            $array            = [
                 'errCode' => 0,
-                'errMsg' => 'SUCCESS'
+                'errMsg'  => 'SUCCESS'
             ];
             break;
         case 'delete':
             $_SESSION['data'] = dataDelete($_SESSION['data'], $_POST['id']);
-            $array = [
+            $array            = [
                 'errCode' => 0,
-                'errMsg' => 'SUCCESS'
+                'errMsg'  => 'SUCCESS'
             ];
             break;
     }
@@ -84,10 +72,21 @@ if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search'
     <link href="./public/css/bootstrap.min.css" rel="stylesheet">
     <link href="./public/css/font-awesome.min.css" rel="stylesheet">
     <style type="text/css">
-        div.main {margin-top:50px;}
-        p.bg-success {padding:10px;}
-        .m-coll {margin-top:3px;}
-        .isHide {display:none}
+        div.main {
+            margin-top: 50px;
+        }
+
+        p.bg-success {
+            padding: 10px;
+        }
+
+        .m-coll {
+            margin-top: 3px;
+        }
+
+        .isHide {
+            display: none
+        }
     </style>
 </head>
 <body role="document">
@@ -95,7 +94,8 @@ if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search'
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -126,38 +126,37 @@ if ($_GET && isset($_GET['type']) && in_array($_GET['type'], ['create', 'search'
 <!-- 加载公共js -->
 <script src="./public/js/jquery.min.js"></script>
 <script src="./public/js/bootstrap.min.js"></script>
-<script src="./public/js/jquery.dataTables.min.js"></script>
-<script src="./public/js/jquery.dataTables.bootstrap.js"></script>
+<script src="./public/js/dataTables/jquery.dataTables.min.js"></script>
+<script src="./public/js/dataTables/dataTables.bootstrap.min.js"></script>
 <script src="./public/js/jquery.validate.min.js"></script>
-<script src="./public/js/meTables.js"></script>
 <script src="./public/js/layer/layer.js"></script>
-<script src="./public/js/tables.js"></script>
+<script src="./public/js/jquery.meTables.js"></script>
 <script type="text/javascript">
-    var m = meTables({
-        title: "示例",
-        url: {
-            search: "./index.php?type=search",
-            create: "./index.php?type=create",
-            update: "./index.php?type=update",
-            delete: "./index.php?type=delete"
-        },
-        table: {
-            "aoColumns":[
-                {"title": "id", "data": "id", "sName": "id",  "defaultOrder": "desc",
-                    "edit": {"type": "hidden"}
-                },
-                {"title": "名称", "data": "name", "sName": "name",
-                    "edit": {"type": "text", "required": true, "rangelength":"[2, 40]"},
-                    "search": {"type": "text"},
-                    "bSortable": false
-                }
-            ]
-        }
+    $(function () {
+        $("#show-table").meTables({
+            title: "示例",
+            url: {
+                search: "./index.php?type=search",
+                create: "./index.php?type=create",
+                update: "./index.php?type=update",
+                delete: "./index.php?type=delete"
+            },
+            table: {
+                "columns": [
+                    {
+                        "title": "id", "data": "id", "sName": "id", "defaultOrder": "desc",
+                        "edit": {"type": "hidden"}
+                    },
+                    {
+                        "title": "名称", "data": "name", "sName": "name",
+                        "edit": {"type": "text", "required": true, "rangelength": "[2, 40]"},
+                        "search": {"type": "text"},
+                        "bSortable": false
+                    }
+                ]
+            }
+        });
     });
-
-    $(function(){
-        m.init();
-    })
 </script>
 </body>
 </html>
