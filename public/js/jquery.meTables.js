@@ -1,18 +1,18 @@
 (function ($) {
+    // 初始化处理
     var MeTables = function (options) {
         this.options = $.extend(true, {}, MeTables.defaults, options);
         return this;
     };
 
+    //  默认配置信息
     MeTables.defaults = {
         version: "1.0.0",
         author: {
             name: "liujinxing",
             email: "jinxing.liu@qq.com",
-            github: ""
+            github: "https://github.com/myloveGy"
         }
-
-
     };
 
     // 获取数组信息
@@ -32,6 +32,7 @@
         return arrValue[key] ? arrValue[key] : defaultValue;
     };
 
+    // 辅助函数
     $.fn.meTables = MeTables;
 
     $.fn.MeTables = function (opts) {
