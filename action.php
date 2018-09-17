@@ -17,7 +17,7 @@ if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'del
             $limit   = (int)get('limit', 10); // 查询长度
             $draw    = (int)get('draw', 0);   // 请求次数
             $data    = get_data();
-            $arrData = array_splice($data, $offset, $limit);
+            $arrData = array_slice($data, $offset, $limit);
             echo_json([
                 'draw'            => $draw,
                 'recordsTotal'    => count($data),

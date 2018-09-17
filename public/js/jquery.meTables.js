@@ -105,6 +105,11 @@
 
         // 操作按钮
         if (this.options.operations) {
+            var btn = this.options.operations.buttons;
+            delete this.options.operations.buttons;
+            this.options.operations.createdCell = function (td, data, rowArr, row) {
+                $(td).html(MeTables.buttonsCreate(row, btn));
+            };
             this.options.table.columns.push(this.options.operations);
         }
 
@@ -393,21 +398,21 @@
             sortable: false,
             buttons: {
                 see: {
-                    show: true,
+                    title: $.getValue(MeTables.language, "meTables.see"),
                     className: "btn-success",
                     operationClass: "me-table-detail",
                     icon: "fa-search-plus",
                     colorClass: "blue"
                 },
                 update: {
-                    show: true,
+                    title: $.getValue(MeTables.language, "meTables.update"),
                     className: "btn-info",
                     operationClass: "me-table-update",
                     icon: "fa-pencil-square-o",
                     colorClass: "green"
                 },
                 delete: {
-                    show: true,
+                    title: $.getValue(MeTables.language, "meTables.delete"),
                     className: "btn-danger",
                     operationClass: "me-table-delete",
                     icon: "fa-trash-o",
@@ -421,6 +426,32 @@
             email: "jinxing.liu@qq.com",
             github: "https://github.com/myloveGy"
         }
+    };
+
+    // 辅助函数
+    MeTables.buttonsCreate = function (index, data) {
+        var div1 = '<div class="hidden-sm hidden-xs btn-group">',
+            div2 = '<div class="hidden-md hidden-lg">' +
+                '<div class="inline position-relative">' +
+                '<button data-position="auto" data-toggle="dropdown" class="btn btn-minier btn-primary dropdown-toggle">' +
+                '<i class="ace-icon fa fa-cog icon-only bigger-110"></i>' +
+                '</button>' +
+                '<ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-menu-right dropdown-caret dropdown-close">';
+        // 添加按钮信息
+        if (data !== undefined && typeof data === "object") {
+            for (var i in data) {
+                div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['operationClass'] + ' btn-xs" data-row="' + index + '">' +
+                    '<i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
+                div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + data[i]['operationClass'] + '" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '">' +
+                    '<span class="' + data[i]['colorClass'] + '">' +
+                    '<i class="ace-icon fa ' + data[i]['icon'] + ' bigger-120"></i>' +
+                    '</span>' +
+                    '</a>' +
+                    '</li>';
+            }
+        }
+
+        return div1 + '</div>' + div2 + '</ul></div></div>';
     };
 
     // 辅助函数

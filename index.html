@@ -74,8 +74,9 @@
 <script src="./public/js/jquery.meTables.js"></script>
 <script type="text/javascript">
     var m = null;
+    $.fn.meTables.language.meTables.update = "mylove";
     $(function () {
-        m = $("#show-table").meTables({
+        m = $("#show-table").MeTables({
             title: "示例",
             number: false,
             params: {
