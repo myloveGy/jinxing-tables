@@ -60,6 +60,7 @@
                 <h1> 简单例子 </h1>
                 <p id="me-table-buttons"></p>
                 <table class="table table-striped table-bordered table-hover" id="show-table"></table>
+                <table class="table table-striped table-bordered table-hover" id="me-table"></table>
             </div>
         </div>
     </div>
@@ -73,24 +74,25 @@
 <script src="./public/js/layer/layer.js"></script>
 <script src="./public/js/jquery.meTables.js"></script>
 <script type="text/javascript">
-    var m = null;
-    $.fn.meTables.language.meTables.update = "mylove";
+    var m = null, m1 = null;
     $(function () {
         m = $("#show-table").MeTables({
+            unique: "show-table",
             title: "示例",
             number: false,
             params: {
                 url: 123,
                 love: 456,
             },
+            checkbox: {width: "60px"},
             url: {
                 search: "./action.php?type=search",
                 create: "./action.php?type=create",
                 update: "./action.php?type=update",
                 delete: "./action.php?type=delete"
             },
-
             table: {
+                colReorder: true,
                 columns: [
                     {
                         title: "id", data: "id",
@@ -106,7 +108,8 @@
                         search: {type: "text"},
                         sortable: false
                     }
-                ]
+                ],
+                order: [[1, "desc"]]
             }
         });
     });
