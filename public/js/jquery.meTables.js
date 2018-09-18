@@ -500,7 +500,7 @@
         this.searchRender = function () {
             // 判断初始化处理(搜索添加位置)
             if (this.options.searchType === "middle") {
-                $(".dataTables_wrapper>div.row>div.col-sm-6:first")
+                $(this).parent().parent().parent().find("div.row:first>div.col-sm-6:first")
                     .removeClass("col-sm-6")
                     .addClass("col-sm-2")
                     .next()
