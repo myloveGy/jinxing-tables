@@ -10,7 +10,7 @@ session_start();
 include './includes/data.php';
 include './includes/functions.php';
 
-if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'delete'])) {
+if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'delete', 'delete-all', 'export'])) {
     switch ($type) {
         case 'search':
             $offset  = (int)get('offset', 0); // 查询开始位置
@@ -37,6 +37,27 @@ if (($type = get('type')) && in_array($type, ['create', 'search', 'update', 'del
             $_SESSION['data'] = dataDelete($_SESSION['data'], $_POST['id']);
             success($_POST);
             break;
+        case 'delete-all':
+            if ($ids = explode(',', post('id'))) {
+                foreach ($ids as $id) {
+                    $_SESSION['data'] = dataDelete($_SESSION['data'], $id);
+                }
+
+                success($ids);
+            }
+            break;
+        case 'export':
+            $columns = post('columns', []);
+            header('Content-type:text/csv');
+            header('Content-Disposition:attachment;filename=' . date('YmdHis') . '.csv');
+            header('Cache-Control:must-revalidate,post-check=0,pre-check=0');
+            header('Expires:0');
+            header('Pragma:public');
+            echo implode(",", $columns) . "\n";
+            foreach ($_SESSION['data'] as $value) {
+                echo implode(",", $value) . "\n";
+            }
+            exit;
     }
 
     error(405, '请求失败');

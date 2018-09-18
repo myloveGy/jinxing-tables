@@ -10,6 +10,10 @@
  */
 function get($key, $default = null)
 {
+    if ($key === null) {
+        return $_GET;
+    }
+
     return get_value($_GET, $key, $default);
 }
 
@@ -21,8 +25,12 @@ function get($key, $default = null)
  *
  * @return null|mixed
  */
-function post($key, $default = null)
+function post($key = null, $default = null)
 {
+    if ($key === null) {
+        return $_POST;
+    }
+
     return get_value($_POST, $key, $default);
 }
 

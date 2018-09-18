@@ -80,16 +80,18 @@
             unique: "show-table",
             title: "示例",
             number: false,
-            params: {
-                url: 123,
-                love: 456,
+            where: {
+                "url:like": 123,
+                "name:like": 456,
             },
             checkbox: {width: "60px"},
             url: {
                 search: "./action.php?type=search",
                 create: "./action.php?type=create",
                 update: "./action.php?type=update",
-                delete: "./action.php?type=delete"
+                delete: "./action.php?type=delete",
+                deleteAll: "./action.php?type=delete-all",
+                export: "./action.php?type=export"
             },
             table: {
                 colReorder: true,
@@ -105,7 +107,8 @@
                             required: true,
                             rangelength: "[2, 40]"
                         },
-                        search: {type: "text"},
+                        value: ['我的', '你的', '他的'],
+                        search: {type: "select"},
                         sortable: false
                     }
                 ],

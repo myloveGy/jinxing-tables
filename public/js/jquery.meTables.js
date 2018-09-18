@@ -165,6 +165,21 @@
                 _self.search(true);
             });
 
+            // 按钮方法
+            $(document).on("click", ".me-table-button-" + _self.options.unique, function (evt) {
+                evt.preventDefault();
+                var func = $(this).data("func");
+                if (func && $.isFunction($.getValue(_self, func))) {
+                    _self[func]();
+                }
+            });
+
+            // 修改
+            $(document).on("click", "#me-table-button-updateAll-" + _self.options.unique, function (evt) {
+                evt.preventDefault();
+                _self.updateAll();
+            });
+
             // 添加保存事件
             $(document).on("click", "#" + _self.options.unique + "-save", function (evt) {
                 evt.preventDefault();
@@ -232,11 +247,11 @@
 
         // 修改多个
         this.updateAll = function () {
-            var row = $(this).find("tbody input:checkbox:checked:last").attr('table-data');
+            var row = $(this).find("tbody input:checkbox:checked:last").data("row");
             if (row) {
                 this.update(row);
             } else {
-                return layer.msg($.getValue(MeTables.language, "meTables.notSelect"), {icon: 5});
+                return layer.msg($.getValue(MeTables.language, "meTables.noSelect", "请选择修改数据"), {icon: 5});
             }
         };
 
@@ -342,6 +357,7 @@
 
                     // 执行之后的数据处理
                     _self.table.draw(false);
+                    $(_self).find("input:checkbox").prop("checked", false);
                     $(_self.options.modalSelector).modal('hide');
                 }
             });
@@ -370,119 +386,115 @@
             $(this.options.modalSelector).modal({backdrop: "static"});   // 弹出信息
         };
 
-        $.extend(this, {
-            // 删除全部数据
-            deleteAll: function () {
-                this.action = "deleteAll";
-                var self = this, data = [];
-                // 数据添加
-                $(this).find("tbody input:checkbox:checked").each(function () {
-                    var row = parseInt($(this).val()),
-                        tmp = self.table.data()[row] || null;
+        // 删除全部数据
+        this.deleteAll = function () {
+            this.action = "deleteAll";
+            var self = this, data = [];
+            // 数据添加
+            $(this).find("tbody input:checkbox:checked").each(function () {
+                var row = parseInt($(this).data("row")),
+                    tmp = self.table.data()[row] || null;
 
-                    if ($.getValue(tmp, self.options.pk)) {
-                        data.push(tmp[self.options.pk]);
-                    }
-                });
-
-                // 数据为空提醒
-                if (data.length < 1) {
-                    return layer.msg(self.getLanguage("noSelect"), {icon: 5});
+                if ($.getValue(tmp, self.options.pk)) {
+                    data.push(tmp[self.options.pk]);
                 }
+            });
 
-                // 询问框
-                layer.confirm($.getValue(MeTables.language, "meTables.confirm").replace("_LENGTH_", data.length), {
-                    title: $.getValue(MeTables.language, "meTables.confirmOperation"),
-                    btn: [
-                        $.getValue(MeTables.language, "meTables.determine"),
-                        $.getValue(MeTables.language, "meTables.cancel")
-                    ],
-                    shift: 4,
-                    icon: 0
-                    // 确认删除
-                }, function () {
-                    self.save({"id": data.join(',')});
-                    $(this).find("input:checkbox:checked").prop("checked", false);
-                    // 取消删除
-                }, function () {
-                    layer.msg($.getValue(MeTables.language, "meTables.cancelOperation"), {time: 800});
-                });
-            },
+            // 数据为空提醒
+            if (data.length < 1) {
+                return layer.msg($.getValue(MeTables.language, "meTables.noSelect"), {icon: 5});
+            }
 
+            // 询问框
+            layer.confirm($.getValue(MeTables.language, "meTables.confirm").replace("_LENGTH_", data.length), {
+                title: $.getValue(MeTables.language, "meTables.confirmOperation"),
+                btn: [
+                    $.getValue(MeTables.language, "meTables.determine"),
+                    $.getValue(MeTables.language, "meTables.cancel")
+                ],
+                icon: 0
+                // 确认删除
+            }, function () {
+                self.save({"id": data.join(',')});
+                $(this).find("input:checkbox:checked").prop("checked", false);
+                // 取消删除
+            }, function () {
+                layer.msg($.getValue(MeTables.language, "meTables.cancelOperation"), {time: 800});
+            });
+        };
 
-            // 数据导出
-            export: function () {
-                this.action = "export";
-                var _self = this,
-                    csrf_param = $('meta[name=csrf-param]').attr('content') || "_csrf",
-                    html = '<form action="' + _self.getUrl("export") + '" target="_blank" method="POST" class="me-export" style="display:none">';
-                html += '<input type="hidden" name="title" value="' + self.options.title + '"/>';
-                html += '<input type="hidden" name="' + csrf_param + '" value="' + $('meta[name=csrf-token]').attr('content') + '"/>';
+        // 数据导出
+        this.export = function () {
+            this.action = "export";
+            var _self = this,
+                csrf_param = $('meta[name=csrf-param]').attr('content') || "_csrf",
+                html = '<form action="' + _self.getUrl("export") + '" target="_blank" method="POST" class="me-export" style="display:none">';
+            html += '<input type="hidden" name="title" value="' + _self.options.title + '"/>';
+            html += '<input type="hidden" name="' + csrf_param + '" value="' + $('meta[name=csrf-token]').attr('content') + '"/>';
 
-                // 添加字段信息
-                _self.options.table.columns.forEach(function (value) {
-                    if (value.data && $.getValue(value, "export", true)) {
-                        html += '<input type="hidden" name="fields[' + k.data + ']" value="' + k.title + '"/>';
-                    }
-                });
-
-                // 添加查询条件
-                var value = $(_self.options.searchForm).serializeArray();
-                for (var i in value) {
-                    if (!MeTables.empty(value[i]["value"]) && value[i]["value"] !== "All") {
-                        var strName = MeTables.getAttributeName(value[i]["name"], "params");
-                        html += '<input type="hidden" name="' + strName + '" value="' + value[i]["value"] + '"/>';
-                    }
+            // 添加字段信息
+            _self.options.table.columns.forEach(function (value) {
+                if (value.data && $.getValue(value, "export", true)) {
+                    html += '<input type="hidden" name="columns[' + value.data + ']" value="' + value.title + '"/>';
                 }
+            });
 
-                // 默认查询参数添加
-                for (i in _self.options.params) {
-                    html += '<input type="hidden" name="params[' + i + ']" value="' + _self.options.params[i] + '"/>';
+            // 添加查询条件
+            var value = $(_self.options.searchForm).serializeArray();
+            for (var i in value) {
+                if (!MeTables.empty(value[i]["value"]) && value[i]["value"] !== "All") {
+                    var strName = MeTables.getAttributeName(value[i]["name"], "where");
+                    html += '<input type="hidden" name="' + strName + '" value="' + value[i]["value"] + '"/>';
                 }
+            }
 
-                // 表单提交
-                var $form = $(html);
-                $('body').append($form);
-                var deferred = new $.Deferred,
-                    temporary_iframe_id = 'temporary-iframe-' + (new Date()).getTime() + '-' + (parseInt(Math.random() * 1000)),
-                    temp_iframe = $('<iframe id="' + temporary_iframe_id + '" name="' + temporary_iframe_id + '" \
+            // 默认查询参数添加
+            for (i in _self.options.where) {
+                html += '<input type="hidden" name="where[' + i + ']" value="' + _self.options.where[i] + '"/>';
+            }
+
+            // 表单提交
+            var $form = $(html);
+            $('body').append($form);
+            var deferred = new $.Deferred,
+                temporary_iframe_id = 'temporary-iframe-' + (new Date()).getTime() + '-' + (parseInt(Math.random() * 1000)),
+                temp_iframe = $('<iframe id="' + temporary_iframe_id + '" name="' + temporary_iframe_id + '" \
 								frameborder="0" width="0" height="0" src="about:blank"\
 								style="position:absolute; z-index:-1; visibility: hidden;"></iframe>')
-                        .insertAfter($form);
-                $form.append('<input type="hidden" name="temporary-iframe-id" value="' + temporary_iframe_id + '" />');
-                temp_iframe.data('deferrer', deferred);
-                $form.attr({
-                    method: 'POST',
-                    enctype: 'multipart/form-data',
-                    target: temporary_iframe_id //important
-                });
+                    .insertAfter($form);
+            $form.append('<input type="hidden" name="temporary-iframe-id" value="' + temporary_iframe_id + '" />');
+            temp_iframe.data('deferrer', deferred);
+            $form.attr({
+                method: 'POST',
+                enctype: 'multipart/form-data',
+                target: temporary_iframe_id //important
+            });
 
-                $form.get(0).submit();
-                var ie_timeout = setTimeout(function () {
-                    ie_timeout = null;
-                    deferred.reject($(document.getElementById(temporary_iframe_id).contentDocument).text());
-                    $('.me-export').remove();
-                }, 500);
+            $form.get(0).submit();
+            var ie_timeout = setTimeout(function () {
+                ie_timeout = null;
+                deferred.reject($(document.getElementById(temporary_iframe_id).contentDocument).text());
+                $('.me-export').remove();
+            }, 500);
 
-                deferred.fail(function (result) {
-                    if (result) {
-                        try {
-                            result = $.parseJSON(result);
-                            layer.msg(_self.options.getMessage(result), {
-                                icon: _self.options.isSuccess(result) === 0 ? 6 : 5
-                            });
-                        } catch (e) {
-                            layer.msg($.getValue(MeTables.language, "meTables.serverError"), {icon: 5});
-                        }
-                    } else {
-                        layer.msg($.getValue(MeTables.language, "meTables.export"), {icon: 6});
+            deferred.fail(function (result) {
+                if (result) {
+                    try {
+                        result = $.parseJSON(result);
+                        layer.msg(_self.options.getMessage(result), {
+                            icon: _self.options.isSuccess(result) === 0 ? 6 : 5
+                        });
+                    } catch (e) {
+                        layer.msg($.getValue(MeTables.language, "meTables.serverError"), {icon: 5});
                     }
-                }).always(function () {
-                    clearTimeout(ie_timeout);
-                });
-                deferred.promise();
-            }
-        });
+                } else {
+                    layer.msg($.getValue(MeTables.language, "meTables.export"), {icon: 6});
+                }
+            }).always(function () {
+                clearTimeout(ie_timeout);
+            });
+            deferred.promise();
+        };
 
         // 搜索表单
         this.searchRender = function () {
@@ -521,7 +533,7 @@
                 for (var i in this.options.buttons) {
                     if (this.options.buttons[i]) {
                         this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
-                        this.options.buttonHtml += '<button class="' + this.options.buttons[i]["className"] + '" id="' + this.options.unique + "-" + i + '">\
+                        this.options.buttonHtml += '<button class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '" data-func="' + i + '">\
                                 <i class="' + this.options.buttons[i]["icon"] + '"></i>\
                             ' + this.options.buttons[i]["text"] + '\
                             </button> ';
@@ -578,14 +590,17 @@
                     var from_data = $(_self.options.searchForm).serializeArray();
                     from_data.forEach(function (value) {
                         if (value.value !== "") {
-                            return_object.push(value);
+                            return_object.push({
+                                name: MeTables.getAttributeName(value.name, "where"),
+                                value: value.value
+                            });
                         }
                     });
 
                     // 第五步：添加附加数据
-                    if (_self.options.params) {
-                        for (var i in _self.options.params) {
-                            return_object.push({name: i, value: _self.options.params[i]});
+                    if (_self.options.where) {
+                        for (var i in _self.options.where) {
+                            return_object.push({name: "where[" + i + "]", value: _self.options.where[i]});
                         }
                     }
 
@@ -663,7 +678,7 @@
             cancel: "取消",
             confirm: "您确定需要删除这_LENGTH_条数据吗?",
             confirmOperation: "确认操作",
-            cancelOperation: "您取消了删除操作!",
+            cancelOpertation: "您取消了删除操作!",
             noSelect: "没有选择需要操作的数据",
             operationError: "操作有误",
             empty: "没有数据",
@@ -879,6 +894,7 @@
             defaultContent: "",
             title: $.getValue(MeTables.language, "meTables.operations"),
             sortable: false,
+            data: null,
             buttons: {
                 see: {
                     title: $.getValue(MeTables.language, "meTables.see"),
@@ -936,7 +952,7 @@
             return $.ajax(params).always(function () {
                 layer.close(mixLoading);
             }).fail(function () {
-                layer.msg($.getValue(MeTables.language, "serverError"), {icon: 5});
+                layer.msg($.getValue(MeTables.language, "meTables.serverError"), {icon: 5});
             });
         },
 
@@ -1047,7 +1063,7 @@
                     html += '<div class="checkbox col-xs-12">' +
                         '<label>' +
                         '<input type="checkbox" class="ace checkbox-all" onclick="var isChecked = $(this).prop(\'checked\');$(this).parent().parent().parent().find(\'input[type=checkbox]\').prop(\'checked\', isChecked);" />' +
-                        '<span class="lbl"> ' + $.getValue(MeTables.language, "selectAll") + ' </span>' +
+                        '<span class="lbl"> ' + $.getValue(MeTables.language, "meTables.pleaseSelect") + ' </span>' +
                         '</label>' +
                         '</div>';
                 }
@@ -1099,7 +1115,7 @@
             k.search.type = $.getValue(k, "search.type", "text");
 
             // select 默认选中
-            var defaultObject = k.search.type === "select" ? {"": $.getValue(MeTables.language, "all")} : null;
+            var defaultObject = k.search.type === "select" ? {"": $.getValue(MeTables.language, "meTables.pleaseSelect")} : null;
             if (searchType === "middle") {
                 try {
                     html = this[k.search.type + "SearchMiddleCreate"](k.search, k.value, defaultObject);
