@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title> meTables -- 使用示例 </title>
+    <!-- Bootstrap core CSS -->
+    <link href="./public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./public/css/font-awesome.min.css" rel="stylesheet">
+    <style type="text/css">
+        div.main {
+            margin-top: 70px;
+        }
+
+        .mt20 {
+            margin-top: 20px
+        }
+    </style>
+</head>
+<body role="document">
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="./index.html"> meTables -- 使用示例 </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav pull-right">
+                <li><a href="./index.html">首页</a></li>
+                <li class="active"><a href="./create.php">创建视图文件</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
+
+<div class="container theme-showcase main" role="main">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#db-div" aria-controls="db-div" role="tab" data-toggle="tab">数据库配置</a>
+                </li>
+                <li role="presentation">
+                    <a href="#view-edit" aria-controls="view-edit" role="tab" data-toggle="tab"
+                       id="tab-view-edit">视图编辑</a>
+                </li>
+                <li role="presentation">
+                    <a href="#view" aria-controls="view" role="tab" data-toggle="tab" id="tab-view">生成视图文件</a>
+                </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="db-div">
+                    <div class="col-md-12 mt20">
+                        <form action="./create.php?action=table" method="post" id="db-form">
+                            <div class="form-group">
+                                <label for="db-host">数据库配置DNS</label>
+                                <input type="text" required="true" rangelength="[2, 200]" name="dns"
+                                       class="form-control"
+                                       value="mysql:host=localhost;dbname=laravel;port=3306"
+                                       id="db-host"
+                                       placeholder="数据库配置DNS">
+                            </div>
+                            <div class="form-group">
+                                <label for="db-user">数据库用户名</label>
+                                <input type="text" required="true" rangelength="[2, 200]" name="username"
+                                       class="form-control" value="root" id="db-user"
+                                       placeholder="用户名">
+                            </div>
+                            <div class="form-group">
+                                <label for="db-password">数据库密码</label>
+                                <input type="password" rangelength="[1, 100]" name="password" class="form-control"
+                                       value="" id="db-password" placeholder="密码">
+                            </div>
+                            <div class="form-group">
+                                <label for="db-table">数据表名称</label>
+                                <input type="text" required="true" rangelength="[2, 200]" name="table"
+                                       class="form-control" id="db-table" placeholder="数据表名称">
+                            </div>
+                            <button type="submit" class="btn btn-success">提交</button>
+                        </form>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="view-edit">
+                    <div class="col-md-12 mt20">
+                        <form action="./create.php?action=edit" method="POST" id="edit-form">
+                        </form>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="view">
+                    <div class="col-md-12 mt20">
+                        <div class="code" id="view-code"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="./public/js/jquery.min.js"></script>
+<script src="./public/js/bootstrap.min.js"></script>
+<script src="./public/js/jquery.validate.min.js"></script>
+<script src="./public/js/layer/layer.js"></script>
+<script type="text/javascript">
+    $(function () {
+        // 查询数据库
+        $("#db-form").submit(function (evt) {
+            var $fm = $(this);
+            evt.preventDefault();
+            if (!$(this).validate().form()) {
+                return false;
+            }
+
+            $.ajax({
+                url: $fm.prop("action"),
+                data: $fm.serialize(),
+                type: $fm.prop("method"),
+                dataType: "json"
+            }).done(function (json) {
+                if (json.code === 0) {
+                    $("#edit-form").html(json.data + '<div class="form-group">\
+                    <label for="db-name">标题</label>\
+                        <input type="text" required="true" rangelength="[2, 20]" name="title" class="form-control"  placeholder="标题">\
+                        </div><button type="submit" class="btn btn-success">提交</button>');
+                    $("#tab-view-edit").trigger("click");
+                } else {
+                    layer.msg(json.msg, {icon: 5})
+                }
+            }).fail(function () {
+                layer.msg("服务器繁忙,请稍后再试...")
+            });
+        });
+
+        // 生成试图文件
+        $("#edit-form").submit(function (evt) {
+            var $fm = $(this);
+            evt.preventDefault();
+            $.ajax({
+                url: $fm.prop("action"),
+                data: $fm.serialize(),
+                type: $fm.prop("method"),
+                dataType: "json"
+            }).done(function (json) {
+                if (json.code === 0) {
+                    $("#view-code").html(json.data);
+                    $("#tab-view").trigger("click");
+                } else {
+                    layer.msg(json.msg, {icon: 5})
+                }
+            }).fail(function () {
+                layer.msg("服务器繁忙,请稍后再试...")
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,25 +1,32 @@
 <?php
-// 设置头信息
-header('Content-Type:text/html; charset=UTF-8');
 
-$arrConfig = [
-    'host'     => 'localhost',
-    'user'     => 'root',
-    'password' => 'gongyan',
-    'dbname'   => 'test',
-    'port'     => 3306
-];
+session_start();
+
+include './includes/data.php';
+include './includes/functions.php';
+include './includes/PdoObject.php';
 
 /**
  * createForm() 生成表格配置表单信息
  * @access private
  *
  * @param  array $array 数据表信息
- *                      return  string 返回HTML
+ *
+ * @return  string 返回HTML
  */
 function createForm($array)
 {
-    $strHtml = '';
+    $strHtml = '<table class="table table-striped table-bordered table-hover" id="show-table">
+    <thead>
+        <tr>
+            <th width="150px">字段</th>
+            <th width="150px">标题</th>
+            <th>编辑</th>
+            <th width="80px">搜索</th>
+            <th width="80px">排序</th>
+            <th>回调</th>    
+        </tr>
+    </thead><tbody>';
     foreach ($array as $value) {
         $key     = $value['Field'];
         $sTitle  = isset($value['Comment']) && !empty($value['Comment']) ? $value['Comment'] : $value['Field'];
@@ -30,43 +37,46 @@ function createForm($array)
             $sOption .= '"rangelength": "[2, ' . $sLen . ']"';
         }
 
-        $sOther = stripos($value['Field'], '_at') !== false ? 'mt.dateTimeString' : '';
+        $sOther = stripos($value['Field'], '_at') !== false ? 'MeTables.dateTimeString' : '';
 
         $strHtml .= <<<HTML
-<div class="alert alert-success me-alert-su">
-    <span class="label label-success me-label-sp">{$key}</span>
-    <label class="me-label">标题: <input type="text" name="attr[{$key}][title]" value="{$sTitle}" required="true"/></label>
-    <label class="me-label">编辑：
-        <select class="is-hide" name="attr[{$key}][edit]">
-            <option value="1" selected="selected">开启</option>
-            <option value="0" >关闭</option>
-        </select>
-        <select name="attr[{$key}][type]">
-            <option value="text" selected="selected">text</option>
+<tr>
+    <td>
+        <input type="text" name="attr[{$key}][data]" class="form-control" value="{$sTitle}" required="true"/>
+    </td>
+    <td>
+        <input type="text" name="attr[{$key}][title]" class="form-control" value="{$sTitle}" required="true"/>
+    </td>
+    <td>
+        <select name="attr[{$key}][type]" class="form-control pull-left" style="width: 80px">
+            <option value="" selected="selected">选择编辑类型</option>
+            <option value="text" >text</option>
             <option value="hidden">hidden</option>
             <option value="select">select</option>
             <option value="radio">radio</option>
             <option value="password">password</option>
             <option value="textarea">textarea</option>
         </select>
-        <input type="text" name="attr[{$key}][options]" value='{$sOption}'/>
-    </label>
-    <label class="me-label">搜索：
-        <select name="attr[{$key}][search]">
+        <input type="text" name="attr[{$key}][options]" class="form-control pull-left" value='{$sOption}'/>
+    </td>
+    <td>
+        <select name="attr[{$key}][search]" class="form-control">
             <option value="1">开启</option>
             <option value="0" selected="selected">关闭</option>
         </select>
-    </label>
-    <label class="me-label">排序：<select name="attr[{$key}][bSortable]">
-        <option value="1" >开启</option>
-        <option value="0" selected="selected">关闭</option>
-    </select></label>
-    <label class="me-label">回调：<input type="text" name="attr[{$key}][createdCell]" value="{$sOther}" /></label>
-</div>
+    </td>
+    <td>
+        <select name="attr[{$key}][bSortable]" class="form-control">
+            <option value="1" >开启</option>
+            <option value="0" selected="selected">关闭</option>
+        </select>
+    </td>
+    <td><input type="text" name="attr[{$key}][createdCell]" class="form-control" value="{$sOther}" /></td>
+</tr>
 HTML;
     }
 
-    return $strHtml;
+    return $strHtml . '</tbody></table>';
 }
 
 /**
@@ -74,7 +84,6 @@ HTML;
  *
  * @param  array  $array 接收表单配置文件
  * @param  string $title 标题信息
- * @param  string $path  文件地址
  *
  * @return string 返回 字符串
  */
@@ -110,85 +119,69 @@ function createHtml($array, $title)
     <p id="me-table-buttons"></p>
     <!-- 表格数据 -->
     <table class="table table-striped table-bordered table-hover" id="show-table"></table>
-    
     <script type="text/javascript">
-        var m = mt({
+        var m = $("#show-table").MeTables({
             title: "{$title}",
             table: {
-                "aoColumns": [
+                "columns": [
                     {$strHtml}
                 ]       
             }
         });
         
+       
+        
         /**
-        m.fn.extend({
-            // 显示的前置和后置操作
+        $.extend(m, {
+            // 显示的前置和后置操作,需要暂停操作，返回false
             beforeShow: function(data, child) {
-                return true;
+                
             },
             afterShow: function(data, child) {
-                return true;
+                
             },
             
-            // 编辑的前置和后置操作
+            // 编辑的前置和后置操作，需要暂停操作，返回false
             beforeSave: function(data, child) {
-                return true;
+                
             },
             afterSave: function(data, child) {
-                return true;
+                
             }
         });
         */
-    
-         \$(function(){
-             m.init();
-         });
     </script>
 html;
 
     return $strHtml;
 }
 
-
 // 判断操作类型
-if (isset($_GET) && isset($_GET['action'])) {
-    $arrReturn = [
-        'errCode' => 1,
-        'errMsg'  => '请求参数为空',
-        'data'    => null,
-    ];
-
+if ($action = get('action')) {
     switch ($_GET['action']) {
         case 'table':
-            include './includes/PdoObject.php';
-            if (isset($_POST) && $_POST && isset($_POST['table']) && !empty($_POST['table'])) {
-                $strTable = trim($_POST['table']);
-                unset($_POST['table']);
-                $params              = array_merge($arrConfig, $_POST);
-                $mysql               = PdoObject::getInstance($params);
-                $pdoStatement        = $mysql->query('SHOW TABLES');
-                $array               = $pdoStatement->fetchAll(PDO::FETCH_NUM);
-                $arrReturn['errMsg'] = '数据表不存在';
-                if ($array) {
-                    $isHave = false;
-                    foreach ($array as $value) {
-                        if (in_array($strTable, $value)) {
-                            $isHave = true;
-                            break;
-                        }
-                    }
-
-                    if ($isHave) {
-                        $pdoStatement         = $mysql->query('SHOW FULL COLUMNS FROM `' . $strTable . '`');
-                        $array                = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
-                        $arrReturn['errCode'] = 0;
-                        $arrReturn['errMsg']  = 'success';
-                        $arrReturn['data']    = createForm($array);
-                    }
-                }
+            // 验证参数
+            if ((!$table = trim(post('table'))) || empty(post('dns')) || empty(post('username'))) {
+                error(401, '请求参数问题');
             }
 
+            // 连接数据
+            $mysql = PdoObject::getInstance([
+                'dns'      => post('dns'),
+                'username' => post('username'),
+                'password' => post('password'),
+            ]);
+
+            // 查询表是否存在
+            $pdoStatement = $mysql->getPdo()->query('SHOW TABLES like "' . $table . '"');
+            if (!$array = $pdoStatement->fetchAll(PDO::FETCH_NUM)) {
+                error(505, '查询失败');
+            }
+
+            // 查询表结构
+            $pdoStatement = $mysql->getPdo()->query('SHOW FULL COLUMNS FROM `' . $table . '`');
+            $array        = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+            success(createForm($array));
             break;
         case 'edit':
             if (isset($_POST) && $_POST && isset($_POST['title']) && !empty($_POST['title'])) {
@@ -201,200 +194,4 @@ if (isset($_GET) && isset($_GET['action'])) {
 
             break;
     }
-
-    header('application/json; charset=utf-8');
-    exit(json_encode($arrReturn, 320));
 }
-
-?>
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title> meTables -- 使用示例 </title>
-    <!-- Bootstrap core CSS -->
-    <link href="./public/css/bootstrap.min.css" rel="stylesheet">
-    <link href="./public/css/font-awesome.min.css" rel="stylesheet">
-    <style type="text/css">
-        div.main {
-            margin-top: 70px;
-        }
-
-        .mt20 {
-            margin-top: 20px
-        }
-
-        p.bg-success {
-            padding: 10px;
-        }
-
-        .m-coll {
-            margin-top: 3px;
-        }
-
-        .isHide {
-            display: none
-        }
-    </style>
-</head>
-<body role="document">
-<!-- Fixed navbar -->
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="./index.php"> meTables -- 使用示例 </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav pull-right">
-                <li><a href="./index.php">首页</a></li>
-                <li class="active"><a href="./create.php">创建视图文件</a></li>
-            </ul>
-        </div><!--/.nav-collapse -->
-    </div>
-</nav>
-
-<div class="container theme-showcase main" role="main">
-    <div class="row">
-        <div class="col-md-12">
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active">
-                    <a href="#db-div" aria-controls="db-div" role="tab" data-toggle="tab">数据库配置</a>
-                </li>
-                <li role="presentation">
-                    <a href="#view-edit" aria-controls="view-edit" role="tab" data-toggle="tab"
-                       id="tab-view-edit">视图编辑</a>
-                </li>
-                <li role="presentation">
-                    <a href="#view" aria-controls="view" role="tab" data-toggle="tab" id="tab-view">生成视图文件</a>
-                </li>
-            </ul>
-
-            <!-- Tab panes -->
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="db-div">
-                    <div class="col-md-12 mt20">
-                        <form action="./create.php?action=table" method="post" id="db-form">
-                            <div class="form-group">
-                                <label for="db-host">数据库地址</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="host"
-                                       class="form-control" value="<?= $arrConfig['host'] ?>" id="db-host"
-                                       placeholder="数据库地址">
-                            </div>
-                            <div class="form-group">
-                                <label for="db-host">数据库端口</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="port" number="true"
-                                       class="form-control" value="<?= $arrConfig['port'] ?>" id="db-port"
-                                       placeholder="数据库端口">
-                            </div>
-                            <div class="form-group">
-                                <label for="db-user">数据库用户名</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="user"
-                                       class="form-control" value="<?= $arrConfig['user'] ?>" id="db-user"
-                                       placeholder="用户名">
-                            </div>
-                            <div class="form-group">
-                                <label for="db-password">数据库密码</label>
-                                <input type="password" rangelength="[1, 100]" name="password" class="form-control"
-                                       value="<?= $arrConfig['password'] ?>" id="db-password" placeholder="密码">
-                            </div>
-                            <div class="form-group">
-                                <label for="db-name">数据库名称</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="dbname"
-                                       class="form-control" value="<?= $arrConfig['dbname'] ?>" id="db-name"
-                                       placeholder="数据库名称">
-                            </div>
-                            <div class="form-group">
-                                <label for="db-table">数据表名称</label>
-                                <input type="text" required="true" rangelength="[2, 20]" name="table"
-                                       class="form-control" id="db-table" placeholder="数据表名称">
-                            </div>
-                            <button type="submit" class="btn btn-success">提交</button>
-                        </form>
-                    </div>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="view-edit">
-                    <div class="col-md-12 mt20">
-                        <form action="./create.php?action=edit" method="POST" id="edit-form">
-                        </form>
-                    </div>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="view">
-                    <div class="col-md-12 mt20">
-                        <div class="code" id="view-code"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="./public/js/jquery.min.js"></script>
-<script src="./public/js/bootstrap.min.js"></script>
-<script src="./public/js/jquery.dataTables.min.js"></script>
-<script src="./public/js/jquery.dataTables.bootstrap.js"></script>
-<script src="./public/js/jquery.validate.min.js"></script>
-<script src="./public/js/meTables.js"></script>
-<script src="./public/js/layer/layer.js"></script>
-<script type="text/javascript">
-    $(function () {
-        // 查询数据库
-        $("#db-form").submit(function (evt) {
-            var $fm = $(this);
-            evt.preventDefault();
-            if ($(this).validate().form()) {
-                mt.ajax({
-                    url: $fm.prop("action"),
-                    data: $fm.serialize(),
-                    type: $fm.prop("method"),
-                    dataType: "json"
-                }).done(function (json) {
-                    if (json.errCode === 0) {
-                        $("#edit-form").html(json.data + '<div class="form-group">\
-                        <label for="db-name">标题</label>\
-                            <input type="text" required="true" rangelength="[2, 20]" name="title" class="form-control"  placeholder="标题">\
-                            </div><button type="submit" class="btn btn-success">提交</button>');
-                        $("#tab-view-edit").trigger("click");
-                    } else {
-                        layer.msg(json.errMsg, {icon: 5})
-                    }
-                });
-            }
-            ;
-        });
-
-        // 生成试图文件
-        $("#edit-form").submit(function (evt) {
-            var $fm = $(this);
-            evt.preventDefault();
-            mt.ajax({
-                url: $fm.prop("action"),
-                data: $fm.serialize(),
-                type: $fm.prop("method"),
-                dataType: "json"
-            }).done(function (json) {
-                if (json.errCode === 0) {
-                    $("#view-code").html(json.data);
-                    $("#tab-view").trigger("click");
-                } else {
-                    layer.msg(json.errMsg, {icon: 5})
-                }
-            });
-        });
-    });
-</script>
-</body>
-</html>
