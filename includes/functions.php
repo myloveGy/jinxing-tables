@@ -404,3 +404,19 @@ function filter_array($array)
 
     return $array;
 }
+
+if (!function_exists('studly_case')) {
+    /**
+     * 大驼峰法
+     *
+     * @param string $str
+     *
+     * @return mixed
+     */
+    function studly_case($str)
+    {
+        $str = str_replace(['-', '_'], ' ', $str);
+        $str = ucwords($str);
+        return str_replace(' ', '', $str);
+    }
+}

@@ -16,18 +16,6 @@
         div.main {
             margin-top: 50px;
         }
-
-        p.bg-success {
-            padding: 10px;
-        }
-
-        .m-coll {
-            margin-top: 3px;
-        }
-
-        .isHide {
-            display: none
-        }
     </style>
 </head>
 <body role="document">
@@ -47,7 +35,7 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav pull-right">
                 <li class="active"><a href="/">首页</a></li>
-                <li><a href="./create.php">创建视图文件</a></li>
+                <li><a href="./create.html">创建视图文件</a></li>
             </ul>
         </div><!--/.nav-collapse -->
     </div>
@@ -110,6 +98,18 @@
                         value: ['我的', '你的', '他的'],
                         search: {type: "select"},
                         sortable: false
+                    },
+                    {
+                        title: "创建时间",
+                        data: "created_at",
+                        sortable: false,
+                        createdCell: $.fn.meTables.dateTimeString
+                    },
+                    {
+                        title: "修改时间",
+                        data: "updated_at",
+                        sortable: false,
+                        createdCell: $.fn.meTables.dateTimeString
                     }
                 ],
                 order: [[1, "desc"]]

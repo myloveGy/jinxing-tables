@@ -1405,7 +1405,7 @@
 
         // 根据时间戳返回时间字符串
         timeFormat: function (time, str) {
-            if (!str) str = "yyyy-MM-dd";
+            str = str || "yyyy-MM-dd";
             var date = new Date(time * 1000);
             return date.Format(str);
         },

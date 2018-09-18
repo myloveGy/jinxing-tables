@@ -27,28 +27,35 @@ function createForm($array)
             <th>回调</th>    
         </tr>
     </thead><tbody>';
-    foreach ($array as $value) {
-        $key     = $value['Field'];
-        $sTitle  = isset($value['Comment']) && !empty($value['Comment']) ? $value['Comment'] : $value['Field'];
-        $sOption = isset($value['Null']) && $value['Null'] == 'NO' ? '"required": true,' : '';
-        if (stripos($value['Type'], 'int(') !== false) $sOption .= '"number": true,';
-        if (stripos($value['Type'], 'varchar(') !== false) {
-            $sLen    = trim(str_replace('varchar(', '', $value['Type']), ')');
-            $sOption .= '"rangelength": "[2, ' . $sLen . ']"';
+    foreach ($array as $k => $value) {
+        $key    = $value['Field'];
+        $title  = !empty($value['Comment']) ? $value['Comment'] : studly_case($key);
+        $option = $value['Null'] == 'NO' ? 'required: true,' : '';
+        if (stripos($value['Type'], 'int(') !== false) {
+            $option       .= 'number: true,';
+            $order_select = '<option value="1" selected="selected">开启</option>
+            <option value="0" >关闭</option>';
+        } else {
+            $order_select = '<option value="1" >开启</option>
+            <option value="0" selected="selected">关闭</option>';
         }
 
-        $sOther = stripos($value['Field'], '_at') !== false ? 'MeTables.dateTimeString' : '';
+        if (stripos($value['Type'], 'varchar(') !== false) {
+            $sLen   = trim(str_replace('varchar(', '', $value['Type']), ')');
+            $option .= 'rangelength: "[2, ' . $sLen . ']"';
+        }
 
-        $strHtml .= <<<HTML
-<tr>
-    <td>
-        <input type="text" name="attr[{$key}][data]" class="form-control" value="{$sTitle}" required="true"/>
-    </td>
-    <td>
-        <input type="text" name="attr[{$key}][title]" class="form-control" value="{$sTitle}" required="true"/>
-    </td>
-    <td>
-        <select name="attr[{$key}][type]" class="form-control pull-left" style="width: 80px">
+        $other = stripos($key, '_at') !== false ? '$.fn.meTables.dateTimeString' : '';
+
+        if (in_array($key, ['created_time', 'updated_time', 'created_at', 'updated_at'])) {
+            $update_select = '';
+            $order_select  = '<option value="1" selected="selected">开启</option>
+            <option value="0" >关闭</option>';
+        } elseif (get_value($value, 'Key') == 'PRI') {
+            $update_select = '<input type="hidden" name="attr[' . $k . '][type]" value="hidden">
+            <input type="hidden" name="primary_key" value="' . $key . '">';
+        } else {
+            $update_select = '<select name="attr[' . $k . '][type]" class="form-control pull-left" style="width: 80px">
             <option value="" selected="selected">选择编辑类型</option>
             <option value="text" >text</option>
             <option value="hidden">hidden</option>
@@ -57,21 +64,32 @@ function createForm($array)
             <option value="password">password</option>
             <option value="textarea">textarea</option>
         </select>
-        <input type="text" name="attr[{$key}][options]" class="form-control pull-left" value='{$sOption}'/>
+        <input type="text" name="attr[' . $k . '][options]" class="form-control pull-left" value=\'' . $option . '\'/>';
+        }
+
+        $strHtml .= <<<HTML
+<tr>
+    <td>
+        <input type="text" name="attr[{$k}][data]" class="form-control" value="{$key}" required="true"/>
     </td>
     <td>
-        <select name="attr[{$key}][search]" class="form-control">
+        <input type="text" name="attr[{$k}][title]" class="form-control" value="{$title}" required="true"/>
+    </td>
+    <td>
+        {$update_select}
+    </td>
+    <td>
+        <select name="attr[{$k}][search]" class="form-control">
             <option value="1">开启</option>
             <option value="0" selected="selected">关闭</option>
         </select>
     </td>
     <td>
-        <select name="attr[{$key}][bSortable]" class="form-control">
-            <option value="1" >开启</option>
-            <option value="0" selected="selected">关闭</option>
+        <select name="attr[{$k}][sortable]" class="form-control">
+            {$order_select}
         </select>
     </td>
-    <td><input type="text" name="attr[{$key}][createdCell]" class="form-control" value="{$sOther}" /></td>
+    <td><input type="text" name="attr[{$k}][createdCell]" class="form-control" value="{$other}" /></td>
 </tr>
 HTML;
     }
@@ -82,33 +100,52 @@ HTML;
 /**
  * createHtml() 生成预览HTML文件
  *
- * @param  array  $array 接收表单配置文件
- * @param  string $title 标题信息
+ * @param  array  $array       接收表单配置文件
+ * @param  string $title       标题信息
+ * @param  string $primary_key 主键
  *
  * @return string 返回 字符串
  */
-function createHtml($array, $title)
+function createHtml($array, $title, $primary_key)
 {
     $strHtml = '';
     if ($array) {
         foreach ($array as $key => $value) {
-            $html = "\t\t\t{\"title\": \"{$value['title']}\", \"data\": \"{$key}\", ";
+            $columns = [];
+            if ($title = get_value($value, 'title')) {
+                $columns[] = 'title: "' . $title . '"';
+            }
+
+            if ($data = get_value($value, 'data')) {
+                $columns[] = 'data: "' . $data . '"';
+            }
 
             // 编辑
-            if ($value['edit'] == 1) $html .= "\"edit\": {\"type\": \"{$value['type']}\", " . trim($value['options'], ',') . "}, ";
+            if ($type = get_value($value, 'type')) {
+                $edits = ['type: "' . $type . '"'];
+                if ($options = trim(get_value($value, 'options'), ',')) {
+                    $edits[] = $options;
+                }
+
+                $columns[] = 'edit: {' . implode(',', $edits) . '}';
+            }
 
             // 搜索
-            if ($value['search'] == 1) {
-                $html .= "\"search\": {\"type\": \"text\"}, ";
+            if (get_value($value, 'search') == 1) {
+                $columns[] = 'search: {type: "text"}';
             }
 
             // 排序
-            if ($value['bSortable'] == 0) $html .= '"bSortable": false, ';
+            if (get_value($value, 'sortable') == 0) {
+                $columns[] = 'sortable: false';
+            }
 
             // 回调
-            if (!empty($value['createdCell'])) $html .= '"createdCell" : ' . $value['createdCell'] . ', ';
+            if (!empty($value['createdCell'])) {
+                $columns[] = 'createdCell: ' . $value['createdCell'];
+            }
 
-            $strHtml .= trim($html, ', ') . "}, \n";
+            $strHtml .= "\t\t\t\t{\n \t\t\t\t\t" . implode(",\n \t\t\t\t\t", $columns) . "\n \t\t\t\t}, \n";
         }
 
         $strHtml = trim($strHtml, ", \n");
@@ -122,14 +159,13 @@ function createHtml($array, $title)
     <script type="text/javascript">
         var m = $("#show-table").MeTables({
             title: "{$title}",
+            pk: "{$primary_key}",
             table: {
                 "columns": [
-                    {$strHtml}
+ {$strHtml}
                 ]       
             }
         });
-        
-       
         
         /**
         $.extend(m, {
@@ -184,14 +220,10 @@ if ($action = get('action')) {
             success(createForm($array));
             break;
         case 'edit':
-            if (isset($_POST) && $_POST && isset($_POST['title']) && !empty($_POST['title'])) {
-                $arrReturn = [
-                    'errCode' => 0,
-                    'errMsg'  => 'success',
-                    'data'    => highlight_string(createHtml($_POST['attr'], $_POST['title']), true),
-                ];
+            if (!$title = post('title')) {
+                error(404, '请输入标题');
             }
-
+            success(highlight_string(createHtml(post('attr'), $title, post('primary_key')), true));
             break;
     }
 }

@@ -59,8 +59,10 @@ function get_data($key = 'data')
         $data = [];
         for ($i = 1; $i < 100; $i++) {
             $data[] = [
-                'id'   => $i,
-                'name' => 'Test -- ' . mt_rand(1000, 9999)
+                'id'         => $i,
+                'name'       => 'Test -- ' . mt_rand(1000, 9999),
+                'created_at' => time() - mt_rand(1000, 9999) * 2,
+                'updated_at' => time(),
             ];
         }
 
