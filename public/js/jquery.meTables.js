@@ -473,6 +473,34 @@
             }
         });
 
+        // 搜索表单
+        this.searchRender = function () {
+            // 判断初始化处理(搜索添加位置)
+            if (this.options.searchType === "middle") {
+                $(".dataTables_wrapper>div.row>div.col-sm-6:first")
+                    .removeClass("col-sm-6")
+                    .addClass("col-sm-2")
+                    .next()
+                    .removeClass("col-sm-6")
+                    .addClass("col-sm-10").html('<form id="' +
+                    this.options.searchForm.replace("#", "") + '" class="pull-right">' + this.options.searchHtml + '</form>');	// 处理搜索信息
+            } else {
+                // 添加搜索表单信息
+                if (this.options.search.render) {
+                    this.options.searchHtml += '<button class="' + this.options.search.button.class + '">\
+                    <i class="' + this.options.search.button.icon + '"></i>\
+                    ' + $.getValue(MeTables.language, "meTables.search") + '\
+                    </button>';
+                    console.info(this.options.searchHtml);
+                    try {
+                        $(this.options.searchForm)[this.options.search.type](this.options.searchHtml);
+                    } catch (e) {
+                        $(this.options.searchForm).append(this.options.searchHtml);
+                    }
+                }
+            }
+        };
+
         // 配置覆盖
         this.options = $.extend(true, {}, MeTables.defaults, options);
 
@@ -545,10 +573,33 @@
         this.options.checkbox && this.options.table.columns.unshift(this.options.checkbox);
         // 序号
         this.options.number && this.options.table.columns.unshift(this.options.number);
+
+        // 处理搜索位置
+        if (this.options.searchType !== "middle" && MeTables.empty(this.options.table.dom)) {
+            this.options.table.dom = "t<'row'<'col-xs-6'li><'col-xs-6'p>>";
+        }
+
         this.render();
         // 初始化主要表格
         this.table = $(this).DataTable(this.options.table);
+        this.searchRender();
         this.bind();
+
+        // 判断开启editTable
+        if (this.options.editable) {
+            $.fn.editable.defaults.mode = this.options.editableMode || 'inline';
+            $.fn.editableform.loading = "<div class='editableform-loading'><i class='ace-icon fa fa-spinner fa-spin fa-2x light-blue'></i></div>";
+            $.fn.editableform.buttons = '<button type="submit" class="btn btn-info editable-submit"><i class="ace-icon fa fa-check"></i></button>' +
+                '<button type="button" class="btn editable-cancel"><i class="ace-icon fa fa-times"></i></button>';
+            $.fn.editable.defaults.ajaxOptions = {type: "POST", dataType: 'json'};
+        }
+
+        // 文件上传
+        if (!$.isEmptyObject(this.options.fileSelector)) {
+            for (var i in this.options.fileSelector) {
+                aceFileUpload(this.options.fileSelector[i], this.getUrl("upload"));
+            }
+        }
 
         return this;
     };
