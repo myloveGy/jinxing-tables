@@ -193,6 +193,17 @@
             $(this).find("th input:checkbox").on("click", function () {
                 $(_self).find("input:checkbox").prop("checked", $(this).prop("checked"));
             });
+
+            // 搜索表单的事件
+            if (this.options.event) {
+                $(this.options.searchForm + ' input').on(this.options.searchInputEvent, function () {
+                    _self.table.draw();
+                });
+
+                $(this.options.searchForm + ' select').on(this.options.searchSelectEvent, function () {
+                    _self.table.draw();
+                });
+            }
         };
 
         // 搜索
@@ -501,6 +512,31 @@
             }
         };
 
+        // 按钮组处理
+        this.buttonRender = function () {
+
+            if (this.options.buttonSelector) {
+                this.options.buttonHtml = "";
+                // 处理按钮
+                for (var i in this.options.buttons) {
+                    if (this.options.buttons[i]) {
+                        this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
+                        this.options.buttonHtml += '<button class="' + this.options.buttons[i]["className"] + '" id="' + this.options.unique + "-" + i + '">\
+                                <i class="' + this.options.buttons[i]["icon"] + '"></i>\
+                            ' + this.options.buttons[i]["text"] + '\
+                            </button> ';
+                    }
+                }
+
+                // 添加按钮
+                try {
+                    $(this.options.buttonSelector)[this.options.buttonType](this.options.buttonHtml);
+                } catch (e) {
+                    $(this.options.buttonSelector).append(this.options.buttonHtml);
+                }
+            }
+        };
+
         // 配置覆盖
         this.options = $.extend(true, {}, MeTables.defaults, options);
 
@@ -583,6 +619,7 @@
         // 初始化主要表格
         this.table = $(this).DataTable(this.options.table);
         this.searchRender();
+        this.buttonRender();
         this.bind();
 
         // 判断开启editTable
@@ -789,27 +826,22 @@
         // 默认按钮信息
         buttons: {
             create: {
-                show: true,
                 icon: "ace-icon fa fa-plus-circle blue",
                 className: "btn btn-white btn-primary btn-bold"
             },
             updateAll: {
-                show: true,
                 icon: "ace-icon fa fa-pencil-square-o orange",
                 className: "btn btn-white btn-info btn-bold"
             },
             deleteAll: {
-                show: true,
                 icon: "ace-icon fa fa-trash-o red",
                 className: "btn btn-white btn-danger btn-bold"
             },
             refresh: {
-                show: true,
                 icon: "ace-icon fa  fa-refresh",
                 className: "btn btn-white btn-success btn-bold"
             },
             export: {
-                show: true,
                 icon: "ace-icon glyphicon glyphicon-export",
                 className: "btn btn-white btn-warning btn-bold"
             }
