@@ -46,8 +46,9 @@
         <div class="col-md-12">
             <div class="page-header">
                 <h1> 简单例子 </h1>
-                <p id="me-table-buttons"></p>
+                <p id="me-table-buttons-one"></p>
                 <table class="table table-striped table-bordered table-hover" id="show-table"></table>
+                <p id="me-table-buttons-two"></p>
                 <table class="table table-striped table-bordered table-hover" id="me-table"></table>
             </div>
         </div>
@@ -70,7 +71,7 @@
 
     $(function () {
         var m = $("#show-table").MeTables({
-            unique: "show-table",
+            buttonSelector: "#me-table-buttons-one",
             title: "示例",
             number: false,
             where: {
@@ -146,7 +147,7 @@
 
 
         var m1 = $("#me-table").MeTables({
-            unique: "me-table",
+            buttonSelector: "#me-table-buttons-two",
             title: "示例",
             number: false,
             where: {

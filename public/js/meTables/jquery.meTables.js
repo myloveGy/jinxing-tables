@@ -134,7 +134,8 @@
                     "modalDialogClass": self.options.editFormParams.modalDialogClass
                 },
                 {
-                    "params": {"id": "data-detail-" + self.options.unique}, "html": views
+                    "params": {"id": "data-detail-" + self.options.unique},
+                    "html": views
                 });
 
             // 添加处理表格排序配置
@@ -223,16 +224,10 @@
             });
         };
 
-        // 搜索
+        // 搜索&重写加载
         this.search = function () {
             this.action = "search";
             this.table.ajax.reload();
-        };
-
-        // 重写加载
-        this.refresh = function () {
-            this.action = "refresh";
-            this.search();
         };
 
         // 创建数据
@@ -535,7 +530,9 @@
                 for (var i in this.options.buttons) {
                     if (this.options.buttons[i]) {
                         this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
-                        this.options.buttonHtml += '<button class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '" data-func="' + i + '">\
+                        this.options.buttonHtml += '<button ' +
+                            'class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '"';
+                        this.options.buttonHtml += ' data-func="' + ($.getValue(this.options.buttons[i], "func") || i) + '">\
                                 <i class="' + this.options.buttons[i]["icon"] + '"></i>\
                             ' + this.options.buttons[i]["text"] + '\
                             </button> ';
@@ -553,6 +550,7 @@
 
         // 配置覆盖
         this.options = $.extend(true, {}, MeTables.defaults, options);
+        this.options.unique = this.selector.replace("#", "").replace(".", "");
 
         var _self = this;
 
@@ -855,6 +853,7 @@
                 className: "btn btn-white btn-danger btn-bold"
             },
             refresh: {
+                func: "search",
                 icon: "ace-icon fa  fa-refresh",
                 className: "btn btn-white btn-success btn-bold"
             },
