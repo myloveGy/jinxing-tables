@@ -327,6 +327,43 @@
             });
         };
 
+        // 删除全部数据
+        this.deleteAll = function () {
+            this.action = "deleteAll";
+            var self = this, data = [];
+            // 数据添加
+            $(this).find("tbody input:checkbox:checked").each(function () {
+                var row = parseInt($(this).data("row")),
+                    tmp = self.table.data()[row] || null;
+
+                if ($.getValue(tmp, self.options.pk)) {
+                    data.push(tmp[self.options.pk]);
+                }
+            });
+
+            // 数据为空提醒
+            if (data.length < 1) {
+                return layer.msg($.getValue(MeTables.language, "meTables.noSelect"), {icon: 5});
+            }
+
+            // 询问框
+            layer.confirm($.getValue(MeTables.language, "meTables.confirm").replace("_LENGTH_", data.length), {
+                title: $.getValue(MeTables.language, "meTables.confirmOperation"),
+                btn: [
+                    $.getValue(MeTables.language, "meTables.determine"),
+                    $.getValue(MeTables.language, "meTables.cancel")
+                ],
+                icon: 0
+                // 确认删除
+            }, function () {
+                self.save({"id": data.join(',')});
+                $(this).find("input:checkbox:checked").prop("checked", false);
+                // 取消删除
+            }, function () {
+                layer.msg($.getValue(MeTables.language, "meTables.cancelOperation"), {time: 800});
+            });
+        };
+
         // 查看详情
         this.detail = function (row) {
             if (this.options.oLoading) {
@@ -437,42 +474,7 @@
             $(this.options.modalSelector).modal({backdrop: "static"});   // 弹出信息
         };
 
-        // 删除全部数据
-        this.deleteAll = function () {
-            this.action = "deleteAll";
-            var self = this, data = [];
-            // 数据添加
-            $(this).find("tbody input:checkbox:checked").each(function () {
-                var row = parseInt($(this).data("row")),
-                    tmp = self.table.data()[row] || null;
 
-                if ($.getValue(tmp, self.options.pk)) {
-                    data.push(tmp[self.options.pk]);
-                }
-            });
-
-            // 数据为空提醒
-            if (data.length < 1) {
-                return layer.msg($.getValue(MeTables.language, "meTables.noSelect"), {icon: 5});
-            }
-
-            // 询问框
-            layer.confirm($.getValue(MeTables.language, "meTables.confirm").replace("_LENGTH_", data.length), {
-                title: $.getValue(MeTables.language, "meTables.confirmOperation"),
-                btn: [
-                    $.getValue(MeTables.language, "meTables.determine"),
-                    $.getValue(MeTables.language, "meTables.cancel")
-                ],
-                icon: 0
-                // 确认删除
-            }, function () {
-                self.save({"id": data.join(',')});
-                $(this).find("input:checkbox:checked").prop("checked", false);
-                // 取消删除
-            }, function () {
-                layer.msg($.getValue(MeTables.language, "meTables.cancelOperation"), {time: 800});
-            });
-        };
 
         // 数据导出
         this.export = function () {
@@ -677,7 +679,7 @@
             cancel: "取消",
             confirm: "您确定需要删除这_LENGTH_条数据吗?",
             confirmOperation: "确认操作",
-            cancelOpertation: "您取消了删除操作!",
+            cancelOperation: "您取消了删除操作!",
             noSelect: "没有选择需要操作的数据",
             operationError: "操作有误",
             empty: "没有数据",
