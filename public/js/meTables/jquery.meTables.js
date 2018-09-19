@@ -156,6 +156,60 @@
             $("body").append(modalHtml);
         };
 
+        // 搜索表单
+        this.searchRender = function () {
+            // 判断初始化处理(搜索添加位置)
+            if (this.options.searchType === "middle") {
+                $(this).parent().parent().parent().find("div.row:first>div.col-sm-6:first")
+                    .removeClass("col-sm-6")
+                    .addClass("col-sm-2")
+                    .next()
+                    .removeClass("col-sm-6")
+                    .addClass("col-sm-10").html('<form id="' +
+                    this.options.searchForm.replace("#", "") + '" class="pull-right">' + this.options.searchHtml + '</form>');	// 处理搜索信息
+            } else {
+                // 添加搜索表单信息
+                if (this.options.search.render) {
+                    this.options.searchHtml += '<button class="' + this.options.search.button.class + '">\
+                    <i class="' + this.options.search.button.icon + '"></i>\
+                    ' + $.getValue(MeTables.language, "meTables.search") + '\
+                    </button>';
+                    console.info(this.options.searchHtml);
+                    try {
+                        $(this.options.searchForm)[this.options.search.type](this.options.searchHtml);
+                    } catch (e) {
+                        $(this.options.searchForm).append(this.options.searchHtml);
+                    }
+                }
+            }
+        };
+
+        // 按钮组处理
+        this.buttonRender = function () {
+            if (this.options.buttonSelector) {
+                this.options.buttonHtml = "";
+                // 处理按钮
+                for (var i in this.options.buttons) {
+                    if (this.options.buttons[i]) {
+                        this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
+                        this.options.buttonHtml += '<button ' +
+                            'class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '"';
+                        this.options.buttonHtml += ' data-func="' + ($.getValue(this.options.buttons[i], "func") || i) + '">\
+                                <i class="' + this.options.buttons[i]["icon"] + '"></i>\
+                            ' + this.options.buttons[i]["text"] + '\
+                            </button> ';
+                    }
+                }
+
+                // 添加按钮
+                try {
+                    $(this.options.buttonSelector)[this.options.buttonType](this.options.buttonHtml);
+                } catch (e) {
+                    $(this.options.buttonSelector).append(this.options.buttonHtml);
+                }
+            }
+        };
+
         // 绑定事件
         this.bind = function () {
             var _self = this;
@@ -491,61 +545,6 @@
                 clearTimeout(ie_timeout);
             });
             deferred.promise();
-        };
-
-        // 搜索表单
-        this.searchRender = function () {
-            // 判断初始化处理(搜索添加位置)
-            if (this.options.searchType === "middle") {
-                $(this).parent().parent().parent().find("div.row:first>div.col-sm-6:first")
-                    .removeClass("col-sm-6")
-                    .addClass("col-sm-2")
-                    .next()
-                    .removeClass("col-sm-6")
-                    .addClass("col-sm-10").html('<form id="' +
-                    this.options.searchForm.replace("#", "") + '" class="pull-right">' + this.options.searchHtml + '</form>');	// 处理搜索信息
-            } else {
-                // 添加搜索表单信息
-                if (this.options.search.render) {
-                    this.options.searchHtml += '<button class="' + this.options.search.button.class + '">\
-                    <i class="' + this.options.search.button.icon + '"></i>\
-                    ' + $.getValue(MeTables.language, "meTables.search") + '\
-                    </button>';
-                    console.info(this.options.searchHtml);
-                    try {
-                        $(this.options.searchForm)[this.options.search.type](this.options.searchHtml);
-                    } catch (e) {
-                        $(this.options.searchForm).append(this.options.searchHtml);
-                    }
-                }
-            }
-        };
-
-        // 按钮组处理
-        this.buttonRender = function () {
-
-            if (this.options.buttonSelector) {
-                this.options.buttonHtml = "";
-                // 处理按钮
-                for (var i in this.options.buttons) {
-                    if (this.options.buttons[i]) {
-                        this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
-                        this.options.buttonHtml += '<button ' +
-                            'class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '"';
-                        this.options.buttonHtml += ' data-func="' + ($.getValue(this.options.buttons[i], "func") || i) + '">\
-                                <i class="' + this.options.buttons[i]["icon"] + '"></i>\
-                            ' + this.options.buttons[i]["text"] + '\
-                            </button> ';
-                    }
-                }
-
-                // 添加按钮
-                try {
-                    $(this.options.buttonSelector)[this.options.buttonType](this.options.buttonHtml);
-                } catch (e) {
-                    $(this.options.buttonSelector).append(this.options.buttonHtml);
-                }
-            }
         };
 
         // 配置覆盖
