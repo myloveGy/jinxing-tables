@@ -1211,10 +1211,8 @@
             var defaultParams = {
                 "id": "search-" + params.name,
                 "name": params.name,
-                // "placeholder": meGrid.fn.getLanguage("pleaseInput") + params.title,
                 "class": "form-control"
             }, defaultLabel = {
-                // "class": "sr-only",
                 "for": "search-" + params.name
             }, options = params.options, labelOptions = params.labelOptions;
 
