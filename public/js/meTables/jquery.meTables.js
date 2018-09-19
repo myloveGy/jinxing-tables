@@ -159,12 +159,6 @@
         this.bind = function () {
             var _self = this;
 
-            // 添加表单事件
-            $(this.options.searchForm).submit(function (evt) {
-                evt.preventDefault();
-                _self.search(true);
-            });
-
             // 按钮方法
             $(document).on("click", ".me-table-button-" + _self.options.unique, function (evt) {
                 evt.preventDefault();
@@ -210,15 +204,23 @@
             });
 
             // 搜索表单的事件
-            if (this.options.event) {
+            if (this.options.searchInputEvent) {
                 $(this.options.searchForm + ' input').on(this.options.searchInputEvent, function () {
                     _self.table.draw();
                 });
+            }
 
+            if (this.options.searchSelectEvent) {
                 $(this.options.searchForm + ' select').on(this.options.searchSelectEvent, function () {
                     _self.table.draw();
                 });
             }
+
+            // 搜索表单提交执行搜索
+            $(this.options.searchForm).submit(function (evt) {
+                evt.preventDefault();
+                _self.search(true);
+            });
         };
 
         // 搜索
@@ -727,12 +729,6 @@
         modalSelector: "#table-modal",  // 编辑Modal选择器
         formSelector: "#edit-form",	    // 编辑表单选择器
         params: null,				    // 请求携带参数
-        searchHtml: "",				    // 搜索信息额外HTML
-        searchType: "middle",		    // 搜索表单位置
-        searchForm: "#search-form",	    // 搜索表单选择器
-        event: true,                    // 是否监听事件
-        searchInputEvent: "blur",       // 搜索表单input事件
-        searchSelectEvent: "change",    // 搜索表单select事件
 
         // 请求相关
         isSuccess: function (json) {
@@ -743,6 +739,12 @@
             return json.msg;
         },
 
+        // 搜索相关
+        searchHtml: "",				    // 搜索信息额外HTML
+        searchType: "middle",		    // 搜索表单位置
+        searchForm: "#search-form",	    // 搜索表单选择器
+        searchInputEvent: "blur",       // 搜索表单input事件
+        searchSelectEvent: "change",    // 搜索表单select事件
         // 搜索信息(只对searchType !== "middle") 情况
         search: {
             render: true,
