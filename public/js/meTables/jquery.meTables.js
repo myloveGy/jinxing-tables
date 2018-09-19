@@ -160,6 +160,12 @@
         this.searchRender = function () {
             // 判断初始化处理(搜索添加位置)
             if (this.options.searchType === "middle") {
+                // 自定义处理
+                if ($.isFunction($.getValue(this.options, "searchMiddleHandle"))) {
+                    this.options.searchMiddleHandle(this.options.searchHtml);
+                    return;
+                }
+
                 $(this).parent().parent().parent().find("div.row:first>div.col-sm-6:first")
                     .removeClass("col-sm-6")
                     .addClass("col-sm-2")
@@ -174,7 +180,6 @@
                     <i class="' + this.options.search.button.icon + '"></i>\
                     ' + $.getValue(MeTables.language, "meTables.search") + '\
                     </button>';
-                    console.info(this.options.searchHtml);
                     try {
                         $(this.options.searchForm)[this.options.search.type](this.options.searchHtml);
                     } catch (e) {
