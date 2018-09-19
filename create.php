@@ -30,9 +30,9 @@ function createForm($array)
     foreach ($array as $k => $value) {
         $key    = $value['Field'];
         $title  = !empty($value['Comment']) ? $value['Comment'] : studly_case($key);
-        $option = $value['Null'] == 'NO' ? 'required: true,' : '';
+        $option = $value['Null'] == 'NO' ? ['required: true'] : [];
         if (stripos($value['Type'], 'int(') !== false) {
-            $option       .= 'number: true,';
+            $option[]     = 'number: true';
             $order_select = '<option value="1" selected="selected">开启</option>
             <option value="0" >关闭</option>';
         } else {
@@ -41,12 +41,12 @@ function createForm($array)
         }
 
         if (stripos($value['Type'], 'varchar(') !== false) {
-            $sLen   = trim(str_replace('varchar(', '', $value['Type']), ')');
-            $option .= 'rangelength: "[2, ' . $sLen . ']"';
+            $sLen     = trim(str_replace('varchar(', '', $value['Type']), ')');
+            $option[] = 'rangelength: "[2, ' . $sLen . ']"';
         }
 
-        $other = stripos($key, '_at') !== false ? '$.fn.meTables.dateTimeString' : '';
-
+        $option = implode(', ', $option);
+        $other  = stripos($key, '_at') !== false ? '$.fn.meTables.dateTimeString' : '';
         if (in_array($key, ['created_time', 'updated_time', 'created_at', 'updated_at'])) {
             $update_select = '';
             $order_select  = '<option value="1" selected="selected">开启</option>
@@ -56,15 +56,15 @@ function createForm($array)
             <input type="hidden" name="primary_key" value="' . $key . '">';
         } else {
             $update_select = '<select name="attr[' . $k . '][type]" class="form-control pull-left" style="width: 80px">
-            <option value="" selected="selected">选择编辑类型</option>
-            <option value="text" >text</option>
+            <option value="" >选择编辑类型</option>
+            <option selected="selected" value="text" >text</option>
             <option value="hidden">hidden</option>
             <option value="select">select</option>
             <option value="radio">radio</option>
             <option value="password">password</option>
             <option value="textarea">textarea</option>
         </select>
-        <input type="text" name="attr[' . $k . '][options]" class="form-control pull-left" value=\'' . $option . '\'/>';
+        <input type="text" name="attr[' . $k . '][options]" class="form-control pull-left" style="margin-left:10px;width:280px" value=\'' . $option . '\'/>';
         }
 
         $strHtml .= <<<HTML
@@ -127,7 +127,7 @@ function createHtml($array, $title, $primary_key)
                     $edits[] = $options;
                 }
 
-                $columns[] = 'edit: {' . implode(',', $edits) . '}';
+                $columns[] = 'edit: {' . implode(', ', $edits) . '}';
             }
 
             // 搜索
