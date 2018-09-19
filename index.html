@@ -142,7 +142,70 @@
             beforeSave: function (data) {
                 console.info(data, '修改之前');
             }
-        })
+        });
+
+
+        var m1 = $("#me-table").MeTables({
+            unique: "me-table",
+            title: "示例",
+            number: false,
+            where: {
+                "url:like": 123,
+                "name:like": 456
+            },
+            checkbox: {width: "60px"},
+            url: {
+                search: "./action.php?type=search",
+                create: "./action.php?type=create",
+                update: "./action.php?type=update",
+                delete: "./action.php?type=delete",
+                deleteAll: "./action.php?type=delete-all",
+                export: "./action.php?type=export"
+            },
+            table: {
+                columns: [
+                    {
+                        title: "id",
+                        data: "id",
+                        defaultOrder: "desc", // 默认一个排序
+                        edit: {type: "hidden"}
+                    },
+                    {
+                        title: "名称",
+                        data: "name",
+                        edit: {
+                            required: true,
+                            rangelength: "[2, 40]"
+                        },
+                        value: ['我的', '你的', '他的'],
+                        search: {type: "select"},
+                        sortable: false
+                    },
+                    {
+                        title: "测试数据",
+                        data: null,
+                        view: false, // 导出不显示
+                        hide: true,   // 列表不显示处理
+                        edit: {
+                            name: "text",
+                            type: "customize"
+                        }
+                    },
+                    {
+                        title: "创建时间",
+                        data: "created_at",
+                        sortable: false,
+                        createdCell: $.fn.meTables.dateTimeString
+                    },
+                    {
+                        title: "修改时间",
+                        data: "updated_at",
+                        sortable: false,
+                        createdCell: $.fn.meTables.dateTimeString
+                    }
+                ]
+            }
+        });
     });
 </script>
 </body>
