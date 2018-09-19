@@ -62,9 +62,14 @@
 <script src="./public/js/layer/layer.js"></script>
 <script src="./public/js/jquery.meTables.js"></script>
 <script type="text/javascript">
-    var m = null, m1 = null;
+    // 自定义编辑类型
+    $.fn.meTables.customizeCreate = function (params) {
+        delete params.type;
+        return "<textarea " + this.handleParams(params) + "></textarea>";
+    };
+
     $(function () {
-        m = $("#show-table").MeTables({
+        var m = $("#show-table").MeTables({
             unique: "show-table",
             title: "示例",
             number: false,
@@ -82,15 +87,16 @@
                 export: "./action.php?type=export"
             },
             table: {
-                colReorder: true,
                 columns: [
                     {
-                        title: "id", data: "id",
-                        defaultOrder: "desc",
+                        title: "id",
+                        data: "id",
+                        defaultOrder: "desc", // 默认一个排序
                         edit: {type: "hidden"}
                     },
                     {
-                        title: "名称", data: "name",
+                        title: "名称",
+                        data: "name",
                         edit: {
                             required: true,
                             rangelength: "[2, 40]"
@@ -98,6 +104,16 @@
                         value: ['我的', '你的', '他的'],
                         search: {type: "select"},
                         sortable: false
+                    },
+                    {
+                        title: "测试数据",
+                        data: null,
+                        view: false, // 导出不显示
+                        hide: true,   // 列表不显示处理
+                        edit: {
+                            name: "text",
+                            type: "customize"
+                        }
                     },
                     {
                         title: "创建时间",
@@ -111,10 +127,22 @@
                         sortable: false,
                         createdCell: $.fn.meTables.dateTimeString
                     }
-                ],
-                order: [[1, "desc"]]
+                ]
             }
         });
+
+        // 自定义事件
+        $.extend(m, {
+            beforeShow: function (data) {
+                // alert('显示之前');
+                console.info(data, '显示之前');
+                // 不向下执行，那么返回false
+                // return false;
+            },
+            beforeSave: function (data) {
+                console.info(data, '修改之前');
+            }
+        })
     });
 </script>
 </body>

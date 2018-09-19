@@ -28,6 +28,7 @@ function find($data, $id)
 function dataCreate(&$data, $update)
 {
     $update['id'] = mt_rand(10000, 99999);
+    $update['created_at'] = $update['updated_at'] = time();
     array_push($data, $update);
     return $data;
 }
@@ -36,7 +37,8 @@ function dataUpdate($data, $id, $update)
 {
     $key = find($data, $id);
     if ($key !== false) {
-        $data[$key] = $update;
+        $update['updated_at'] = time();
+        $data[$key] = array_merge($data[$key], $update);
     }
 
     return $data;
