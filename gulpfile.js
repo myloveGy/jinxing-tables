@@ -10,7 +10,7 @@ gulp.task('default', function () {
                 min: ".min.js"
             }
         }))
-        .pipe(gulp.dest('public/js'));
+        .pipe(gulp.dest('public/js/meTables/'));
 });
 
 
