@@ -160,6 +160,12 @@
         this.searchRender = function () {
             // 判断初始化处理(搜索添加位置)
             if (this.options.searchType === "middle") {
+                // 自定义处理
+                if ($.isFunction($.getValue(this.options, "searchMiddleHandle"))) {
+                    this.options.searchMiddleHandle(this);
+                    return;
+                }
+
                 $(this).parent().parent().parent().find("div.row:first>div.col-sm-6:first")
                     .removeClass("col-sm-6")
                     .addClass("col-sm-2")
@@ -174,7 +180,6 @@
                     <i class="' + this.options.search.button.icon + '"></i>\
                     ' + $.getValue(MeTables.language, "meTables.search") + '\
                     </button>';
-                    console.info(this.options.searchHtml);
                     try {
                         $(this.options.searchForm)[this.options.search.type](this.options.searchHtml);
                     } catch (e) {
@@ -274,7 +279,11 @@
             // 搜索表单提交执行搜索
             $(this.options.searchForm).submit(function (evt) {
                 evt.preventDefault();
-                _self.search(true);
+                _self.search();
+            }).find("button:reset").on("click", function (evt) {
+                evt.preventDefault();
+                $(_self.options.searchForm).get(0).reset();
+                _self.search();
             });
         };
 
@@ -464,6 +473,11 @@
             // 确定操作的表单和模型
             var t = $.getValue(MeTables.language, this.action === "create" ? "meTables.insert" : "meTables.update");
             $(this.options.modalSelector).find('h4').html(this.options.title + t);
+            try {
+                $(this.options.formSelector).find(".has-error").removeClass("has-error");
+                $(this.options.formSelector).validate(this.options.formValidate).resetForm();
+            } catch (e) {
+            }
             MeTables.initForm(this.options.formSelector, data);
 
             // 显示之后的处理
@@ -473,7 +487,6 @@
 
             $(this.options.modalSelector).modal({backdrop: "static"});   // 弹出信息
         };
-
 
 
         // 数据导出
@@ -496,14 +509,15 @@
             var value = $(_self.options.searchForm).serializeArray();
             for (var i in value) {
                 if (!MeTables.empty(value[i]["value"]) && value[i]["value"] !== "All") {
-                    var strName = MeTables.getAttributeName(value[i]["name"], "where");
+                    var strName = MeTables.getAttributeName(value[i]["name"], _self.options.filter);
                     html += '<input type="hidden" name="' + strName + '" value="' + value[i]["value"] + '"/>';
                 }
             }
 
             // 默认查询参数添加
-            for (i in _self.options.where) {
-                html += '<input type="hidden" name="where[' + i + ']" value="' + _self.options.where[i] + '"/>';
+            for (i in _self.options.defaultFilters) {
+                html += '<input type="hidden" name="';
+                html += _self.options.filters + '[' + i + ']" value="' + _self.options.defaultFilters[i] + '"/>';
             }
 
             // 表单提交
@@ -592,16 +606,19 @@
                     from_data.forEach(function (value) {
                         if (value.value !== "") {
                             return_object.push({
-                                name: MeTables.getAttributeName(value.name, "where"),
+                                name: MeTables.getAttributeName(value.name, _self.options.filters),
                                 value: value.value
                             });
                         }
                     });
 
                     // 第五步：添加附加数据
-                    if (_self.options.where) {
-                        for (var i in _self.options.where) {
-                            return_object.push({name: "where[" + i + "]", value: _self.options.where[i]});
+                    if (_self.options.defaultFilters) {
+                        for (var i in _self.options.defaultFilters) {
+                            return_object.push({
+                                name: _self.options.filters + "[" + i + "]",
+                                value: _self.options.defaultFilters[i]
+                            });
                         }
                     }
 
@@ -691,7 +708,8 @@
             export: "导出",
             pleaseInput: "请输入",
             all: "全部",
-            pleaseSelect: "请选择"
+            pleaseSelect: "请选择",
+            clear: "清除"
         },
 
         // dataTables 表格
@@ -727,7 +745,8 @@
         pk: "id",		                // 行内编辑pk索引值
         modalSelector: "#table-modal",  // 编辑Modal选择器
         formSelector: "#edit-form",	    // 编辑表单选择器
-        params: null,				    // 请求携带参数
+        defaultFilters: null,			// 默认查询条件 {id: 1, type: 2}
+        filters: "filters",             // 查询参数名称
 
         // 请求相关
         isSuccess: function (json) {
@@ -818,7 +837,7 @@
         // dataTables 表格默认配置对象信息
         table: {
             paging: true,
-            lengthMenu: [15, 30, 50, 100],
+            lengthMenu: [10, 30, 50, 100],
             searching: false,
             ordering: true,
             info: true,
@@ -868,8 +887,12 @@
         , number: {
             title: $.getValue(MeTables.language, "meTables.number"),
             data: null,
+            view: false,
             render: function (data, type, row, meta) {
-                console.info(meta);
+                if (!meta || $.isEmptyObject(meta)) {
+                    return false;
+                }
+
                 return meta.row + 1 + meta.settings._iDisplayStart;
             },
             sortable: false
@@ -1211,10 +1234,8 @@
             var defaultParams = {
                 "id": "search-" + params.name,
                 "name": params.name,
-                // "placeholder": meGrid.fn.getLanguage("pleaseInput") + params.title,
                 "class": "form-control"
             }, defaultLabel = {
-                // "class": "sr-only",
                 "for": "search-" + params.name
             }, options = params.options, labelOptions = params.labelOptions;
 
@@ -1348,21 +1369,23 @@
             // 循环处理显示信息
             object.forEach(function (k) {
                 var tmpKey = k.data, tmpValue = data[tmpKey], dataInfo = $(tClass + tmpKey);
-                // 处理值
-                if ($.getValue(k, "edit.type") === 'password') {
-                    tmpValue = "******";
-                }
-
-                // createdCell 函数
-                if ($.isFunction($.getValue(k, "createdCell"))) {
-                    k.createdCell(dataInfo, tmpValue, data, row, undefined);
-                } else {
-                    // render 修改值
-                    if ($.isFunction($.getValue(k, "render"))) {
-                        tmpValue = k.render(tmpValue, true, row);
+                if ($.getValue(k, "view", true)) {
+                    // 处理值
+                    if ($.getValue(k, "edit.type") === 'password') {
+                        tmpValue = "******";
                     }
 
-                    dataInfo.html(tmpValue)
+                    // createdCell 函数
+                    if ($.isFunction($.getValue(k, "createdCell"))) {
+                        k.createdCell(dataInfo, tmpValue, data, row, undefined);
+                    } else {
+                        // render 修改值
+                        if ($.isFunction($.getValue(k, "render"))) {
+                            tmpValue = k.render(tmpValue, true, row);
+                        }
+
+                        dataInfo.html(tmpValue)
+                    }
                 }
             });
         },

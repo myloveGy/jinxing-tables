@@ -8,7 +8,7 @@ meTables.js 基于 jquery.dataTables.js 表格
 ### 依赖声明
 * jQuery v2.1.1 
 * Bootstrap v3.2.0
-* DataTables 1.10.10
+* DataTables 1.10.15
 * layer-v2.1
 * jQuery Validation Plugin - v1.14.0
 
@@ -26,21 +26,21 @@ meTables.js 基于 jquery.dataTables.js 表格
  * 简单配置说明
  * title 配置表格名称
  * table DataTables 的配置 
- * --- aoColumns 中的 value, search, edit, defaultOrder, isHide 是 meTables 的配置
+ * --- columns 中的 value, search, edit, defaultOrder, hide 是 MeTables 的配置
  * ------ value 为编辑表单radio、select, checkbox， 搜索的表单的select 提供数据源,格式为一个对象 {"值": "显示信息"}
  * ------ search 搜索表单配置(不配置不会生成查询表单), type 类型支持 text, select 其他可以自行扩展
  * ------ edit 编辑表单配置（不配置不会生成编辑表单）, 
  * --------- type 类型支持hidden, text, password, file, radio, select, checkbox, textarea 等等 
- * --------- meTable.inputCreate 等后缀函数为其生成表单元素，可以自行扩展
+ * --------- MeTable.inputCreate 等后缀函数为其生成表单元素，可以自行扩展
  * --------- 除了表单元素自带属性，比如 required: true, number: true 等为 jquery.validate.js 的验证配置
  * --------- 最终生成表单元素 <input name="name" required="true" number="true" />
  * ------ defaultOrder 设置默认排序的方式(有"ace", "desc")
- * ------ isHide 该列是否需要隐藏 true 隐藏
- * 其他配置查看 meTables 配置
+ * ------ hide 该列是否需要隐藏 true 隐藏
+ * 其他配置查看 MeTables 配置
  */
 
 // 自定义表单处理方式
-meTables.extend({
+$.extend($.fn.meTables, {
     /**
      * 定义编辑表单(函数后缀名Create)
      * 使用配置 edit: {"type": "email", "id": "user-email"}
@@ -61,29 +61,35 @@ meTables.extend({
 });
 
 
-var m = meTables({
+var m = $("#show-table").MeTables({
     title: "地址信息",
     table: {
-        "aoColumns":[
-            {"title": "id", "data": "id", "sName": "id",  "defaultOrder": "desc",
-                "edit": {"type": "text", "required":true,"number":true}
+        columns:[
+            {
+                title: "id", 
+                data: "id", 
+                defaultOrder: "desc",
+                // type 类型默认为text,可以不写
+                edit: {required: true, number: true}
             },
-            {"title": "地址名称", "data": "name", "sName": "name",
-                "edit": {"type": "text", "required": true, "rangelength":"[2, 40]"},
-                "search": {"type": "text"},
-                "bSortable": false
+            {
+                title: "地址名称", 
+                data: "name", 
+                edit: {required: true, rangelength: "[2, 40]"},
+                search: {type: "text"},
+                sortable: false
             },
-            {"title": "父类ID", "data": "pid", "sName": "pid", "value": {"0": "中国", "1": "上海"},
-                "edit": {"type": "text", "required": true, "number": true},
-                "search": {"type":"select"}
+            {
+                title: "父类ID", 
+                data: "pid", 
+                value: {"0": "中国", "1": "上海"},
+                edit: {required: true, number: true},
+                search: {"type":"select"}
             }
         ]
     }
 });
 
-$(window).ready(function(){
-    m.init();
-});
 </script>
 ```
 
@@ -94,45 +100,16 @@ $(window).ready(function(){
 
 搜索表单的查询信息以及排序条件都会拼接到dataTables 提交数据中
 
-```js
+>请求参数说明
 
-    meTables.fnServerData = function(sSource, aoData, fnCallback) {
-        var attributes = aoData[2].value.split(","),
-            mSort 	   = (attributes.length + 1) * 5 + 2;
-
-        // 添加查询条件
-        var data = $(meTables.fn.options.searchForm).serializeArray();
-        for (i in data) {
-            if (!meTables.empty(data[i]["value"]) && data[i]["value"] != "All") {
-                aoData.push({"name": "params[" + data[i]['name'] + "]", "value": data[i]["value"]});
-            }
-        }
-
-        // 添加排序字段信息
-        meTables.fn.push(aoData, {"orderBy": attributes[parseInt(aoData[mSort].value)]}, "params");
-
-        // 添加其他字段信息
-        meTables.fn.push(aoData, meTables.fn.options.params, "params");
-
-        // ajax请求
-        meTables.ajax({
-            url: sSource,
-            data: aoData,
-            type: meTables.fn.options.sMethod,
-            dataType: 'json'
-        }).done(function(data){
-            if (data.errCode != 0) {
-                return layer.msg(meTables.fn.getLanguage("sAppearError") + data.errMsg, {
-                    time:2000,
-                    icon:5
-                });
-            }
-
-            fnCallback(data.data);
-        });
-    };
-
-```
+ 名称     |  类型 | 说明
+:--------|:------|:----
+draw     | int   | 请求次数
+offset   | int   | 分页偏移量(对应mysql 的 offset)
+limit    | int   | 分页数据条数( 对应mysql 的 limit)
+columns  | array | 表格的字段信息(data 为 null 忽略)
+filters  | array | 查询的参数信息,定义了defaultFilters 数据也在里面
+orderBy  | string| 排序条件(排序字段 排序方式： id asc)
 
 #### 服务器数据的处理(PHP代码)
 
@@ -140,10 +117,10 @@ $(window).ready(function(){
 // 默认使用的POST提交的数据
 
 // 请求次数
-$intEcho = isset($_POST['sEcho']) ? (int)$_POST['sEcho'] : 0;
+$intDraw = isset($_POST['draw']) ? (int)$_POST['draw'] : 0;
 
 // 查询参数(查询条件排序字段)
-$params = isset($_POST['params']) ? $_POST['params'] : [];
+$filters = isset($_POST['filters']) ? $_POST['filters'] : [];
 
 // 查询开始位置(分页启始位置)
 $intStart = isset($_POST['iDisplayStart']) ? (int)$_POST['iDisplayStart'] : 0; 
