@@ -178,14 +178,13 @@ if ($intTotal > 0) {
 // 返回json数据
 header('Content-Type: application/json; charset=utf-8');
 exit(json_encode([
-    'errCode' => 0,
-    'errMsg' => 'success',
-    'data' => [
-        'sEcho' => $intEcho,  					// 请求次数
-        'iTotalRecords' => count($data),        // 当前页条数
-        'iTotalDisplayRecords' => $intTotal,  	// 数据总条数
-        'aaData' => $data,						// 数据信息
-    ]  
+    'draw'            => 0,
+    'data'            => [
+        'id'   => 1,
+        'name' => 'name'
+    ],
+    'recordsFiltered' => 99,
+    'recordsTotal'    => 99  
 ], 320));
 
 ```
