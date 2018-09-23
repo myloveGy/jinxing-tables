@@ -190,28 +190,24 @@ exit(json_encode([
 ```
 
 #### 服务器返回数据说明
-* 查询返回json
+* 查询返回 json
 ```
 {
-  errCode: 0, 
-  errMsg: "操作成功", 
-  data: {
-    sEcho: 1,                   // 查询次数
-    iTotalRecords: 10,          // 当页数据条数
-    iTotalDisplayRecords: 100,  // 数据总条数 
-    aaData: [                   // 数据
+    draw: 1,                   // 查询次数
+    recordsFiltered: 100,      // 当页数据条数
+    recordsTotal: 100,        // 数据总条数 
+    data: [                   // 数据
       {id: 1, name: "中国"},
       {id: 2, name: "上海"}
     ]
-  }
 }
 ```
 * 新增、修改、删除返回json
 1. 处理成功
 ```
 {
-    errCode: 0,
-    errMsg: "操作成功",
+    code: 0,
+    msg: "操作成功",
     data: {
         id: 1,
         name: "中国"
@@ -221,224 +217,236 @@ exit(json_encode([
 2. 处理失败
 ```js
 {
-  errCode: 1,
-  errMsg: "处理失败",
+  code: 1,
+  msg: "处理失败",
   data: null
 }
 ```
 ### 配置说明
 
+>目前配置选择器都只能使用ID选择器
+
+| 配置名称 | 字段类型 | 默认值 | 说明 |
+|----------------|---------|-------------------|---------|
+| title          | string  | 空字符串           |  表格标题(会在编辑和新增弹框显示)      |
+| pk             | string  | id                | 数据主键值(行内编辑,和多个删除需要使用) |
+| modalSelector  | string  | #table-modal      | 弹出模块框的选择器                    |
+| formSelector   | string  | #edit-form        | 编辑表单的选择器                      |
+| defaultFilters | object  | null              | 默认查询条件(该配置在查询和导出都会提交给服务器)|
+| filters        | string  | filters           | 查询条件提交给服务器字段名称                  |
+|   
+
+### 请求相关配置
+| 配置名称 | 字段类型 | 默认值 | 说明 |
+|----------------|---------|-------------------|---------|
+| isSuccess      | function | function(response) { return response.code === 0 } | 验证请求是否成功(response 为响应json 数据)
+| getMessage     | function | function(response) { return response.msg; }       | 获取响应的提示信息(response 为响应 json 数据)
+| urlPrefix      | string   | 空字符串    | 路由前缀     |
+| urlSuffix      | string   | 空字符串    | 路由后缀     |
+| url            | object   |            | 具体路由信息  |
+| url.search     | string   | search     | 搜索&列表显示数据请求地址 |
+| url.create     | string   | create     | 新增数据请求地址         |
+| url.update     | string   | update     | 编辑数据请求地址         |
+| url.delete     | string   | delete     | 删除数据请求地址         |
+| url.export     | string   | export     | 导出数据请求地址         |
+| url.editable   | string   | editable   | 行内编辑请求地址         |
+| url.deleteAll  | string   | delete-all | 多删除请求地址           |
+
+ 
+
 * 在 meTables() 函数中传递的对象信息会覆盖如下的默认配置信息
 * 选择器配置一定要使用ID选择器，例如：sModal, sTable, sFormId, searchForm, buttonSelector
 ```js
-var config = {
-    title: "",                  // 表格的标题  
-    language: "zh-cn",          // 使用语言          
-    pk: "id",		            // 行内编辑、多选删除、多选编辑 pk索引值
-    sModal: "#table-modal",     // 编辑Modal选择器
-    sTable:  "#show-table", 	// 显示表格选择器
-    sFormId: "#edit-form",		// 编辑表单选择器
-    sMethod: "POST",			// 查询数据的请求方式
-    bCheckbox: true,			// 需要多选框
-    params: null,				// 请求携带参数
-    ajaxRequest: false,         // ajax一次性获取数据
-    
-    // 关于地址配置信息
-    urlPrefix: "", 
-    urlSuffix: "",
-    url: {
-        search: "search",
-        create: "create",
-        update: "update",
-        delete: "delete",
-        export: "export",
-        upload: "upload",
-        editable: "editable",
-        deleteAll: "delete-all"
-    },
-    
-    // 最终生成地址 urlPrefix + url.search + urlSuffix;
-             
-    // dataTables 表格默认配置对象信息
-    table: {
-        // "fnServerData": fnServerData,		// 获取数据的处理函数
-        // "sAjaxSource":      "search",		// 获取数据地址
-        "bLengthChange": true, 			// 是否可以调整分页
-        "bAutoWidth": false,           	// 是否自动计算列宽
-        "bPaginate": true,			    // 是否使用分页
-        "iDisplayStart":  0,
-        "iDisplayLength": 10,
-        "bServerSide": true,		 	// 是否开启从服务器端获取数据
-        "bRetrieve": true,
-        "bDestroy": true,
-        // "processing": true,		    // 是否使用加载进度条
-        // "searching": false,
-        "sPaginationType":  "full_numbers"     // 分页样式
-        // "order": [[1, "desc"]]       // 默认排序，
-        // sDom: "t<'row'<'col-xs-6'li><'col-xs-6'p>>"
-    },
+    var default_config = {
 
-    // 关于搜索的配置
-    searchHtml: "",				// 搜索信息额外HTML
-    searchType: "middle",		// 搜索表单位置
-    searchForm: "#search-form",	// 搜索表单选择器
+// 搜索相关
+searchHtml: "",				    // 搜索信息额外HTML
+searchType: "middle",		    // 搜索表单位置
+searchForm: "#search-form",	    // 搜索表单选择器
+searchInputEvent: "blur",       // 搜索表单input事件
+searchSelectEvent: "change",    // 搜索表单select事件
+// 搜索信息(只对searchType !== "middle") 情况
+search: {
+render: true,
+type: "append",
+button: {
+"class": "btn btn-info btn-sm",
+"icon": "ace-icon fa fa-search"
+}
+},
 
-    // 搜索信息(只对searchType !== "middle") 情况
-    search: {
-        render: true,           // 是否渲染表格，自己创建了搜索表单，可以将该值设置为false
-        type: "append",         // 渲染时添加表单html的jquery 函数方式
-        // 搜索按钮
-        button: {
-            "class": "btn btn-info btn-sm", // 搜索按钮class
-            "icon": "ace-icon fa fa-search" // 搜索按钮的icon
-        }
-    },
+fileSelector: [],			// 上传文件选择器
 
-    // 上传文件选择器， 依赖ace.min.js 中的 ace_file_input() 函数
-    fileSelector: [],			
+// 编辑表单信息
+form: {
+"method": "post",
+"class": "form-horizontal",
+"name": "edit-form"
+},
 
-    // 编辑表单信息
-    form: {
-        "method": "post", 
-        "class":  "form-horizontal",
-        "name":   "edit-form"
-    },
+// 编辑表单验证方式
+formValidate: {
+errorElement: 'div',
+errorClass: 'help-block',
+focusInvalid: false,
+highlight: function (e) {
+$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+},
+success: function (e) {
+$(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
+$(e).remove();
+}
+},
 
-    // 编辑表单验证方式（jquery.validate 需要的验证对象信息）
-    formValidate: {
-        errorElement: 'div',
-        errorClass: 'help-block',
-        focusInvalid: false,
-        highlight: function (e) {
-            $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
-        },
-        success: function (e) {
-            $(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
-            $(e).remove();
-        }
-    },
+// 表单编辑其他信息
+editFormParams: {			// 编辑表单配置
+multiCols: false,       // 是否多列
+colsLength: 1,          // 几列
+cols: [3, 9],           // label 和 input 栅格化设置
+modalClass: "",			// 弹出模块框配置
+modalDialogClass: ""	// 弹出模块的class
+},
 
-    // 表单编辑其他信息
-    editFormParams: {				// 编辑表单配置
-        bMultiCols: false,          // 是否多列
-        iColsLength: 1,             // 几列
-        aCols: [3, 9],              // label 和 input 栅格化设置
-        sModalClass: "",			// 弹出模块框配置
-        sModalDialogClass: ""		// 弹出模块的class
-    },
+// 关于详情的配置
+viewFull: false, // 详情打开的方式 1 2 打开全屏
+viewConfig: {
+type: 1,
+shade: 0.3,
+shadeClose: true,
+maxmin: true,
+area: ['50%', 'auto']
+},
 
-    // 关于详情的配置
-    bViewFull: false, // 详情打开的方式 1 2 打开全屏
-    // layer.open() 函数需要的配置信息
-    oViewConfig: {
-        type: 1,
-        shade: 0.3,
-        shadeClose: true,
-        maxmin: true,
-        area: ['50%', 'auto']
-    },
+detailTable: {                   // 查看详情配置信息
+multiCols: false,
+colsLength: 1
+},
 
-    detailTable: {                   // 查看详情配置信息
-        bMultiCols: false,
-        iColsLength: 1
-    },
+// 关于地址配置信息
+urlPrefix: "",
+urlSuffix: "",
+url: {
+search: "search",
+create: "create",
+update: "update",
+delete: "delete",
+export: "export",
+upload: "upload",
+editable: "editable",
+deleteAll: "delete-all"
+},
 
-    // 子表格配置信息
-    bChildTables: false, // 是否开启
-    childTables: {
-        sTable: "#child-table",
-        sModal: "#child-modal",
-        sFormId: "#child-form",
-        urlPrefix: "",
-        urlSuffix: "",
-        url: {
-            "search": "view",  // 查询
-            "create": "create", // 创建
-            "update": "update",	// 修改
-            "delete": "delete" // 删除
-        },
-        sClickSelect: "td.child-control",
-        table: 	{
-            "bPaginate": false,             // 不使用分页
-            "bLengthChange": false,         // 是否可以调整分页
-            "bServerSide": true,		 	// 是否开启从服务器端获取数据
-            "bAutoWidth": false,
-            "searching": false,				// 搜索
-            "ordering": false			 	// 排序
-        },
+// dataTables 表格默认配置对象信息
+table: {
+paging: true,
+lengthMenu: [10, 30, 50, 100],
+searching: false,
+ordering: true,
+info: true,
+autoWidth: false,
+processing: true,
+serverSide: true,
+paginationType: "full_numbers",
+language: $.getValue(MeTables.language, "dataTables"),
+},
 
-        detailTable: {                   // 查询详情配置信息
-            bMultiCols: false,
-            iColsLength: 1
-        },
+// 开启行处理
+editable: null,
+editableMode: "inline",
 
-        editFormParams: {				// 编辑表单配置
-            bMultiCols: false,          // 是否多列
-            iColsLength: 1,             // 几列
-            aCols: [3, 9],              // label 和 input 栅格化设置
-            sModalClass: "",			// 弹出模块框配置
-            sModalDialogClass: ""		// 弹出模块的class
-        }
-    },
+// 默认按钮信息
+buttonHtml: "",
+// 按钮添加容器
+buttonSelector: "#me-table-buttons",
+// 按钮添加方式
+buttonType: "append",
+// 默认按钮信息
+buttons: {
+create: {
+icon: "ace-icon fa fa-plus-circle blue",
+className: "btn btn-white btn-primary btn-bold"
+},
+updateAll: {
+icon: "ace-icon fa fa-pencil-square-o orange",
+className: "btn btn-white btn-info btn-bold"
+},
+deleteAll: {
+icon: "ace-icon fa fa-trash-o red",
+className: "btn btn-white btn-danger btn-bold"
+},
+refresh: {
+func: "search",
+icon: "ace-icon fa  fa-refresh",
+className: "btn btn-white btn-success btn-bold"
+},
+export: {
+icon: "ace-icon glyphicon glyphicon-export",
+className: "btn btn-white btn-warning btn-bold"
+}
+}
 
-    // 开启行处理
-    editable: null,
+// 需要序号
+, number: {
+title: $.getValue(MeTables.language, "meTables.number"),
+data: null,
+view: false,
+render: function (data, type, row, meta) {
+if (!meta || $.isEmptyObject(meta)) {
+return false;
+}
 
-    // 默认按钮信息
-    buttonHtml: "",
-    // 按钮添加容器
-    buttonSelector: "#me-table-buttons",
-    // 按钮添加方式
-    buttonType: "append",
-    // 默认按钮信息
-    buttons: {
-        // 添加数据
-        create: {
-            bShow: true, // 是否显示出来
-            icon: "ace-icon fa fa-plus-circle blue",
-            className: "btn btn-white btn-primary btn-bold"
-        },
-        
-        // 多选编辑
-        updateAll: {
-            bShow: true,
-            icon: "ace-icon fa fa-pencil-square-o orange",
-            className: "btn btn-white btn-info btn-bold"
-        },
-        
-        // 多选删除
-        deleteAll: {
-            bShow: true,
-            icon: "ace-icon fa fa-trash-o red",
-            className: "btn btn-white btn-danger btn-bold"
-        },
-        
-        // 刷新表格
-        refresh: {
-            bShow: true,
-            icon: "ace-icon fa  fa-refresh",
-            className: "btn btn-white btn-success btn-bold"
-        },
-        
-        // 导出数据
-        export: {
-            bShow: true,
-            icon: "ace-icon glyphicon glyphicon-export",
-            className: "btn btn-white btn-warning btn-bold"
-        }
-    }
+return meta.row + 1 + meta.settings._iDisplayStart;
+},
+sortable: false
+}
 
-    // 操作选项
-    ,operations: {
-        isOpen: true, // 是否显示
-        width: "120px",
-        defaultContent: "",
-        buttons: {
-            "see": {"className": "btn-success", "cClass":"me-table-detail",  "icon":"fa-search-plus",  "sClass":"blue"},
-            "update": {"className": "btn-info", "cClass":"me-table-update", "icon":"fa-pencil-square-o",  "sClass":"green"},
-            "delete": {"className": "btn-danger", "cClass":"me-table-delete", "icon":"fa-trash-o",  "sClass":"red"}
-        }
-    }
-};
+// 需要多选框
+, checkbox: {
+data: null,
+sortable: false,
+class: "center text-center",
+title: "<label class=\"position-relative\">" +
+"<input type=\"checkbox\" class=\"ace\" /><span class=\"lbl\"></span></label>",
+view: false,
+createdCell: function (td, data, array, row) {
+$(td).html('<label class="position-relative">' +
+'<input type="checkbox" class="ace" data-row="' + row + '" />' +
+'<span class="lbl"></span>' +
+'</label>');
+}
+}
+// 操作选项
+, operations: {
+width: "120px",
+defaultContent: "",
+title: $.getValue(MeTables.language, "meTables.operations"),
+sortable: false,
+data: null,
+buttons: {
+see: {
+title: $.getValue(MeTables.language, "meTables.see"),
+className: "btn-success",
+operationClass: "me-table-detail",
+icon: "fa-search-plus",
+colorClass: "blue"
+},
+update: {
+title: $.getValue(MeTables.language, "meTables.update"),
+className: "btn-info",
+operationClass: "me-table-update",
+icon: "fa-pencil-square-o",
+colorClass: "green"
+},
+delete: {
+title: $.getValue(MeTables.language, "meTables.delete"),
+className: "btn-danger",
+operationClass: "me-table-delete",
+icon: "fa-trash-o",
+colorClass: "red"
+}
+}
+}
+}
+;
 
 ```
