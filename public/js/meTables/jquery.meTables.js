@@ -574,6 +574,7 @@
             this.options.table.ajax = {
                 url: _self.getUrl("search"),
                 data: function (d) {
+                    console.info(d);
                     // 第一步：分页必须的参数
                     var return_object = [];
                     return_object.push({name: "offset", value: d.start});

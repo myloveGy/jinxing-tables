@@ -100,7 +100,7 @@ var m = $("#show-table").MeTables({
 
 搜索表单的查询信息以及排序条件都会拼接到dataTables 提交数据中
 
->请求参数说明
+>请求参数说明(请求方式为get)
 
  名称     |  类型 | 说明
 :--------|:------|:----
@@ -114,70 +114,60 @@ orderBy  | string| 排序条件(排序字段 排序方式： id asc)
 #### 服务器数据的处理(PHP代码)
 
 ```php
-// 默认使用的POST提交的数据
+// 默认使用get 请求参数
 
 // 请求次数
-$intDraw = isset($_POST['draw']) ? (int)$_POST['draw'] : 0;
+$draw = isset($_GET['draw']) ? (int)$_GET['draw'] : 0;
 
 // 查询参数(查询条件排序字段)
-$filters = isset($_POST['filters']) ? $_POST['filters'] : [];
+$filters = isset($_GET['filters']) ? $_GET['filters'] : [];
 
 // 查询开始位置(分页启始位置)
-$intStart = isset($_POST['iDisplayStart']) ? (int)$_POST['iDisplayStart'] : 0; 
+$offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0; 
 
 // 查询数据条数
-$intLength = isset($_POST['iDisplayLength']) ? (int)$_POST['iDisplayLength'] : 10;
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
 
-// 排序的方式
-$sort = isset($_POST['sSortDir_0']) ? trim($_POST['sSortDir_0']) : 'desc';
-
-// 处理排序字段
-if (isset($params['orderBy']) && !empty($params['orderBy'])) {
-    $field = trim($params['orderBy']);
-    unset($params['orderBy']);
-} else {
-    $field = 'id';
-}
+// 排序的字段和方式
+$orderBy = isset($_GET['orderBy']) ? trim($_GET['orderBy']) : 'id desc';
 
 // 处理查询条件
-if (!empty($params)) {
-
+if (!empty($filters)) {
     /**
-     * 这里的$params 其实就是前台搜索表单中的数据(查询字段对应值的一个数组)
+     * 这里的 $filters 其实就是前台搜索表单中的数据(查询字段对应值的一个数组)
      * ['id' => '1', 'name' => '湖南']
      */
      
     $arrWhere = $bindParams = [];
-    foreach ($params as $key => $value) {
+    foreach ($filter as $key => $value) {
         // 具体对应查询条件根据实际情况处理，我这里使用最简单的处理方式('=')
-        $arrWhere[] = '`'.$key.'` = ?';
+        $arrWhere[]   = '`'.$key.'` = ?';
         $bindParams[] = trim($value);
     }
      
-    $where = ' WHERE '.implode(' AND ', $arrWhere);
+    $where = ' WHERE ' . implode(' AND ', $arrWhere);
 } else {
-    $where = '';
+    $where      = '';
     $bindParams = [];
 }
 
 // 实例化PDO类
-$pdo = new PDO('mysql:host=127.0.0.1;port=3306;dbname=test;charset=utf8', 'user', 'password');
-
+$pdo   = new PDO('mysql:host=127.0.0.1;port=3306;dbname=test;charset=utf8', 'user', 'password');
 $table = 'china';
 
 // 查询数据总条数
 $intTotal = 0;
 $strCount = 'SELECT COUNT(*) AS `total` FROM `' . $table . '` ' . $where;
-$stem = $pdo->prepare($strCount);
+$stem     = $pdo->prepare($strCount);
 if ($stem->execute($bindParams)) {
-    $array = $stem->fetch(PDO::FETCH_ASSOC);
+    $array    = $stem->fetch(PDO::FETCH_ASSOC);
     $intTotal = (int)$array['total'];
 }
 
 // 查询具体数据
 if ($intTotal > 0) {
     $strSql = 'SELECT * FROM `' . $table . '` ' . $where . ' ORDER BY `' . $field . '` ' . $sort . ' LIMIT '.$intStart.','.$intLength;
-    $stem = $pdo->prepare($strSql);
+    $stem   = $pdo->prepare($strSql);
     if ($stem->execute($bindParams)) {
         $data = $stem->fetchAll(PDO::FETCH_ASSOC);
     }
