@@ -233,8 +233,7 @@ exit(json_encode([
 | modalSelector  | string  | #table-modal      | 弹出模块框的选择器                    |
 | formSelector   | string  | #edit-form        | 编辑表单的选择器                      |
 | defaultFilters | object  | null              | 默认查询条件(该配置在查询和导出都会提交给服务器)|
-| filters        | string  | filters           | 查询条件提交给服务器字段名称                  |
-|   
+| filters        | string  | filters           | 查询条件提交给服务器字段名称                  | 
 
 ### 请求相关配置
 | 配置名称 | 字段类型 | 默认值 | 说明 |
@@ -251,6 +250,14 @@ exit(json_encode([
 | url.export     | string   | export     | 导出数据请求地址         |
 | url.editable   | string   | editable   | 行内编辑请求地址         |
 | url.deleteAll  | string   | delete-all | 多删除请求地址           |
+
+请求数据说明
+
+* 新增请求数据和修改请求数据一致(就是表单中声明的字段的数据),*主键值新增和编辑的时候，请将表单编辑字段设置为隐藏字段，编辑的时候会根据表格中的数据复赋值上去*
+> 需要注意的是新增的时候，表单中的隐藏字段也会提交上去,多余字段，需要后端服务器自行处理
+
+* 查询&导出请求数据一致  
+
 
  
 
