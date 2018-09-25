@@ -115,8 +115,7 @@
             }
 
             if (self.options.editFormParams.multiCols && MeTables.empty(self.options.editFormParams.modalClass)) {
-                self.options.editFormParams.modalClass = "bs-example-modal-lg";
-                self.options.editFormParams.modalDialogClass = "modal-lg";
+                self.options.editFormParams.modalClass = "modal-lg";
             }
 
             if (self.options.editFormParams.multiCols && self.options.editFormParams.index % self.options.editFormParams.cols !== (self.options.editFormParams.cols - 1)) {
@@ -130,8 +129,7 @@
                     },
                     "html": form,
                     "buttonId": self.options.unique + '-save',
-                    "modalClass": self.options.editFormParams.modalClass,
-                    "modalDialogClass": self.options.editFormParams.modalDialogClass
+                    "modalClass": self.options.editFormParams.modalClass
                 },
                 {
                     "params": {"id": "data-detail-" + self.options.unique},
@@ -192,16 +190,14 @@
         // 按钮组处理
         this.buttonRender = function () {
             if (this.options.buttonSelector) {
-                this.options.buttonHtml = "";
                 // 处理按钮
                 for (var i in this.options.buttons) {
                     if (this.options.buttons[i]) {
-                        this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
                         this.options.buttonHtml += '<button ' +
-                            'class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '"';
+                            'class="' + this.options.buttons[i]["class"] + ' me-table-button-' + this.options.unique + '"';
                         this.options.buttonHtml += ' data-func="' + ($.getValue(this.options.buttons[i], "func") || i) + '">\
                                 <i class="' + this.options.buttons[i]["icon"] + '"></i>\
-                            ' + this.options.buttons[i]["text"] + '\
+                            ' + $.getValue(this.options.buttons[i], "text", $.getValue(MeTables.language, "meTables." + i)) + '\
                             </button> ';
                     }
                 }
@@ -574,7 +570,6 @@
             this.options.table.ajax = {
                 url: _self.getUrl("search"),
                 data: function (d) {
-                    console.info(d);
                     // 第一步：分页必须的参数
                     var return_object = [];
                     return_object.push({name: "offset", value: d.start});
@@ -863,24 +858,24 @@
         buttons: {
             create: {
                 icon: "ace-icon fa fa-plus-circle blue",
-                className: "btn btn-white btn-primary btn-bold"
+                class: "btn btn-white btn-primary btn-bold"
             },
             updateAll: {
                 icon: "ace-icon fa fa-pencil-square-o orange",
-                className: "btn btn-white btn-info btn-bold"
+                class: "btn btn-white btn-info btn-bold"
             },
             deleteAll: {
                 icon: "ace-icon fa fa-trash-o red",
-                className: "btn btn-white btn-danger btn-bold"
+                class: "btn btn-white btn-danger btn-bold"
             },
             refresh: {
                 func: "search",
                 icon: "ace-icon fa  fa-refresh",
-                className: "btn btn-white btn-success btn-bold"
+                class: "btn btn-white btn-success btn-bold"
             },
             export: {
                 icon: "ace-icon glyphicon glyphicon-export",
-                className: "btn btn-white btn-warning btn-bold"
+                class: "btn btn-white btn-warning btn-bold"
             }
         }
 
@@ -924,21 +919,21 @@
             buttons: {
                 see: {
                     title: $.getValue(MeTables.language, "meTables.see"),
-                    className: "btn-success",
+                    btnClass: "btn-success",
                     operationClass: "me-table-detail",
                     icon: "fa-search-plus",
                     colorClass: "blue"
                 },
                 update: {
                     title: $.getValue(MeTables.language, "meTables.update"),
-                    className: "btn-info",
+                    btnClass: "btn-info",
                     operationClass: "me-table-update",
                     icon: "fa-pencil-square-o",
                     colorClass: "green"
                 },
                 delete: {
                     title: $.getValue(MeTables.language, "meTables.delete"),
-                    className: "btn-danger",
+                    btnClass: "btn-danger",
                     operationClass: "me-table-delete",
                     icon: "fa-trash-o",
                     colorClass: "red"
@@ -1018,8 +1013,12 @@
             // 添加按钮信息
             if (!$.isEmptyObject(data)) {
                 for (var i in data) {
+                    if ($.isEmptyObject(data[i]) || !data) {
+                        continue;
+                    }
+
                     var operationClass = data[i]['operationClass'] + "-" + unique;
-                    div1 += ' <button class="btn ' + data[i]['className'] + ' ' + operationClass + ' btn-xs" data-row="' + index + '">' +
+                    div1 += ' <button class="btn ' + data[i]['btnClass'] + ' ' + operationClass + ' btn-xs" data-row="' + index + '">' +
                         '<i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
                     div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + operationClass + '" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '">' +
                         '<span class="' + data[i]['colorClass'] + '">' +
@@ -1412,8 +1411,8 @@
 
         modalCreate: function (oModal, oViews) {
             return '<div class="hide" ' + this.handleParams(oViews['params']) + '> ' + oViews['html'] + ' </table></div> \
-            <div class="modal fade ' + (oModal["modalClass"] ? oModal["modalClass"] : "") + '" ' + this.handleParams(oModal['params']) + ' tabindex="-1" role="dialog" > \
-                <div class="modal-dialog ' + (oModal["modalDialogClass"] ? oModal["modalDialogClass"] : "") + '" role="document"> \
+            <div class="modal fade" ' + this.handleParams(oModal['params']) + ' tabindex="-1" role="dialog" > \
+                <div class="modal-dialog ' + $.getValue(oModal, "modalClass", "") + '" role="document"> \
                     <div class="modal-content"> \
                         <div class="modal-header"> \
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> \
@@ -1422,7 +1421,7 @@
                         <div class="modal-body">' + oModal['html'] + '</fieldset></form></div> \
                         <div class="modal-footer"> \
                             <button type="button" class="btn btn-default" data-dismiss="modal">' + $.getValue(MeTables.language, "meTables.btnCancel") + '</button> \
-                            <button type="button" class="btn btn-primary ' + (oModal['btnClass'] ? oModal['btnClass'] : '') + '" ' + (oModal["buttonId"] ? 'id="' + oModal["buttonId"] + '"' : "") + '>' + $.getValue(MeTables.language, "meTables.btnSubmit") + '</button> \
+                            <button type="button" class="btn btn-primary ' + $.getValue(oModal, "btnClass", "")  + '" ' + (oModal["buttonId"] ? 'id="' + oModal["buttonId"] + '"' : "") + '>' + $.getValue(MeTables.language, "meTables.btnSubmit") + '</button> \
                         </div> \
                     </div> \
                 </div> \
