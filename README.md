@@ -380,16 +380,16 @@ search 配置需要在 searchType 不为 middle 才会生效
     }
 }
 ``` 
-###关于上面按钮组配置说明
+###关于按钮组配置说明
 | 配置名称 | 配置类型 | 配置值 | 配置说明 |
 |---------|----------|------|---------|
 | buttonHtml     | string | 空字符串          | 按钮组默认html 内容，配置的按钮都会追加到该html 后面|
 | buttonSelector | string | #me-table-buttons| 容纳按钮组html 容器的选择器     |
 | buttonType     | string | append           | html 怎么追加到容器里面         |
-| buttons        | object | --               | 按钮组配置                     |
-| buttons.text   | string | --               | 按钮里面文本信息               |
-| buttons.icon   | string | --               | 使用的图标信息                  |
-| buttons.class  | string | --               | 按钮的class 信息               |
+| buttons        | object |               | 按钮组配置                     |
+| buttons.text   | string |                | 按钮里面文本信息               |
+| buttons.icon   | string |                | 使用的图标信息                  |
+| buttons.class  | string |                | 按钮的class 信息               |
 
 默认按钮组有5个，分别是:
 1. 新增(create)
@@ -562,4 +562,4 @@ $(document).on("click", ".me-table-other-table", function () {
 });
 ```
 >需要自己监听事件信息(注意,监听的类名需要加上 - 表格选择器去掉 #和.号的字符串)
-这里选择器为 #table 去掉 #和.号后为 table, operationClass 为 me-table-other 那么监听的对象为 **.me-table-other-table**
+这里选择器为 #table 去掉 #和.号后为 table, operationClass 为 me-table-other 那么监听的对象为 **.me-table-other-table*
