@@ -96,7 +96,7 @@ var m = $("#show-table").MeTables({
 #### 生成视图
 ![试图文件](./public/images/desc5.png)
 
-####关于搜索条件和排序字段的处理
+#### 关于搜索条件和排序字段的处理
 
 搜索表单的查询信息以及排序条件都会拼接到dataTables 提交数据中
 
@@ -358,7 +358,7 @@ search 配置需要在 searchType 不为 middle 才会生效
 }
 ```
 
-###查看详情配置说明
+### 查看详情配置说明
 
 | 配置名称 | 配置类型 | 配置值  | 配置说明 |
 |---------|---------|--------|---------|
@@ -380,7 +380,7 @@ search 配置需要在 searchType 不为 middle 才会生效
     }
 }
 ``` 
-###关于按钮组配置说明
+### 关于按钮组配置说明
 
 | 配置名称 | 配置类型 | 配置值 | 配置说明 |
 |---------|----------|------|---------|
@@ -429,7 +429,7 @@ $(document).on("click", "button.other-class", function () {
 });
 ```
 
-###三个自定义 columns 列的信息
+### 三个自定义 columns 列的信息
 >其实就是默认定义了table.columns 中配置信息，columns 的配置都可以追加和覆盖到默认配置中
 
 **不需要直接配置为null或者false**
@@ -564,3 +564,268 @@ $(document).on("click", ".me-table-other-table", function () {
 ```
 >需要自己监听事件信息(注意,监听的类名需要加上 - 表格选择器去掉 #和.号的字符串)
 这里选择器为 #table 去掉 #和.号后为 table, operationClass 为 me-table-other 那么监听的对象为 **.me-table-other-table*
+
+### 所有默认配置
+```
+    //  默认配置信息
+    MeTables.defaults = {
+        title: "",                      // 表格的标题
+        pk: "id",		                // 行内编辑pk索引值
+        modalSelector: "#table-modal",  // 编辑Modal选择器
+        formSelector: "#edit-form",	    // 编辑表单选择器
+        defaultFilters: null,			// 默认查询条件 {id: 1, type: 2}
+        filters: "filters",             // 查询参数名称
+
+        // 请求相关
+        isSuccess: function (json) {
+            return json.code === 0;
+        },
+
+        getMessage: function (json) {
+            return json.msg;
+        },
+
+        // 搜索相关
+        searchHtml: "",				    // 搜索信息额外HTML
+        searchType: "middle",		    // 搜索表单位置
+        searchForm: "#search-form",	    // 搜索表单选择器
+        searchInputEvent: "blur",       // 搜索表单input事件
+        searchSelectEvent: "change",    // 搜索表单select事件
+        // 搜索信息(只对searchType !== "middle") 情况
+        search: {
+            render: true,
+            type: "append",
+            button: {
+                "class": "btn btn-info btn-sm",
+                "icon": "ace-icon fa fa-search"
+            }
+        },
+
+        fileSelector: [],			// 上传文件选择器
+
+        // 编辑表单信息
+        form: {
+            "method": "post",
+            "class": "form-horizontal",
+            "name": "edit-form"
+        },
+
+        // 编辑表单验证方式
+        formValidate: {
+            errorElement: 'div',
+            errorClass: 'help-block',
+            focusInvalid: false,
+            highlight: function (e) {
+                $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+            },
+            success: function (e) {
+                $(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
+                $(e).remove();
+            }
+        },
+
+        // 表单编辑其他信息
+        editFormParams: {			// 编辑表单配置
+            multiCols: false,       // 是否多列
+            colsLength: 1,          // 几列
+            cols: [3, 9],           // label 和 input 栅格化设置
+            modalClass: "",			// 弹出模块框配置
+            modalDialogClass: ""	// 弹出模块的class
+        },
+
+        // 关于详情的配置
+        viewFull: false, // 详情打开的方式 1 2 打开全屏
+        viewConfig: {
+            type: 1,
+            shade: 0.3,
+            shadeClose: true,
+            maxmin: true,
+            area: ['50%', 'auto']
+        },
+
+        detailTable: {                   // 查看详情配置信息
+            multiCols: false,
+            colsLength: 1
+        },
+
+        // 关于地址配置信息
+        urlPrefix: "",
+        urlSuffix: "",
+        url: {
+            search: "search",
+            create: "create",
+            update: "update",
+            delete: "delete",
+            export: "export",
+            upload: "upload",
+            editable: "editable",
+            deleteAll: "delete-all"
+        },
+
+        // dataTables 表格默认配置对象信息
+        table: {
+            paging: true,
+            lengthMenu: [10, 30, 50, 100],
+            searching: false,
+            ordering: true,
+            info: true,
+            autoWidth: false,
+            processing: true,
+            serverSide: true,
+            paginationType: "full_numbers",
+            language: $.getValue(MeTables.language, "dataTables"),
+        },
+
+        // 开启行处理
+        editable: null,
+        editableMode: "inline",
+
+        // 默认按钮信息
+        buttonHtml: "",
+        // 按钮添加容器
+        buttonSelector: "#me-table-buttons",
+        // 按钮添加方式
+        buttonType: "append",
+        // 默认按钮信息
+        buttons: {
+            create: {
+                icon: "ace-icon fa fa-plus-circle blue",
+                class: "btn btn-white btn-primary btn-bold"
+            },
+            updateAll: {
+                icon: "ace-icon fa fa-pencil-square-o orange",
+                class: "btn btn-white btn-info btn-bold"
+            },
+            deleteAll: {
+                icon: "ace-icon fa fa-trash-o red",
+                class: "btn btn-white btn-danger btn-bold"
+            },
+            refresh: {
+                func: "search",
+                icon: "ace-icon fa  fa-refresh",
+                class: "btn btn-white btn-success btn-bold"
+            },
+            export: {
+                icon: "ace-icon glyphicon glyphicon-export",
+                class: "btn btn-white btn-warning btn-bold"
+            }
+        }
+
+        // 需要序号
+        , number: {
+            title: $.getValue(MeTables.language, "meTables.number"),
+            data: null,
+            view: false,
+            render: function (data, type, row, meta) {
+                if (!meta || $.isEmptyObject(meta)) {
+                    return false;
+                }
+
+                return meta.row + 1 + meta.settings._iDisplayStart;
+            },
+            sortable: false
+        }
+
+        // 需要多选框
+        , checkbox: {
+            data: null,
+            sortable: false,
+            class: "center text-center",
+            title: "<label class=\"position-relative\">" +
+                "<input type=\"checkbox\" class=\"ace\" /><span class=\"lbl\"></span></label>",
+            view: false,
+            createdCell: function (td, data, array, row) {
+                $(td).html('<label class="position-relative">' +
+                    '<input type="checkbox" class="ace" data-row="' + row + '" />' +
+                    '<span class="lbl"></span>' +
+                    '</label>');
+            }
+        }
+        // 操作选项
+        , operations: {
+            width: "120px",
+            defaultContent: "",
+            title: $.getValue(MeTables.language, "meTables.operations"),
+            sortable: false,
+            data: null,
+            buttons: {
+                see: {
+                    title: $.getValue(MeTables.language, "meTables.see"),
+                    btnClass: "btn-success",
+                    operationClass: "me-table-detail",
+                    icon: "fa-search-plus",
+                    colorClass: "blue"
+                },
+                update: {
+                    title: $.getValue(MeTables.language, "meTables.update"),
+                    btnClass: "btn-info",
+                    operationClass: "me-table-update",
+                    icon: "fa-pencil-square-o",
+                    colorClass: "green"
+                },
+                delete: {
+                    title: $.getValue(MeTables.language, "meTables.delete"),
+                    btnClass: "btn-danger",
+                    operationClass: "me-table-delete",
+                    icon: "fa-trash-o",
+                    colorClass: "red"
+                }
+            }
+        },
+        version: "1.0.0",
+        author: {
+            name: "liujinxing",
+            email: "jinxing.liu@qq.com",
+            github: "https://github.com/myloveGy"
+        }
+    };
+```
+
+全局默认配置修改
+```
+    // 修改默认配置
+    $.fn.meTables.defaults.table.dom = "t<'row'<'table-page col-sm-4'li><'col-sm-8'p>>";
+    $.fn.meTables.defaults.url.create = 'store';
+    $.fn.meTables.defaults.url.delete = 'destroy';
+    $.fn.meTables.defaults.number = null;
+    $.fn.meTables.defaults.checkbox = null;
+```
+全局添加自定义表单编辑信息
+```
+$.extend($.fn.meTables, {
+    /**
+     * 多选
+     * @param params
+     * @param d
+     * @returns {string}
+     */
+    checkboxCreate: function (params, d) {
+        html = '';
+        if (d && this.isObject(d)) {
+            var o = params.all;
+            delete params.all;
+            delete params.divClass;
+            params["class"] = "ace m-checkbox";
+            params = this.handleParams(params);
+            if (o) {
+                html += '<div class="checkbox">' +
+                    '<label>' +
+                    '<input type="checkbox" class="ace checkbox-all" onclick="var isChecked = $(this).prop(\'checked\');$(this).parent().parent().parent().find(\'input[type=checkbox]\').prop(\'checked\', isChecked);" />' +
+                    '<span class="lbl"> ' + meTables.fn.getLanguage("sSelectAll") + ' </span>' +
+                    '</label>' +
+                    '</div>';
+            }
+            for (i in d) {
+                html += '<div class="checkbox">' +
+                    '<label>' +
+                    '<input type="checkbox" ' + params + ' value="' + i + '" />' +
+                    '<span class="lbl"> ' + d[i] + ' </span>' +
+                    '</label>' +
+                    '</div>';
+            }
+        }
+
+        return html;
+    }
+});
+```
