@@ -26,12 +26,12 @@ meTables.js 基于 jquery.dataTables.js 表格
  * 简单配置说明
  * title 配置表格名称
  * table DataTables 的配置 
- * --- columns 中的 value, search, edit, defaultOrder, hide 是 MeTables 的配置
+ * --- columns 中的 value, search, edit, defaultOrder, hide, view, export 是 MeTables 的配置
  * ------ value 为编辑表单radio、select, checkbox， 搜索的表单的select 提供数据源,格式为一个对象 {"值": "显示信息"}
  * ------ search 搜索表单配置(不配置不会生成查询表单), type 类型支持 text, select 其他可以自行扩展
  * ------ edit 编辑表单配置（不配置不会生成编辑表单）, 
  * --------- type 类型支持hidden, text, password, file, radio, select, checkbox, textarea 等等 
- * --------- MeTable.inputCreate 等后缀函数为其生成表单元素，可以自行扩展
+ * --------- meTables.inputCreate 等后缀函数为其生成表单元素，可以自行扩展
  * --------- 除了表单元素自带属性，比如 required: true, number: true 等为 jquery.validate.js 的验证配置
  * --------- 最终生成表单元素 <input name="name" required="true" number="true" />
  * ------ defaultOrder 设置默认排序的方式(有"ace", "desc")
@@ -399,7 +399,7 @@ search 配置需要在 searchType 不为 middle 才会生效
 4. 刷新(refresh)
 5. 导出(export)
 
-使用列子(添加自定义按钮和关闭已经存在的按钮)：
+使用例子(添加自定义按钮和关闭已经存在的按钮)：
 ```
 $("#table").MeTables({
     buttons: {
