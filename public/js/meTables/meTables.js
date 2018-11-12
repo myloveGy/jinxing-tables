@@ -289,38 +289,32 @@
                     return false;
                 }
 
-                var self = this,
-                    data = this.table.data()[row],
-                    obj = this.options.table.aoColumns,
+                var self = this, data = this.table.data()[row]
                     t = self.options.title,
-                    c = '.data-detail-',
-                    i = "#data-detail-" + self.uniqueId;
+                    i = "#data-detail-" + self.options.unique;
 
-                console.info(i)
                 // 处理的数据
                 if (data !== undefined) {
-                    meTables.detailTable(obj, data, c, row);
+                    meTables.detailTable(this.options.table.aoColumns, data, '.data-detail-', row);
                     // 弹出显示
-                    this.options.oLoading = layer.open({
-                        type: this.options.oViewConfig.type,
-                        shade: this.options.oViewConfig.shade,
-                        shadeClose: this.options.oViewConfig.shadeClose,
-                        title: t + meTables.getLanguage("sInfo"),
-                        content: $(i).removeClass("hide"), 			// 捕获的元素
-                        area: this.options.oViewConfig.area,
+                    var c = $.extend(true, {
+                        title: self.options.title + $.getValue(meTables.language, "meTables.sInfo"),
+                        content: $("#data-detail-" + self.options.unique).removeClass("hide"), 			// 捕获的元素
                         cancel: function (index) {
                             layer.close(index);
                         },
                         end: function () {
                             $('.views-info').html('');
-                            $(i).addClass("hide");
+                            $("#data-detail-" + self.options.unique).addClass("hide");
                             self.options.oLoading = null;
-                        },
-                        maxmin: this.options.oViewConfig.maxmin
-                    });
+                        }
+                    }, this.options.oViewConfig);
 
+                    this.options.oLoading = layer.open(c);
                     // 展开全屏(解决内容过多问题)
-                    if (this.options.bViewFull) layer.full(this.options.oLoading);
+                    if (this.options.bViewFull) {
+                        layer.full(this.options.oLoading);
+                    }
                 }
             };
 
