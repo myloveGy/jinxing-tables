@@ -166,6 +166,11 @@
 
             operations: {
                 buttons: {
+                    update: {
+                        show: function (data) {
+                            return data.id == 11;
+                        }
+                    },
                     other: {
                         title: "其他信息",
                         btnClass: "btn-warning",
