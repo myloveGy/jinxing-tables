@@ -163,6 +163,41 @@
                 deleteAll: "./action.php?type=delete-all",
                 export: "./action.php?type=export"
             },
+
+            // 按钮配置说明
+            buttons: {
+                // 关闭之前存在按钮
+                create: null,
+
+                updateAll: null,
+
+                // 自定义添加按钮
+                other: {
+                    text: "其他按钮",
+                    icon: "fa fa-list",
+                    class: "btn btn-success other-class"
+                },
+
+                test: {
+                    text: "测试按钮",
+                    icon: "fa fa-users",
+                    class: "btn btn-info test-class"
+                }
+            },
+
+            operations: {
+                buttons: {
+                    see: false,
+                    other: {
+                        title: "其他信息",
+                        btnClass: "btn-warning",
+                        operationClass: "me-table-other",
+                        icon: "fa fa-user",
+                        colorClass: "red"
+                    }
+                }
+            },
+
             table: {
                 columns: [
                     {
@@ -206,6 +241,23 @@
                     }
                 ]
             }
+        });
+
+        $(document).on("click", "button.other-class", function () {
+            alert("点击了其他按钮");
+        });
+
+        // 需要自己监听事件信息
+        $(document).on("click", ".me-table-other-me-table", function () {
+            // 当前点击按钮所在的行
+            var row = $(this).data("row");
+
+            // 获取当前行的所有数据信息
+            var data = m1.table.data()[row];
+
+            // 自定义处理逻辑
+            console.info(data, row);
+            // ...
         });
     });
 </script>

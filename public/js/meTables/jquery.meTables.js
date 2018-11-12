@@ -115,8 +115,7 @@
             }
 
             if (self.options.editFormParams.multiCols && MeTables.empty(self.options.editFormParams.modalClass)) {
-                self.options.editFormParams.modalClass = "bs-example-modal-lg";
-                self.options.editFormParams.modalDialogClass = "modal-lg";
+                self.options.editFormParams.modalClass = "modal-lg";
             }
 
             if (self.options.editFormParams.multiCols && self.options.editFormParams.index % self.options.editFormParams.cols !== (self.options.editFormParams.cols - 1)) {
@@ -130,8 +129,7 @@
                     },
                     "html": form,
                     "buttonId": self.options.unique + '-save',
-                    "modalClass": self.options.editFormParams.modalClass,
-                    "modalDialogClass": self.options.editFormParams.modalDialogClass
+                    "modalClass": self.options.editFormParams.modalClass
                 },
                 {
                     "params": {"id": "data-detail-" + self.options.unique},
@@ -162,7 +160,7 @@
             if (this.options.searchType === "middle") {
                 // 自定义处理
                 if ($.isFunction($.getValue(this.options, "searchMiddleHandle"))) {
-                    this.options.searchMiddleHandle(this.options.searchHtml);
+                    this.options.searchMiddleHandle(this);
                     return;
                 }
 
@@ -192,16 +190,14 @@
         // 按钮组处理
         this.buttonRender = function () {
             if (this.options.buttonSelector) {
-                this.options.buttonHtml = "";
                 // 处理按钮
                 for (var i in this.options.buttons) {
                     if (this.options.buttons[i]) {
-                        this.options.buttons[i].text = this.options.buttons[i].text || $.getValue(MeTables.language, "meTables." + i);
                         this.options.buttonHtml += '<button ' +
-                            'class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '"';
+                            'class="' + this.options.buttons[i]["class"] + ' me-table-button-' + this.options.unique + '"';
                         this.options.buttonHtml += ' data-func="' + ($.getValue(this.options.buttons[i], "func") || i) + '">\
                                 <i class="' + this.options.buttons[i]["icon"] + '"></i>\
-                            ' + this.options.buttons[i]["text"] + '\
+                            ' + $.getValue(this.options.buttons[i], "text", $.getValue(MeTables.language, "meTables." + i)) + '\
                             </button> ';
                     }
                 }
@@ -279,7 +275,11 @@
             // 搜索表单提交执行搜索
             $(this.options.searchForm).submit(function (evt) {
                 evt.preventDefault();
-                _self.search(true);
+                _self.search();
+            }).find("button:reset").on("click", function (evt) {
+                evt.preventDefault();
+                $(_self.options.searchForm).get(0).reset();
+                _self.search();
             });
         };
 
@@ -469,6 +469,11 @@
             // 确定操作的表单和模型
             var t = $.getValue(MeTables.language, this.action === "create" ? "meTables.insert" : "meTables.update");
             $(this.options.modalSelector).find('h4').html(this.options.title + t);
+            try {
+                $(this.options.formSelector).find(".has-error").removeClass("has-error");
+                $(this.options.formSelector).validate(this.options.formValidate).resetForm();
+            } catch (e) {
+            }
             MeTables.initForm(this.options.formSelector, data);
 
             // 显示之后的处理
@@ -478,7 +483,6 @@
 
             $(this.options.modalSelector).modal({backdrop: "static"});   // 弹出信息
         };
-
 
 
         // 数据导出
@@ -501,14 +505,15 @@
             var value = $(_self.options.searchForm).serializeArray();
             for (var i in value) {
                 if (!MeTables.empty(value[i]["value"]) && value[i]["value"] !== "All") {
-                    var strName = MeTables.getAttributeName(value[i]["name"], "where");
+                    var strName = MeTables.getAttributeName(value[i]["name"], _self.options.filter);
                     html += '<input type="hidden" name="' + strName + '" value="' + value[i]["value"] + '"/>';
                 }
             }
 
             // 默认查询参数添加
-            for (i in _self.options.where) {
-                html += '<input type="hidden" name="where[' + i + ']" value="' + _self.options.where[i] + '"/>';
+            for (i in _self.options.defaultFilters) {
+                html += '<input type="hidden" name="';
+                html += _self.options.filters + '[' + i + ']" value="' + _self.options.defaultFilters[i] + '"/>';
             }
 
             // 表单提交
@@ -597,16 +602,19 @@
                     from_data.forEach(function (value) {
                         if (value.value !== "") {
                             return_object.push({
-                                name: MeTables.getAttributeName(value.name, "where"),
+                                name: MeTables.getAttributeName(value.name, _self.options.filters),
                                 value: value.value
                             });
                         }
                     });
 
                     // 第五步：添加附加数据
-                    if (_self.options.where) {
-                        for (var i in _self.options.where) {
-                            return_object.push({name: "where[" + i + "]", value: _self.options.where[i]});
+                    if (_self.options.defaultFilters) {
+                        for (var i in _self.options.defaultFilters) {
+                            return_object.push({
+                                name: _self.options.filters + "[" + i + "]",
+                                value: _self.options.defaultFilters[i]
+                            });
                         }
                     }
 
@@ -696,7 +704,8 @@
             export: "导出",
             pleaseInput: "请输入",
             all: "全部",
-            pleaseSelect: "请选择"
+            pleaseSelect: "请选择",
+            clear: "清除"
         },
 
         // dataTables 表格
@@ -732,7 +741,8 @@
         pk: "id",		                // 行内编辑pk索引值
         modalSelector: "#table-modal",  // 编辑Modal选择器
         formSelector: "#edit-form",	    // 编辑表单选择器
-        params: null,				    // 请求携带参数
+        defaultFilters: null,			// 默认查询条件 {id: 1, type: 2}
+        filters: "filters",             // 查询参数名称
 
         // 请求相关
         isSuccess: function (json) {
@@ -823,7 +833,7 @@
         // dataTables 表格默认配置对象信息
         table: {
             paging: true,
-            lengthMenu: [15, 30, 50, 100],
+            lengthMenu: [10, 30, 50, 100],
             searching: false,
             ordering: true,
             info: true,
@@ -848,24 +858,24 @@
         buttons: {
             create: {
                 icon: "ace-icon fa fa-plus-circle blue",
-                className: "btn btn-white btn-primary btn-bold"
+                class: "btn btn-white btn-primary btn-bold"
             },
             updateAll: {
                 icon: "ace-icon fa fa-pencil-square-o orange",
-                className: "btn btn-white btn-info btn-bold"
+                class: "btn btn-white btn-info btn-bold"
             },
             deleteAll: {
                 icon: "ace-icon fa fa-trash-o red",
-                className: "btn btn-white btn-danger btn-bold"
+                class: "btn btn-white btn-danger btn-bold"
             },
             refresh: {
                 func: "search",
                 icon: "ace-icon fa  fa-refresh",
-                className: "btn btn-white btn-success btn-bold"
+                class: "btn btn-white btn-success btn-bold"
             },
             export: {
                 icon: "ace-icon glyphicon glyphicon-export",
-                className: "btn btn-white btn-warning btn-bold"
+                class: "btn btn-white btn-warning btn-bold"
             }
         }
 
@@ -873,8 +883,12 @@
         , number: {
             title: $.getValue(MeTables.language, "meTables.number"),
             data: null,
+            view: false,
             render: function (data, type, row, meta) {
-                console.info(meta);
+                if (!meta || $.isEmptyObject(meta)) {
+                    return false;
+                }
+
                 return meta.row + 1 + meta.settings._iDisplayStart;
             },
             sortable: false
@@ -905,21 +919,21 @@
             buttons: {
                 see: {
                     title: $.getValue(MeTables.language, "meTables.see"),
-                    className: "btn-success",
+                    btnClass: "btn-success",
                     operationClass: "me-table-detail",
                     icon: "fa-search-plus",
                     colorClass: "blue"
                 },
                 update: {
                     title: $.getValue(MeTables.language, "meTables.update"),
-                    className: "btn-info",
+                    btnClass: "btn-info",
                     operationClass: "me-table-update",
                     icon: "fa-pencil-square-o",
                     colorClass: "green"
                 },
                 delete: {
                     title: $.getValue(MeTables.language, "meTables.delete"),
-                    className: "btn-danger",
+                    btnClass: "btn-danger",
                     operationClass: "me-table-delete",
                     icon: "fa-trash-o",
                     colorClass: "red"
@@ -999,8 +1013,12 @@
             // 添加按钮信息
             if (!$.isEmptyObject(data)) {
                 for (var i in data) {
+                    if ($.isEmptyObject(data[i]) || !data) {
+                        continue;
+                    }
+
                     var operationClass = data[i]['operationClass'] + "-" + unique;
-                    div1 += ' <button class="btn ' + data[i]['className'] + ' ' + operationClass + ' btn-xs" data-row="' + index + '">' +
+                    div1 += ' <button class="btn ' + data[i]['btnClass'] + ' ' + operationClass + ' btn-xs" data-row="' + index + '">' +
                         '<i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
                     div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + operationClass + '" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '">' +
                         '<span class="' + data[i]['colorClass'] + '">' +
@@ -1351,21 +1369,23 @@
             // 循环处理显示信息
             object.forEach(function (k) {
                 var tmpKey = k.data, tmpValue = data[tmpKey], dataInfo = $(tClass + tmpKey);
-                // 处理值
-                if ($.getValue(k, "edit.type") === 'password') {
-                    tmpValue = "******";
-                }
-
-                // createdCell 函数
-                if ($.isFunction($.getValue(k, "createdCell"))) {
-                    k.createdCell(dataInfo, tmpValue, data, row, undefined);
-                } else {
-                    // render 修改值
-                    if ($.isFunction($.getValue(k, "render"))) {
-                        tmpValue = k.render(tmpValue, true, row);
+                if ($.getValue(k, "view", true)) {
+                    // 处理值
+                    if ($.getValue(k, "edit.type") === 'password') {
+                        tmpValue = "******";
                     }
 
-                    dataInfo.html(tmpValue)
+                    // createdCell 函数
+                    if ($.isFunction($.getValue(k, "createdCell"))) {
+                        k.createdCell(dataInfo, tmpValue, data, row, undefined);
+                    } else {
+                        // render 修改值
+                        if ($.isFunction($.getValue(k, "render"))) {
+                            tmpValue = k.render(tmpValue, true, row);
+                        }
+
+                        dataInfo.html(tmpValue)
+                    }
                 }
             });
         },
@@ -1391,8 +1411,8 @@
 
         modalCreate: function (oModal, oViews) {
             return '<div class="hide" ' + this.handleParams(oViews['params']) + '> ' + oViews['html'] + ' </table></div> \
-            <div class="modal fade ' + (oModal["modalClass"] ? oModal["modalClass"] : "") + '" ' + this.handleParams(oModal['params']) + ' tabindex="-1" role="dialog" > \
-                <div class="modal-dialog ' + (oModal["modalDialogClass"] ? oModal["modalDialogClass"] : "") + '" role="document"> \
+            <div class="modal fade" ' + this.handleParams(oModal['params']) + ' tabindex="-1" role="dialog" > \
+                <div class="modal-dialog ' + $.getValue(oModal, "modalClass", "") + '" role="document"> \
                     <div class="modal-content"> \
                         <div class="modal-header"> \
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> \
@@ -1401,7 +1421,7 @@
                         <div class="modal-body">' + oModal['html'] + '</fieldset></form></div> \
                         <div class="modal-footer"> \
                             <button type="button" class="btn btn-default" data-dismiss="modal">' + $.getValue(MeTables.language, "meTables.btnCancel") + '</button> \
-                            <button type="button" class="btn btn-primary ' + (oModal['btnClass'] ? oModal['btnClass'] : '') + '" ' + (oModal["buttonId"] ? 'id="' + oModal["buttonId"] + '"' : "") + '>' + $.getValue(MeTables.language, "meTables.btnSubmit") + '</button> \
+                            <button type="button" class="btn btn-primary ' + $.getValue(oModal, "btnClass", "")  + '" ' + (oModal["buttonId"] ? 'id="' + oModal["buttonId"] + '"' : "") + '>' + $.getValue(MeTables.language, "meTables.btnSubmit") + '</button> \
                         </div> \
                     </div> \
                 </div> \
