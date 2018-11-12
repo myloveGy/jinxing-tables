@@ -81,7 +81,7 @@
                 export: "./action.php?type=export"
             },
             table: {
-                aoColumns: [
+                columns: [
                     {
                         title: "id",
                         data: "id",
@@ -132,6 +132,8 @@
             title: "示例",
             number: false,
             searchForm: "#me-table-search",
+            sModal: "#me-table-modal1",
+            sFormId: "#me-table-update1",
             checkbox: {width: "60px"},
             url: {
                 search: "./action.php?type=search",
@@ -176,7 +178,7 @@
             },
 
             table: {
-                aoColumns: [
+                columns: [
                     {
                         title: "id",
                         data: "id",
@@ -195,12 +197,22 @@
                         sortable: false
                     },
                     {
-                        title: "测试数据",
+                        title: "测试数据1",
                         data: null,
                         view: false, // 导出不显示
                         hide: true,   // 列表不显示处理
                         edit: {
-                            name: "text",
+                            name: "text1",
+                            type: "customize"
+                        }
+                    },
+                    {
+                        title: "测试数据2",
+                        data: null,
+                        view: false, // 导出不显示
+                        hide: true,   // 列表不显示处理
+                        edit: {
+                            name: "text2",
                             type: "customize"
                         }
                     },

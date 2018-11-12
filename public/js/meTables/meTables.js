@@ -54,7 +54,7 @@
                 // 修改数据
                 $(document).on("click", ".me-table-update-" + _self.options.unique, function (evt) {
                     evt.preventDefault();
-                    _self.update($(this).data("table-data"));
+                    _self.update($(this).data("row"));
                 });
 
                 // 删除数据
@@ -290,12 +290,12 @@
                 }
 
                 var self = this, data = this.table.data()[row]
-                    t = self.options.title,
+                t = self.options.title,
                     i = "#data-detail-" + self.options.unique;
 
                 // 处理的数据
                 if (data !== undefined) {
-                    meTables.detailTable(this.options.table.aoColumns, data, '.data-detail-', row);
+                    meTables.detailTable(this.options.table.columns, data, '.data-detail-', row);
                     // 弹出显示
                     var c = $.extend(true, {
                         title: self.options.title + $.getValue(meTables.language, "meTables.sInfo"),
@@ -319,7 +319,6 @@
             };
 
             this.save = function (data) {
-                var self = this;
                 // 第一步： 验证操作类型
                 if (!meTables.inArray(this.action, ["create", "update", "delete", "deleteAll"])) {
                     layer.msg(meTables.getLanguage("operationError"));
@@ -341,36 +340,37 @@
                     return false;
                 }
 
-                var u = this.getUrl(this.action),
-                    m = this.options.sModal;
-
-                // 数据验证
-                if (data) {
-                    // 执行之前的数据处理
-                    if (typeof self.beforeSave !== 'function' || self.beforeSave(data)) {
-                        // ajax提交数据
-                        meTables.ajax({
-                            url: u,
-                            type: "POST",
-                            data: data,
-                            dataType: "json"
-                        }).done(function (json) {
-                            layer.msg(json.errMsg, {icon: json.errCode === 0 ? 6 : 5});
-                            // 判断操作成功
-                            if (json.errCode === 0) {
-                                // 执行之后的数据处理
-                                if (typeof self.afterSave !== 'function' || self.afterSave(json.data)) {
-                                    self.table.draw(false);
-                                    if (self.action !== "delete") {
-                                        $(m).modal('hide');
-                                    }
-                                    self.action = "save";
-                                }
-                            }
-                        });
-                    }
+                // 第四步：执行之前的数据处理
+                if ($.isFunction(this.beforeSave) && this.beforeSave(data) === false) {
+                    return false;
                 }
 
+                var self = this;
+                // ajax提交数据
+                meTables.ajax({
+                    url: this.getUrl(this.action),
+                    type: "POST",
+                    data: data,
+                    dataType: "json"
+                }).done(function (json) {
+                    // 提示
+                    layer.msg(self.options.getMessage(json), {
+                        icon: self.options.isSuccess(json) ? 6 : 5
+                    });
+
+                    // 判断操作成功
+                    if (self.options.isSuccess(json)) {
+                        // 之后的操作
+                        if ($.isFunction(self.afterSave) && self.afterSave(json.data) === false) {
+                            return false;
+                        }
+
+                        // 执行之后的数据处理
+                        self.table.draw(false);
+                        $(self).find("input:checkbox").prop("checked", false);
+                        $(self.options.sModal).modal('hide');
+                    }
+                });
 
                 return false;
             };
@@ -386,8 +386,8 @@
                 html += '<input type="hidden" name="' + csrf_param + '" value="' + $('meta[name=csrf-token]').attr('content') + '"/>';
 
                 // 添加字段信息
-                this.options.table.aoColumns.forEach(function (k, v) {
-                    if (k.data && (k.isExport !== true || k.bExport !== true)) {
+                this.options.table.columns.forEach(function (k, v) {
+                    if (k.data && (k.isExport !== true || k.bExport !== true || k.export !== true)) {
                         html += '<input type="hidden" name="fields[' + k.data + ']" value="' + k.title + '"/>';
                     }
                 });
@@ -461,7 +461,7 @@
                     aTargets = [];
 
                 // 处理生成表单
-                this.options.table.aoColumns.forEach(function (k, v) {
+                this.options.table.columns.forEach(function (k, v) {
                     // 查看详情信息
                     if (k.bViews !== false && k.view !== false && k.isViews !== false) {
                         views += meTables.detailTableCreate(k.title, k.data, v, self.options.detailTable);
@@ -666,12 +666,12 @@
 
             // 添加序号
             if (this.options.number) {
-                this.options.table.aoColumns.unshift(this.options.number)
+                this.options.table.columns.unshift(this.options.number)
             }
 
             // 判断添加数据(多选)
             if (this.options.checkbox) {
-                this.options.table.aoColumns.unshift(this.options.checkbox)
+                this.options.table.columns.unshift(this.options.checkbox)
             }
 
             // 判断添加数据(操作选项)
@@ -684,7 +684,7 @@
                     }
                 }
 
-                this.options.table.aoColumns.push({
+                this.options.table.columns.push({
                     "data": null,
                     "bSortable": false,
                     "title": meTables.getLanguage("operations"),
@@ -953,8 +953,8 @@
         // 添加按钮信息
         if (data !== undefined && typeof data === "object") {
             for (var i in data) {
-                div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + '-' + unique +' btn-xs" data-row="' + index + '"><i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
-                div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + data[i]['cClass'] + '-' + unique +'" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '"><span class="' + data[i]['sClass'] + '"><i class="ace-icon fa ' + data[i]['icon'] + ' bigger-120"></i></span></a></li>';
+                div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + '-' + unique + ' btn-xs" data-row="' + index + '"><i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
+                div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + data[i]['cClass'] + '-' + unique + '" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '"><span class="' + data[i]['sClass'] + '"><i class="ace-icon fa ' + data[i]['icon'] + ' bigger-120"></i></span></a></li>';
             }
         }
 
