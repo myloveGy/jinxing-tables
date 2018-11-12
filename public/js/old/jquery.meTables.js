@@ -570,6 +570,8 @@
             this.options.table.ajax = {
                 url: _self.getUrl("search"),
                 data: function (d) {
+                    $(_self).find("th input:checkbox").prop("checked", false);
+
                     // 第一步：分页必须的参数
                     var return_object = [];
                     return_object.push({name: "offset", value: d.start});
