@@ -1013,7 +1013,7 @@
             // 添加按钮信息
             if (!$.isEmptyObject(data)) {
                 for (var i in data) {
-                    if ($.isEmptyObject(data[i]) || !data) {
+                    if (!data[i] || $.isEmptyObject(data[i])  || ($.isFunction(data[i]['show']) && !data[i]['show'](rowArray)) ) {
                         continue;
                     }
 
