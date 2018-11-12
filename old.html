@@ -65,10 +65,8 @@
 <script type="text/javascript">
     $(function () {
         var m = meTables({
-            buttonSelector: "#me-table-buttons-one",
             title: "示例",
-            number: false,
-            where: {
+            params: {
                 "url:like": 123,
                 "name:like": 456
             },
@@ -127,103 +125,103 @@
         }).init();
 
 
-        // var m1 = meTables({
-        //     sTable: "#me-table",
-        //     buttonSelector: "#me-table-buttons-two",
-        //     title: "示例",
-        //     number: false,
-        //     where: {
-        //         "url:like": 123,
-        //         "name:like": 456
-        //     },
-        //     checkbox: {width: "60px"},
-        //     url: {
-        //         search: "./action.php?type=search",
-        //         create: "./action.php?type=create",
-        //         update: "./action.php?type=update",
-        //         delete: "./action.php?type=delete",
-        //         deleteAll: "./action.php?type=delete-all",
-        //         export: "./action.php?type=export"
-        //     },
-        //
-        //     // 按钮配置说明
-        //     buttons: {
-        //         // 关闭之前存在按钮
-        //         create: null,
-        //
-        //         updateAll: null,
-        //
-        //         // 自定义添加按钮
-        //         other: {
-        //             text: "其他按钮",
-        //             icon: "fa fa-list",
-        //             class: "btn btn-success other-class"
-        //         },
-        //
-        //         test: {
-        //             text: "测试按钮",
-        //             icon: "fa fa-users",
-        //             class: "btn btn-info test-class"
-        //         }
-        //     },
-        //
-        //     operations: {
-        //         buttons: {
-        //             see: false,
-        //             other: {
-        //                 title: "其他信息",
-        //                 btnClass: "btn-warning",
-        //                 operationClass: "me-table-other",
-        //                 icon: "fa fa-user",
-        //                 colorClass: "red"
-        //             }
-        //         }
-        //     },
-        //
-        //     table: {
-        //         aoColumns: [
-        //             {
-        //                 title: "id",
-        //                 data: "id",
-        //                 defaultOrder: "desc", // 默认一个排序
-        //                 edit: {type: "hidden"}
-        //             },
-        //             {
-        //                 title: "名称",
-        //                 data: "name",
-        //                 edit: {
-        //                     required: true,
-        //                     rangelength: "[2, 40]"
-        //                 },
-        //                 value: ['我的', '你的', '他的'],
-        //                 search: {type: "select"},
-        //                 sortable: false
-        //             },
-        //             {
-        //                 title: "测试数据",
-        //                 data: null,
-        //                 view: false, // 导出不显示
-        //                 hide: true,   // 列表不显示处理
-        //                 edit: {
-        //                     name: "text",
-        //                     type: "customize"
-        //                 }
-        //             },
-        //             {
-        //                 title: "创建时间",
-        //                 data: "created_at",
-        //                 sortable: false,
-        //                 createdCell: mt.dateTimeString
-        //             },
-        //             {
-        //                 title: "修改时间",
-        //                 data: "updated_at",
-        //                 sortable: false,
-        //                 createdCell: mt.dateTimeString
-        //             }
-        //         ]
-        //     }
-        // });
+        var m1 = meTables({
+            sTable: "#me-table",
+            buttonSelector: "#me-table-buttons-two",
+            title: "示例",
+            number: false,
+            where: {
+                "url:like": 123,
+                "name:like": 456
+            },
+            checkbox: {width: "60px"},
+            url: {
+                search: "./action.php?type=search",
+                create: "./action.php?type=create",
+                update: "./action.php?type=update",
+                delete: "./action.php?type=delete",
+                deleteAll: "./action.php?type=delete-all",
+                export: "./action.php?type=export"
+            },
+
+            // 按钮配置说明
+            buttons: {
+                // 关闭之前存在按钮
+                create: null,
+
+                updateAll: null,
+
+                // 自定义添加按钮
+                other: {
+                    text: "其他按钮",
+                    icon: "fa fa-list",
+                    class: "btn btn-success other-class"
+                },
+
+                test: {
+                    text: "测试按钮",
+                    icon: "fa fa-users",
+                    class: "btn btn-info test-class"
+                }
+            },
+
+            operations: {
+                buttons: {
+                    see: false,
+                    other: {
+                        title: "其他信息",
+                        btnClass: "btn-warning",
+                        operationClass: "me-table-other",
+                        icon: "fa fa-user",
+                        colorClass: "red"
+                    }
+                }
+            },
+
+            table: {
+                aoColumns: [
+                    {
+                        title: "id",
+                        data: "id",
+                        defaultOrder: "desc", // 默认一个排序
+                        edit: {type: "hidden"}
+                    },
+                    {
+                        title: "名称",
+                        data: "name",
+                        edit: {
+                            required: true,
+                            rangelength: "[2, 40]"
+                        },
+                        value: ['我的', '你的', '他的'],
+                        search: {type: "select"},
+                        sortable: false
+                    },
+                    {
+                        title: "测试数据",
+                        data: null,
+                        view: false, // 导出不显示
+                        hide: true,   // 列表不显示处理
+                        edit: {
+                            name: "text",
+                            type: "customize"
+                        }
+                    },
+                    {
+                        title: "创建时间",
+                        data: "created_at",
+                        sortable: false,
+                        createdCell: mt.dateTimeString
+                    },
+                    {
+                        title: "修改时间",
+                        data: "updated_at",
+                        sortable: false,
+                        createdCell: mt.dateTimeString
+                    }
+                ]
+            }
+        }).init();
     });
 </script>
 </body>

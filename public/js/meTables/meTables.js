@@ -170,14 +170,7 @@
                     type: self.options.sMethod,
                     dataType: 'json'
                 }).done(function (data) {
-                    if (data.errCode !== 0) {
-                        return layer.msg(meTables.getLanguage("sAppearError") + data.errMsg, {
-                            time: 2000,
-                            icon: 5
-                        });
-                    }
-
-                    fnCallback(data.data);
+                    fnCallback(data);
                 });
             };
 
@@ -589,20 +582,12 @@
             this.options.form["id"] = this.options.sFormId.replace("#", "");
 
             // 判断添加数据(多选)
-            console.info(this.options.table.aoColumns);
+            if (this.options.checkbox) {
+                this.options.table.aoColumns.unshift(this.options.checkbox)
+            }
 
-            if (this.options.bCheckbox) {
-                this.options.table.aoColumns.unshift({
-                    "data": null,
-                    "bSortable": false,
-                    "class": "center",
-                    "title": '<label class="position-relative"><input type="checkbox" class="ace" /><span class="lbl"></span></label>',
-                    "bViews": false,
-                    "width": this.options.checkboxWidth,
-                    "createdCell": function (td, data, array, row, col) {
-                        $(td).html('<label class="position-relative"><input type="checkbox" value="' + row + '" class="ace" table-data="' + row + '" /><span class="lbl"></span></label>');
-                    }
-                })
+            if (this.options.number) {
+                this.options.table.aoColumns.unshift(this.options.number)
             }
 
             // 判断添加数据(操作选项)
@@ -1204,17 +1189,23 @@
         sTable: "#show-table", 	// 显示表格选择器
         sFormId: "#edit-form",		// 编辑表单选择器
         sMethod: "POST",			// 查询数据的请求方式
-        bCheckbox: true,			// 需要多选框
-        checkboxWidth: "auto",      // 设置宽度
         params: null,				// 请求携带参数
-        ajaxRequest: false,         // ajax一次性获取数据
-
         searchHtml: "",				// 搜索信息额外HTML
         searchType: "middle",		// 搜索表单位置
         searchForm: "#search-form",	// 搜索表单选择器
         bEvent: true,               // 是否监听事件
         searchInputEvent: "blur",   // 搜索表单input事件
         searchSelectEvent: "change",// 搜索表单select事件
+
+        // 请求相关
+        isSuccess: function (json) {
+            return json.code === 0;
+        },
+
+        // 获取消息
+        getMessage: function (json) {
+            return json.msg;
+        },
 
         // 搜索信息(只对searchType !== "middle") 情况
         search: {
@@ -1340,6 +1331,37 @@
             }
         }
 
+        // 需要序号
+        , number: {
+            title: meTables.getLanguage("meTables.number"),
+            data: null,
+            view: false,
+            render: function (data, type, row, meta) {
+                if (!meta || $.isEmptyObject(meta)) {
+                    return false;
+                }
+
+                return meta.row + 1 + meta.settings._iDisplayStart;
+            },
+            sortable: false
+        }
+
+        // 需要多选框
+        , checkbox: {
+            data: null,
+            sortable: false,
+            class: "center text-center",
+            title: "<label class=\"position-relative\">" +
+                "<input type=\"checkbox\" class=\"ace\" /><span class=\"lbl\"></span></label>",
+            view: false,
+            createdCell: function (td, data, array, row) {
+                $(td).html('<label class="position-relative">' +
+                    '<input type="checkbox" class="ace" data-row="' + row + '" />' +
+                    '<span class="lbl"></span>' +
+                    '</label>');
+            }
+        }
+
         // 操作选项
         , operations: {
             width: "120px",
@@ -1398,7 +1420,8 @@
             "refresh": "刷新",
             "export": "导出",
             "pleaseInput": "请输入",
-            "all": "全部"
+            "all": "全部",
+            "number": "序号"
         },
 
         // dataTables 表格
