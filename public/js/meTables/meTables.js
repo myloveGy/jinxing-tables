@@ -121,11 +121,11 @@
 
                 // 判断开启editTable
                 if (this.options.editable) {
-                    $.fn.editable.defaults.mode = this.options.editableMode || 'inline';
                     $.fn.editableform.loading = "<div class='editableform-loading'><i class='ace-icon fa fa-spinner fa-spin fa-2x light-blue'></i></div>";
                     $.fn.editableform.buttons = '<button type="submit" class="btn btn-info editable-submit"><i class="ace-icon fa fa-check"></i></button>' +
                         '<button type="button" class="btn editable-cancel"><i class="ace-icon fa fa-times"></i></button>';
                     $.fn.editable.defaults.ajaxOptions = {type: "POST", dataType: 'json'};
+                    $.fn.editable.defaults.mode = this.options.editableMode || 'inline';
                 }
 
                 // 文件上传
@@ -266,14 +266,18 @@
 
             // 查看详情
             this.detail = function (row) {
-                if (this.options.oLoading) return false;
+                if (this.options.oLoading) {
+                    return false;
+                }
+
                 var self = this,
                     data = this.table.data()[row],
                     obj = this.options.table.aoColumns,
                     t = self.options.title,
                     c = '.data-detail-',
-                    i = "#data-detail-" + self.options.sTable.replace("#", "");
+                    i = "#data-detail-" + self.uniqueId;
 
+                console.info(i)
                 // 处理的数据
                 if (data !== undefined) {
                     meTables.detailTable(obj, data, c, row);
@@ -283,13 +287,14 @@
                         shade: this.options.oViewConfig.shade,
                         shadeClose: this.options.oViewConfig.shadeClose,
                         title: t + meTables.getLanguage("sInfo"),
-                        content: $(i), 			// 捕获的元素
+                        content: $(i).removeClass("hide"), 			// 捕获的元素
                         area: this.options.oViewConfig.area,
                         cancel: function (index) {
                             layer.close(index);
                         },
                         end: function () {
                             $('.views-info').html('');
+                            $(i).addClass("hide");
                             self.options.oLoading = null;
                         },
                         maxmin: this.options.oViewConfig.maxmin
@@ -300,50 +305,59 @@
                 }
             };
 
-            this.save = function (data, child) {
+            this.save = function (data) {
                 var self = this;
-                if (meTables.inArray(this.action, ["create", "update", "delete", "deleteAll"])) {
-                    var f = this.options.sFormId,
-                        u = this.getUrl(this.action),
-                        m = this.options.sModal;
-                    // 新增和修改验证数据、数据的处理
-                    if (meTables.inArray(this.action, ["create", "update"])) {
-                        if ($(f).validate(self.options.formValidate).form()) {
-                            data = $(f).serializeArray();
-                        } else {
-                            return false;
-                        }
+                // 第一步： 验证操作类型
+                if (!meTables.inArray(this.action, ["create", "update", "delete", "deleteAll"])) {
+                    layer.msg(meTables.getLanguage("operationError"));
+                    return false;
+                }
+
+                // 第二步：新增和修改验证数据、数据的处理
+                if (meTables.inArray(this.action, ["create", "update"])) {
+                    if (!$(this.options.sFormId).validate(this.options.formValidate).form()) {
+                        return false;
                     }
 
-                    // 数据验证
-                    if (data) {
-                        // 执行之前的数据处理
-                        if (typeof self.beforeSave !== 'function' || self.beforeSave(data)) {
-                            // ajax提交数据
-                            meTables.ajax({
-                                url: u,
-                                type: "POST",
-                                data: data,
-                                dataType: "json"
-                            }).done(function (json) {
-                                layer.msg(json.errMsg, {icon: json.errCode === 0 ? 6 : 5});
-                                // 判断操作成功
-                                if (json.errCode === 0) {
-                                    // 执行之后的数据处理
-                                    if (typeof self.afterSave !== 'function' || self.afterSave(json.data)) {
-                                        self.table.draw(false);
-                                        if (self.action !== "delete") {
-                                            $(m).modal('hide');
-                                        }
-                                        self.action = "save";
-                                    }
-                                }
-                            });
-                        }
-                    }
-                } else {
-                    layer.msg(meTables.getLanguage("operationError"));
+                    data = $(this.options.sFormId).serializeArray();
                 }
+
+                // 第三步：验证数据
+                if ($.isEmptyObject(data)) {
+                    layer.msg($.getValue(meTables.language, "meTables.empty"));
+                    return false;
+                }
+
+                var u = this.getUrl(this.action),
+                    m = this.options.sModal;
+
+                // 数据验证
+                if (data) {
+                    // 执行之前的数据处理
+                    if (typeof self.beforeSave !== 'function' || self.beforeSave(data)) {
+                        // ajax提交数据
+                        meTables.ajax({
+                            url: u,
+                            type: "POST",
+                            data: data,
+                            dataType: "json"
+                        }).done(function (json) {
+                            layer.msg(json.errMsg, {icon: json.errCode === 0 ? 6 : 5});
+                            // 判断操作成功
+                            if (json.errCode === 0) {
+                                // 执行之后的数据处理
+                                if (typeof self.afterSave !== 'function' || self.afterSave(json.data)) {
+                                    self.table.draw(false);
+                                    if (self.action !== "delete") {
+                                        $(m).modal('hide');
+                                    }
+                                    self.action = "save";
+                                }
+                            }
+                        });
+                    }
+                }
+
 
                 return false;
             };
@@ -429,17 +443,25 @@
             this.initRender = function () {
                 var self = this,
                     form = '<form ' + meTables.handleParams(this.options.form) + '><fieldset>',
-                    views = '<table class="table table-bordered table-striped table-detail">',
+                    views = '<table class="table table-bordered table-striped table-detail-'+ this.uniqueId +'">',
                     aOrders = [],
                     aTargets = [];
 
                 // 处理生成表单
                 this.options.table.aoColumns.forEach(function (k, v) {
-                    if (k.bViews !== false) views += meTables.detailTableCreate(k.title, k.data, v, self.options.detailTable);// 查看详情信息
+                    // 查看详情信息
+                    if (k.bViews !== false && k.view !== false && k.isViews !== false) {
+                        views += meTables.detailTableCreate(k.title, k.data, v, self.options.detailTable);
+                    }
+
                     if (k.edit !== undefined) form += meTables.formCreate(k, self.options.editFormParams);	// 编辑表单信息
                     if (k.search !== undefined) self.options.searchHtml += meTables.searchInputCreate(k, v, self.options.searchType);  // 搜索信息
                     if (k.defaultOrder) aOrders.push([v, k.defaultOrder]);							// 默认排序
-                    if (k.isHide || k.bHide) aTargets.push(v);													// 是否隐藏
+
+                    // 是否隐藏
+                    if (k.isHide || k.bHide || k.hide) {
+                        aTargets.push(v);
+                    }
 
                     // 判断行内编辑
                     if (self.options.editable && k.editable !== undefined) {
@@ -563,16 +585,64 @@
             this.options = $.extend(true, {}, meTables.defaultOptions, options);
             this.table = null;
             this.action = "construct";
-            var self = this;
+            this.uniqueId = this.options.sTable.replace("#", "");
 
-            // 属性覆盖继承
-            if (!this.options.table.fnServerData) {
-                this.options.table.fnServerData = this.fnServerData;
-            }
+            // 没有配置ajax请求覆盖
+            if (!this.options.table.ajax) {
+                this.options.table.ajax = {
+                    url: self.getUrl("search"),
+                    data: function (d) {
+                        // 第一步：分页必须的参数
+                        var return_object = [];
+                        return_object.push({name: "offset", value: d.start});
+                        return_object.push({name: "limit", value: d.length});
+                        return_object.push({name: "draw", value: d.draw});
 
-            // 请求地址
-            if (!this.options.table.sAjaxSource) {
-                this.options.table.sAjaxSource = this.getUrl("search");
+                        // 第二步：查询的字段信息
+                        for (var i in d.columns) {
+                            if (d.columns[i].data) {
+                                return_object.push({name: "columns[]", value: d.columns[i].data});
+                            }
+                        }
+
+                        // 第三步：排序处理
+                        var order = [];
+                        for (var i in d.order) {
+                            var index = d.order[i]["column"];
+                            if (d.columns[index] && d.columns[index]["data"]) {
+                                order.push(d.columns[index]["data"] + " " + d.order[i]["dir"]);
+                            }
+                        }
+
+                        if (order.length > 0) {
+                            return_object.push({name: "orderBy", value: order.join(",")});
+                        }
+
+
+                        // 第四步：表单的数据
+                        var from_data = $(self.options.searchForm).serializeArray();
+                        from_data.forEach(function (value) {
+                            if (value.value !== "") {
+                                return_object.push({
+                                    name: MeTables.getAttributeName(value.name, self.options.filters),
+                                    value: value.value
+                                });
+                            }
+                        });
+
+                        // 第五步：添加附加数据
+                        if (self.options.params) {
+                            for (var i in self.options.params) {
+                                return_object.push({
+                                    name: self.options.filters + "[" + i + "]",
+                                    value: self.options.params[i]
+                                });
+                            }
+                        }
+
+                        return return_object;
+                    }
+                };
             }
 
             if (!this.options.table.language) {
@@ -581,13 +651,14 @@
 
             this.options.form["id"] = this.options.sFormId.replace("#", "");
 
+            // 添加序号
+            if (this.options.number) {
+                this.options.table.aoColumns.unshift(this.options.number)
+            }
+
             // 判断添加数据(多选)
             if (this.options.checkbox) {
                 this.options.table.aoColumns.unshift(this.options.checkbox)
-            }
-
-            if (this.options.number) {
-                this.options.table.aoColumns.unshift(this.options.number)
             }
 
             // 判断添加数据(操作选项)
@@ -1123,7 +1194,7 @@
     };
 
     meTables.modalCreate = function (oModal, oViews) {
-        return '<div class="isHide" ' + this.handleParams(oViews['params']) + '> ' + oViews['html'] + ' </table></div> \
+        return '<div class="hide" ' + this.handleParams(oViews['params']) + '> ' + oViews['html'] + ' </table></div> \
             <div class="modal fade ' + (oModal["modalClass"] ? oModal["modalClass"] : "") + '" ' + this.handleParams(oModal['params']) + ' tabindex="-1" role="dialog" > \
                 <div class="modal-dialog ' + (oModal["modalDialogClass"] ? oModal["modalDialogClass"] : "") + '" role="document"> \
                     <div class="modal-content"> \
@@ -1180,6 +1251,62 @@
         return $.getValue(meTables.language, "meTables." + arguments[0]);
     };
 
+
+    // 语言配置
+    meTables.language = {
+        // 我的信息
+        meTables: {
+            "operations": "操作",
+            "operations_see": "查看",
+            "operations_update": "编辑",
+            "operations_delete": "删除",
+            "sBtnCancel": "取消",
+            "sBtnSubmit": "确定",
+            "sSelectAll": "选择全部",
+            "sInfo": "详情",
+            "sCreate": "新增",
+            "sUpdate": "编辑",
+            "sExport": "数据正在导出, 请稍候...",
+            "sAppearError": "出现错误",
+            "sServerError": "服务器繁忙,请稍候再试...",
+            "determine": "确定",
+            "cancel": "取消",
+            "confirm": "您确定需要删除这_LENGTH_条数据吗?",
+            "confirmOperation": "确认操作",
+            "cancelOperation": "您取消了删除操作!",
+            "noSelect": "没有选择需要操作的数据",
+            "operationError": "操作有误",
+            "search": "搜索",
+            "create": "添加",
+            "updateAll": "修改",
+            "deleteAll": "删除",
+            "refresh": "刷新",
+            "export": "导出",
+            "pleaseInput": "请输入",
+            "all": "全部",
+            "number": "序号",
+            "empty": "没有数据"
+        },
+
+        // dataTables 表格
+        dataTables: {
+            // 显示
+            "sLengthMenu": "每页 _MENU_ 条记录",
+            "sZeroRecords": "没有找到记录",
+            "sInfo": "显示 _START_ 到 _END_ 共有 _TOTAL_ 条数据",
+            "sInfoEmpty": "无记录",
+            "sInfoFiltered": "(从 _MAX_ 条记录过滤)",
+            "sSearch": "搜索：",
+            // 分页
+            "oPaginate": {
+                "sFirst": "首页",
+                "sPrevious": "上一页",
+                "sNext": "下一页",
+                "sLast": "尾页"
+            }
+        }
+    };
+
     // 设置默认配置信息
     meTables.defaultOptions = {
         title: "",                  // 表格的标题
@@ -1196,6 +1323,7 @@
         bEvent: true,               // 是否监听事件
         searchInputEvent: "blur",   // 搜索表单input事件
         searchSelectEvent: "change",// 搜索表单select事件
+        filters: "params",
 
         // 请求相关
         isSuccess: function (json) {
@@ -1333,7 +1461,7 @@
 
         // 需要序号
         , number: {
-            title: meTables.getLanguage("meTables.number"),
+            title: meTables.getLanguage("meTables", "number"),
             data: null,
             view: false,
             render: function (data, type, row, meta) {
@@ -1385,60 +1513,6 @@
                     "icon": "fa-trash-o",
                     "sClass": "red"
                 }
-            }
-        }
-    };
-
-    // 语言配置
-    meTables.language = {
-        // 我的信息
-        meTables: {
-            "operations": "操作",
-            "operations_see": "查看",
-            "operations_update": "编辑",
-            "operations_delete": "删除",
-            "sBtnCancel": "取消",
-            "sBtnSubmit": "确定",
-            "sSelectAll": "选择全部",
-            "sInfo": "详情",
-            "sCreate": "新增",
-            "sUpdate": "编辑",
-            "sExport": "数据正在导出, 请稍候...",
-            "sAppearError": "出现错误",
-            "sServerError": "服务器繁忙,请稍候再试...",
-            "determine": "确定",
-            "cancel": "取消",
-            "confirm": "您确定需要删除这_LENGTH_条数据吗?",
-            "confirmOperation": "确认操作",
-            "cancelOperation": "您取消了删除操作!",
-            "noSelect": "没有选择需要操作的数据",
-            "operationError": "操作有误",
-            "search": "搜索",
-            "create": "添加",
-            "updateAll": "修改",
-            "deleteAll": "删除",
-            "refresh": "刷新",
-            "export": "导出",
-            "pleaseInput": "请输入",
-            "all": "全部",
-            "number": "序号"
-        },
-
-        // dataTables 表格
-        dataTables: {
-            // 显示
-            "sLengthMenu": "每页 _MENU_ 条记录",
-            "sZeroRecords": "没有找到记录",
-            "sInfo": "显示 _START_ 到 _END_ 共有 _TOTAL_ 条数据",
-            "sInfoEmpty": "无记录",
-            "sInfoFiltered": "(从 _MAX_ 条记录过滤)",
-            "sSearch": "搜索：",
-            // 分页
-            "oPaginate": {
-                "sFirst": "首页",
-                "sPrevious": "上一页",
-                "sNext": "下一页",
-                "sLast": "尾页"
             }
         }
     };
