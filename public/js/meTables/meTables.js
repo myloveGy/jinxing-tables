@@ -26,6 +26,78 @@
 
     var other, html, i, mixLoading = null,
         meTables = function (options) {
+            // 绑定事件
+            this.bind = function () {
+                var _self = this;
+
+                // 按钮方法
+                $(document).on("click", ".me-table-button-" + _self.options.unique, function (evt) {
+                    evt.preventDefault();
+                    var func = $(this).data("func");
+                    if (func && $.isFunction($.getValue(_self, func))) {
+                        _self[func]();
+                    }
+                });
+
+                // 修改
+                $(document).on("click", "#me-table-button-updateAll-" + _self.options.unique, function (evt) {
+                    evt.preventDefault();
+                    _self.updateAll();
+                });
+
+                // 添加保存事件
+                $(document).on("click", "#" + _self.options.unique + "-save", function (evt) {
+                    evt.preventDefault();
+                    _self.save();
+                });
+
+                // 修改数据
+                $(document).on("click", ".me-table-update-" + _self.options.unique, function (evt) {
+                    evt.preventDefault();
+                    _self.update($(this).data("table-data"));
+                });
+
+                // 删除数据
+                $(document).on("click", ".me-table-delete-" + _self.options.unique, function (evt) {
+                    evt.preventDefault();
+                    _self.delete($(this).data("row"));
+                });
+
+                // 查询详情
+                $(document).on("click", ".me-table-detail-" + _self.options.unique, function (evt) {
+                    evt.preventDefault();
+                    _self.detail($(this).data("row"));
+                });
+
+                // 行选择
+                $(this).find("th input:checkbox").on("click", function () {
+                    $(_self).find("input:checkbox").prop("checked", $(this).prop("checked"));
+                });
+
+                // 搜索表单的事件
+                if (this.options.searchInputEvent) {
+                    $(this.options.searchForm + ' input').on(this.options.searchInputEvent, function () {
+                        _self.table.draw();
+                    });
+                }
+
+                if (this.options.searchSelectEvent) {
+                    $(this.options.searchForm + ' select').on(this.options.searchSelectEvent, function () {
+                        _self.table.draw();
+                    });
+                }
+
+                // 搜索表单提交执行搜索
+                $(this.options.searchForm).submit(function (evt) {
+                    evt.preventDefault();
+                    _self.search();
+                }).find("button:reset").on("click", function (evt) {
+                    evt.preventDefault();
+                    $(_self.options.searchForm).get(0).reset();
+                    _self.search();
+                });
+            };
+
             // 初始化整个 meTables
             this.init = function (params) {
                 this.action = "init";
@@ -57,67 +129,12 @@
                     }
                 }
 
-                // 搜索表单的事件
-                if (this.options.bEvent) {
-                    $(this.options.searchForm + ' input').on(this.options.searchInputEvent, function () {
-                        self.table.draw();
-                    });
-                    $(this.options.searchForm + ' select').on(this.options.searchSelectEvent, function () {
-                        self.table.draw();
-                    });
-                }
-
                 // 添加按钮
                 try {
                     $(self.options.buttonSelector)[self.options.buttonType](self.options.buttonHtml);
                 } catch (e) {
                     $(self.options.buttonSelector).append(self.options.buttonHtml);
                 }
-
-                // 添加按钮事件
-                for (var m in self.options.buttons) {
-                    (function (s) {
-                        if (self.options.buttons[s] && self.options.buttons[s].bShow === true) {
-                            $(document).on('click', self.options.sTable + "-" + s, function (evt) {
-                                evt.preventDefault();
-                                self[s]();
-                            });
-                        }
-                    })(m);
-                }
-
-                // 添加表单事件
-                $(this.options.searchForm).submit(function (evt) {
-                    evt.preventDefault();
-                    self.search(true);
-                });
-
-                // 添加保存事件
-                $(document).on('click', self.options.sTable + '-save', function (evt) {
-                    evt.preventDefault();
-                    self.save();
-                });
-                $(document).on('click', '.me-table-update', function (evt) {
-                    evt.preventDefault();
-                    self.update($(this).attr('table-data'))
-                });
-                $(document).on('click', '.me-table-delete', function (evt) {
-                    evt.preventDefault();
-                    self.delete($(this).attr('table-data'))
-                });
-                $(document).on('click', '.me-table-detail', function (evt) {
-                    evt.preventDefault();
-                    self.detail($(this).attr('table-data'))
-                });
-
-                // 行选择
-                $(document).on('click', this.options.sTable + ' th input:checkbox', function () {
-                    var that = this;
-                    $(this).closest('table').find('tr > td:first-child input:checkbox').each(function () {
-                        this.checked = that.checked;
-                        $(this).closest('tr').toggleClass('selected');
-                    });
-                });
 
                 // 判断开启editTable
                 if (this.options.editable) {
@@ -137,6 +154,8 @@
 
                 // 执行处理
                 if (typeof params === "function") params();
+
+                this.bind();
 
                 return this;
             };
@@ -443,7 +462,7 @@
             this.initRender = function () {
                 var self = this,
                     form = '<form ' + meTables.handleParams(this.options.form) + '><fieldset>',
-                    views = '<table class="table table-bordered table-striped table-detail-'+ this.uniqueId +'">',
+                    views = '<table class="table table-bordered table-striped table-detail-' + this.options.unique + '">',
                     aOrders = [],
                     aTargets = [];
 
@@ -585,7 +604,7 @@
             this.options = $.extend(true, {}, meTables.defaultOptions, options);
             this.table = null;
             this.action = "construct";
-            this.uniqueId = this.options.sTable.replace("#", "");
+            this.options.unique = this.options.sTable.replace("#", "");
 
             // 没有配置ajax请求覆盖
             if (!this.options.table.ajax) {
@@ -624,7 +643,7 @@
                         from_data.forEach(function (value) {
                             if (value.value !== "") {
                                 return_object.push({
-                                    name: MeTables.getAttributeName(value.name, self.options.filters),
+                                    name: meTables.getAttributeName(value.name, self.options.filters),
                                     value: value.value
                                 });
                             }
@@ -664,9 +683,7 @@
             // 判断添加数据(操作选项)
             if (this.options.operations) {
                 for (var s in this.options.operations.buttons) {
-                    if (this.options.operations.buttons[s]["bShow"] === false) {
-                        delete this.options.operations.buttons[s];
-                    } else {
+                    if (this.options.operations.buttons[s]) {
                         if (!this.options.operations.buttons[s]["title"]) {
                             this.options.operations.buttons[s]["title"] = meTables.getLanguage("operations_" + s);
                         }
@@ -679,7 +696,7 @@
                     "title": meTables.getLanguage("operations"),
                     "width": self.options.operations.width,
                     "createdCell": function (td, data, rowArr, row) {
-                        $(td).html(meTables.buttonsCreate(row, self.options.operations.buttons));
+                        $(td).html(meTables.buttonsCreate(row, self.options.operations.buttons, self.options.unique));
                     }
                 })
             }
@@ -931,14 +948,19 @@
         return html;
     };
 
-    meTables.buttonsCreate = function (index, data) {
+    meTables.buttonsCreate = function (index, data, unique) {
         var div1 = '<div class="hidden-sm hidden-xs btn-group">',
-            div2 = '<div class="hidden-md hidden-lg"><div class="inline position-relative"><button data-position="auto" data-toggle="dropdown" class="btn btn-minier btn-primary dropdown-toggle"><i class="ace-icon fa fa-cog icon-only bigger-110"></i></button><ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-menu-right dropdown-caret dropdown-close">';
+            div2 = '<div class="hidden-md hidden-lg">' +
+                '<div class="inline position-relative">' +
+                '<button data-position="auto" data-toggle="dropdown" class="btn btn-minier btn-primary dropdown-toggle">' +
+                '<i class="ace-icon fa fa-cog icon-only bigger-110"></i>' +
+                '</button>' +
+                '<ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-menu-right dropdown-caret dropdown-close">';
         // 添加按钮信息
         if (data !== undefined && typeof data === "object") {
             for (var i in data) {
-                div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + ' btn-xs" table-data="' + index + '"><i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
-                div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + data[i]['cClass'] + '" href="javascript:;" data-original-title="' + data[i]['title'] + '" table-data="' + index + '"><span class="' + data[i]['sClass'] + '"><i class="ace-icon fa ' + data[i]['icon'] + ' bigger-120"></i></span></a></li>';
+                div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + '-' + unique +' btn-xs" data-row="' + index + '"><i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
+                div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + data[i]['cClass'] + '-' + unique +'" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '"><span class="' + data[i]['sClass'] + '"><i class="ace-icon fa ' + data[i]['icon'] + ' bigger-120"></i></span></a></li>';
             }
         }
 
