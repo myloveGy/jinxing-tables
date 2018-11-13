@@ -162,37 +162,6 @@
 
             var self = this;
 
-            // 处理服务器数据
-            this.fnServerData = function (sSource, aoData, fnCallback) {
-                var attributes = aoData[2].value.split(","),
-                    mSort = (attributes.length + 1) * 5 + 2;
-
-                // 添加查询条件
-                var data = $(self.options.searchForm).serializeArray();
-                for (i in data) {
-                    if (!meTables.empty(data[i]["value"]) && data[i]["value"] !== "All") {
-                        var strName = meTables.getAttributeName(data[i]["name"], "params");
-                        aoData.push({"name": strName, "value": data[i]["value"]});
-                    }
-                }
-
-                // 添加排序字段信息
-                self.push(aoData, {"orderBy": attributes[parseInt(aoData[mSort].value)]}, "params");
-
-                // 添加其他字段信息
-                self.push(aoData, self.options.params, "params");
-
-                // ajax请求
-                meTables.ajax({
-                    url: sSource,
-                    data: aoData,
-                    type: self.options.sMethod,
-                    dataType: 'json'
-                }).done(function (data) {
-                    fnCallback(data);
-                });
-            };
-
             // 搜索
             this.search = function (params) {
                 this.action = "search";
@@ -635,7 +604,7 @@
                         // 第四步：表单的数据
                         var from_data = $(self.options.searchForm).serializeArray();
                         from_data.forEach(function (value) {
-                            if (value.value !== "") {
+                            if (value.value !== "" && value.value !== "All") {
                                 return_object.push({
                                     name: meTables.getAttributeName(value.name, self.options.filters),
                                     value: value.value
@@ -664,6 +633,8 @@
 
             this.options.form["id"] = this.options.sFormId.replace("#", "");
 
+
+
             // 添加序号
             if (this.options.number) {
                 this.options.table.columns.unshift(this.options.number)
@@ -676,23 +647,13 @@
 
             // 判断添加数据(操作选项)
             if (this.options.operations) {
-                for (var s in this.options.operations.buttons) {
-                    if (this.options.operations.buttons[s]) {
-                        if (!this.options.operations.buttons[s]["title"]) {
-                            this.options.operations.buttons[s]["title"] = meTables.getLanguage("operations_" + s);
-                        }
-                    }
-                }
+                var btn = this.options.operations.buttons;
+                delete this.options.operations.buttons;
+                this.options.operations.createdCell = function (td, data, rowArr, row) {
+                    $(td).html(meTables.buttonsCreate(row, btn, self.options.unique, rowArr));
+                };
 
-                this.options.table.columns.push({
-                    "data": null,
-                    "bSortable": false,
-                    "title": meTables.getLanguage("operations"),
-                    "width": self.options.operations.width,
-                    "createdCell": function (td, data, rowArr, row) {
-                        $(td).html(meTables.buttonsCreate(row, self.options.operations.buttons, self.options.unique));
-                    }
-                })
+                this.options.table.columns.push(this.options.operations);
             }
 
             // 处理搜索位置
@@ -942,7 +903,7 @@
         return html;
     };
 
-    meTables.buttonsCreate = function (index, data, unique) {
+    meTables.buttonsCreate = function (index, data, unique, rowArray) {
         var div1 = '<div class="hidden-sm hidden-xs btn-group">',
             div2 = '<div class="hidden-md hidden-lg">' +
                 '<div class="inline position-relative">' +
@@ -953,6 +914,11 @@
         // 添加按钮信息
         if (data !== undefined && typeof data === "object") {
             for (var i in data) {
+
+                if (!data[i] || $.isEmptyObject(data[i])  || ($.isFunction(data[i]['show']) && !data[i]['show'](rowArray)) ) {
+                    continue;
+                }
+
                 div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + '-' + unique + ' btn-xs" data-row="' + index + '"><i class="ace-icon fa ' + data[i]["icon"] + ' bigger-120"></i> ' + (data[i]["button-title"] ? data[i]["button-title"] : '') + '</button> ';
                 div2 += '<li><a title="' + data[i]['title'] + '" data-rel="tooltip" class="tooltip-info ' + data[i]['cClass'] + '-' + unique + '" href="javascript:;" data-original-title="' + data[i]['title'] + '" data-row="' + index + '"><span class="' + data[i]['sClass'] + '"><i class="ace-icon fa ' + data[i]['icon'] + ' bigger-120"></i></span></a></li>';
             }
@@ -1508,26 +1474,32 @@
 
         // 操作选项
         , operations: {
+            title: meTables.getLanguage("meTables", "operations"),
             width: "120px",
             defaultContent: "",
+            sortable: false,
+            data: null,
             buttons: {
-                "see": {
-                    "className": "btn-success",
-                    "cClass": "me-table-detail",
-                    "icon": "fa-search-plus",
-                    "sClass": "blue"
+                see: {
+                    title: meTables.getLanguage("meTables", "operations_see"),
+                    className: "btn-success",
+                    cClass: "me-table-detail",
+                    icon: "fa-search-plus",
+                    sClass: "blue"
                 },
-                "update": {
-                    "className": "btn-info",
-                    "cClass": "me-table-update",
-                    "icon": "fa-pencil-square-o",
-                    "sClass": "green"
+                update: {
+                    title: meTables.getLanguage("meTables", "operations_update"),
+                    className: "btn-info",
+                    cClass: "me-table-update",
+                    icon: "fa-pencil-square-o",
+                    sClass: "green"
                 },
-                "delete": {
-                    "className": "btn-danger",
-                    "cClass": "me-table-delete",
-                    "icon": "fa-trash-o",
-                    "sClass": "red"
+                delete: {
+                    title: meTables.getLanguage("meTables", "operations_delete"),
+                    className: "btn-danger",
+                    cClass: "me-table-delete",
+                    icon: "fa-trash-o",
+                    sClass: "red"
                 }
             }
         }

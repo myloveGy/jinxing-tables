@@ -61,10 +61,10 @@
 <script src="./public/js/old/jquery.dataTables.bootstrap.js"></script>
 <script src="./public/js/jquery.validate.min.js"></script>
 <script src="./public/js/layer/layer.min.js"></script>
-<script src="./public/js/old/jquery.meTables.js"></script>
+<script src="./public/js/meTables/meTables.js"></script>
 <script type="text/javascript">
     $(function () {
-        var m = $("#show-table").MeTables({
+        var m = meTables({
             title: "示例",
             buttonSelector: "#me-table-buttons-one",
             defaultFilters: {
@@ -113,26 +113,27 @@
                         title: "创建时间",
                         data: "created_at",
                         sortable: false,
-                        createdCell: $.fn.meTables.dateTimeString
+                        createdCell: meTables.dateTimeString
                     },
                     {
                         title: "修改时间",
                         data: "updated_at",
                         sortable: false,
-                        createdCell: $.fn.meTables.dateTimeString
+                        createdCell: meTables.dateTimeString
                     }
                 ]
             }
-        });
+        }).init();
 
 
-        var m1 = $("#me-table").MeTables({
+        var m1 = meTables({
+            sTable: "#me-table",
             buttonSelector: "#me-table-buttons-two",
             title: "示例",
             number: false,
             searchForm: "#me-table-search",
-            modalSelector: "#me-table-modal1",
-            formSelector: "#me-table-update1",
+            sModal: "#me-table-modal1",
+            sFormId: "#me-table-update1",
             checkbox: {width: "60px"},
             url: {
                 search: "./action.php?type=search",
@@ -224,17 +225,17 @@
                         title: "创建时间",
                         data: "created_at",
                         sortable: false,
-                        createdCell: $.fn.meTables.dateTimeString
+                        createdCell: meTables.dateTimeString
                     },
                     {
                         title: "修改时间",
                         data: "updated_at",
                         sortable: false,
-                        createdCell: $.fn.meTables.dateTimeString
+                        createdCell: meTables.dateTimeString
                     }
                 ]
             }
-        });
+        }).init();
     });
 </script>
 </body>
