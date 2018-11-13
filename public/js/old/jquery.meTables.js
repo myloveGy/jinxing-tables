@@ -636,10 +636,11 @@
             this.options.table.columns.push(this.options.operations);
         }
 
-        // 多选项
-        this.options.checkbox && this.options.table.columns.unshift(this.options.checkbox);
         // 序号
         this.options.number && this.options.table.columns.unshift(this.options.number);
+
+        // 多选项
+        this.options.checkbox && this.options.table.columns.unshift(this.options.checkbox);
 
         // 处理搜索位置
         if (this.options.searchType !== "middle" && MeTables.empty(this.options.table.dom)) {
