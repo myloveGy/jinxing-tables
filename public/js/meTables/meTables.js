@@ -574,6 +574,8 @@
                 this.options.table.ajax = {
                     url: self.getUrl("search"),
                     data: function (d) {
+                        $(self.options.sTable).find("input:checkbox").prop("checked", false);
+
                         // 第一步：分页必须的参数
                         var return_object = [];
                         return_object.push({name: "offset", value: d.start});
@@ -1203,7 +1205,7 @@
 
     // 时间戳转字符日期
     meTables.dateTimeString = function (td, data) {
-        $(td).html(mt.timeFormat(data, 'yyyy-MM-dd hh:mm:ss'));
+        $(td).html(meTables.timeFormat(data, 'yyyy-MM-dd hh:mm:ss'));
     };
 
     // 状态信息
@@ -1509,5 +1511,6 @@
         return new meTables(options)
     };
 
+    window.MeTables = meTables;
     return meTables
 })(window, jQuery);
