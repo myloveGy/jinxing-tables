@@ -171,6 +171,11 @@
 
             // 刷新
             this.refresh = function () {
+                var objectForm = $(this.options.searchForm).get(0);
+                if (objectForm) {
+                    objectForm.reset();
+                }
+
                 this.action = "refresh";
                 this.search(true);
             };
@@ -189,10 +194,11 @@
 
             // 修改
             this.updateAll = function () {
-                var row = $(this.options.sTable + " tbody input:checkbox:checked:last").attr('table-data');
-                if (row) {
+                var row = $(this.options.sTable + " tbody input:checkbox:checked:last").data('row'),
+                    data = $.getValue(this.table.data(), parseInt(row));
+                if (data) {
                     this.action = "update";
-                    this.initForm(this.table.data()[row], false);
+                    this.initForm(data);
                 } else {
                     return layer.msg(meTables.getLanguage("noSelect"), {icon: 5});
                 }
@@ -356,7 +362,7 @@
 
                 // 添加字段信息
                 this.options.table.columns.forEach(function (k, v) {
-                    if (k.data && (k.isExport !== true || k.bExport !== true || k.export !== true)) {
+                    if (k.data && k.isExport !== false && k.bExport !== false && k.export !== false) {
                         html += '<input type="hidden" name="fields[' + k.data + ']" value="' + k.title + '"/>';
                     }
                 });
@@ -365,14 +371,14 @@
                 var value = $(self.options.searchForm).serializeArray();
                 for (i in value) {
                     if (!meTables.empty(value[i]["value"]) && value[i]["value"] !== "All") {
-                        var strName = meTables.getAttributeName(value[i]["name"], "params");
+                        var strName = meTables.getAttributeName(value[i]["name"], self.options.filters);
                         html += '<input type="hidden" name="' + strName + '" value="' + value[i]["value"] + '"/>';
                     }
                 }
 
                 // 默认查询参数添加
                 for (i in this.options.params) {
-                    html += '<input type="hidden" name="params[' + i + ']" value="' + this.options.params[i] + '"/>';
+                    html += '<input type="hidden" name="' + self.options.filters + '[' + i + ']" value="' + this.options.params[i] + '"/>';
                 }
 
                 // 表单提交
@@ -464,8 +470,10 @@
                             }
                         };
 
+                        console.info(self.options.editable[k.editable.name])
                         // 继承修改配置参数
-                        self.options.editable[k.editable.name] = self.extend(self.options.editable[k.editable.name], k.editable);
+                        self.options.editable[k.editable.name] = $.extend(true, {}, self.options.editable[k.editable.name], k.editable);
+                        console.info(self.options.editable[k.editable.name])
                         k["class"] = "my-edit edit-" + k.editable.name;
                     }
                 });
@@ -473,6 +481,7 @@
                 // 判断添加行内编辑信息
                 if (self.options.editable) {
                     self.options.table.fnDrawCallback = function () {
+                        console.info(self.options.editable)
                         for (var key in self.options.editable) {
                             $(self.options.sTable + " tbody tr td.edit-" + key).each(function () {
                                 var data = self.table.row($(this).closest('tr')).data(), mv = {};
@@ -482,7 +491,7 @@
                                     mv['pk'] = data[self.options.pk];
                                 }
 
-                                $(this).editable(self.extend(self.options.editable[key], mv))
+                                $(this).editable($.extend(true, {}, self.options.editable[key], mv))
                             });
                         }
                     }
@@ -635,7 +644,8 @@
 
             this.options.form["id"] = this.options.sFormId.replace("#", "");
 
-
+            // 兼容之前的代码
+            this.options.table.columns = this.options.table.columns || this.options.table.aoColumns;
 
             // 添加序号
             if (this.options.number) {
@@ -665,12 +675,8 @@
 
             // 处理按钮
             for (var i in this.options.buttons) {
-                if (this.options.buttons[i] !== null && this.options.buttons[i].bShow === true) {
-                    if (!this.options.buttons[i].text) {
-                        this.options.buttons[i].text = meTables.getLanguage(i);
-                    }
-
-                    this.options.buttonHtml += '<button class="' + this.options.buttons[i]["className"] + '" id="' + this.options.sTable.replace("#", "") + "-" + i + '">\
+                if (this.options.buttons[i]) {
+                    this.options.buttonHtml += '<button data-func="' + $.getValue(this.options.buttons[i], "data-func") + '" class="' + this.options.buttons[i]["className"] + ' me-table-button-' + this.options.unique + '" id="' + this.options.unique + "-" + i + '">\
                                 <i class="' + this.options.buttons[i]["icon"] + '"></i>\
                             ' + this.options.buttons[i]["text"] + '\
                             </button> ';
@@ -886,20 +892,18 @@
         }
 
         // select 默认选中
-        var defaultObject = k.search.type === "select" ? {"All": meTables.getLanguage("all")} : null;
+        var defaultObject = k.search.type === "select" ? {"All": meTables.getLanguage("all")} : null,
+            func = k.search.type + "SearchMiddleCreate",
+            defaultFunc = "textSearchMiddleCreate";
+        if (searchType !== "middle") {
+            func = func.replace("Middle", "");
+            defaultFunc = defaultFunc.replace("Middle", "");
+        }
 
-        if (searchType === "middle") {
-            try {
-                html = this[k.search.type + "SearchMiddleCreate"](k.search, k.value, defaultObject);
-            } catch (e) {
-                html = this.textSearchMiddleCreate(k.search);
-            }
-        } else {
-            try {
-                html = this[k.search.type + "SearchCreate"](k.search, k.value, defaultObject);
-            } catch (e) {
-                html = this.textSearchCreate(k.search);
-            }
+        try {
+            html = this[func](k.search, k.value, defaultObject);
+        } catch (e) {
+            html = this[defaultFunc](k.search);
         }
 
         return html;
@@ -917,7 +921,7 @@
         if (data !== undefined && typeof data === "object") {
             for (var i in data) {
 
-                if (!data[i] || $.isEmptyObject(data[i])  || ($.isFunction(data[i]['show']) && !data[i]['show'](rowArray)) ) {
+                if (!data[i] || $.isEmptyObject(data[i]) || ($.isFunction(data[i]['show']) && !data[i]['show'](rowArray))) {
                     continue;
                 }
 
@@ -1000,7 +1004,7 @@
         return '<label for="search-' + params.name + '"> ' + params.title + ': ' + this.inputCreate(params) + '</label>';
     };
 
-    selectSearchMiddleCreate = function (params, value, defaultObject) {
+    meTables.selectSearchMiddleCreate = function (params, value, defaultObject) {
         params["id"] = "search-" + params.name;
         return '<label for="search-' + params.name + '"> ' + params.title + ': ' + this.selectInput(params, value, defaultObject) + '</label>';
     };
@@ -1307,16 +1311,16 @@
         bEvent: true,               // 是否监听事件
         searchInputEvent: "blur",   // 搜索表单input事件
         searchSelectEvent: "change",// 搜索表单select事件
-        filters: "params",
+        filters: "filters",         // 查询参数
 
         // 请求相关
         isSuccess: function (json) {
-            return json.code === 0;
+            return json.errCode === 0;
         },
 
         // 获取消息
         getMessage: function (json) {
-            return json.msg;
+            return json.errMsg;
         },
 
         // 搜索信息(只对searchType !== "middle") 情况
@@ -1422,22 +1426,32 @@
         // 默认按钮信息
         buttons: {
             create: {
+                "data-func": "create",
+                text: meTables.getLanguage("create"),
                 icon: "ace-icon fa fa-plus-circle blue",
                 className: "btn btn-white btn-primary btn-bold"
             },
             updateAll: {
+                "data-func": "updateAll",
+                text: meTables.getLanguage("updateAll"),
                 icon: "ace-icon fa fa-pencil-square-o orange",
                 className: "btn btn-white btn-info btn-bold"
             },
             deleteAll: {
+                "data-func": "deleteAll",
+                text: meTables.getLanguage("deleteAll"),
                 icon: "ace-icon fa fa-trash-o red",
                 className: "btn btn-white btn-danger btn-bold"
             },
             refresh: {
+                "data-func": "refresh",
+                text: meTables.getLanguage("refresh"),
                 icon: "ace-icon fa  fa-refresh",
                 className: "btn btn-white btn-success btn-bold"
             },
             export: {
+                "data-func": "export",
+                text: meTables.getLanguage("export"),
                 icon: "ace-icon glyphicon glyphicon-export",
                 className: "btn btn-white btn-warning btn-bold"
             }
@@ -1468,7 +1482,7 @@
             view: false,
             createdCell: function (td, data, array, row) {
                 $(td).html('<label class="position-relative">' +
-                    '<input type="checkbox" class="ace" data-row="' + row + '" />' +
+                    '<input type="checkbox" class="ace" data-row="' + row + '" value="' + row + '"/>' +
                     '<span class="lbl"></span>' +
                     '</label>');
             }
