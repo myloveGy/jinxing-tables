@@ -5,16 +5,16 @@
 (function (window, $) {
     // 获取数组信息
     $.getValue = function (arrValue, key, defaultValue) {
+        if (!arrValue) {
+            return defaultValue;
+        }
+
         if (typeof key === "string") {
             var index = key.lastIndexOf(".");
             if (key.lastIndexOf(".") !== -1) {
                 arrValue = $.getValue(arrValue, key.substr(0, index), defaultValue);
                 key = key.substr(index + 1);
             }
-        }
-
-        if (!arrValue) {
-            return defaultValue;
         }
 
         if (key in arrValue) {
