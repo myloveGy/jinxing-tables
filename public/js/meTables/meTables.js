@@ -1078,24 +1078,6 @@
             objForm.reset();                                                                // 表单重置
             if (data !== undefined) {
                 for (var i in data) {
-                    // 多语言处理 以及多选配置
-                    if (typeof data[i] === 'object') {
-                        for (var x in data[i]) {
-                            var key = i + '[' + x + ']';
-                            // 对语言
-                            if (objForm[key] !== undefined) {
-                                objForm[key].value = data[i][x];
-                            } else {
-                                // 多选按钮
-                                if (parseInt(data[i][x]) > 0) {
-                                    $('input[type=checkbox][name=' + i + '\\[\\]][value=' + data[i][x] + ']').attr('checked', true).each(function () {
-                                        this.checked = true
-                                    });
-                                }
-                            }
-                        }
-                    }
-
                     // 其他除密码的以外的数据
                     if (objForm[i] !== undefined && objForm[i].type !== "password") {
                         var obj = $(objForm[i]), tmp = data[i];
