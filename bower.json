@@ -1,0 +1,22 @@
+{
+  "name": "jinxing/me-tables",
+  "description": "gulp",
+  "main": "gulpfile.js",
+  "authors": [
+    "jinxing.liu@qq.com"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "me-tables",
+    "datatables"
+  ],
+  "homepage": "https://github.com/myloveGy/meTables",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
