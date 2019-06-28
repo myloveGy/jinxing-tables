@@ -10,8 +10,8 @@
     <meta name="author" content="">
     <title> meTables -- 使用示例 </title>
     <!-- Bootstrap core CSS -->
-    <link href="./public/css/bootstrap.min.css" rel="stylesheet">
-    <link href="./public/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
     <style type="text/css">
         div.main {
             margin-top: 70px;
@@ -34,12 +34,12 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="./index.html"> meTables -- 使用示例 </a>
+            <a class="navbar-brand" href="index.html"> meTables -- 使用示例 </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav pull-right">
-                <li><a href="./index.html">首页</a></li>
-                <li class="active"><a href="./create.php">创建视图文件</a></li>
+                <li><a href="index.html">首页</a></li>
+                <li class="active"><a href="create.php">创建视图文件</a></li>
             </ul>
         </div><!--/.nav-collapse -->
     </div>
@@ -66,7 +66,7 @@
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="db-div">
                     <div class="col-md-12 mt20">
-                        <form action="./create.php?action=table" method="post" id="db-form">
+                        <form action="create.phpction=table" method="post" id="db-form">
                             <div class="form-group">
                                 <label for="db-host">数据库配置DNS</label>
                                 <input type="text" required="true" rangelength="[2, 200]" name="dns"
@@ -97,7 +97,7 @@
                 </div>
                 <div role="tabpanel" class="tab-pane" id="view-edit">
                     <div class="mt20">
-                        <form action="./create.php?action=edit" method="POST" id="edit-form"></form>
+                        <form action="create.phpction=edit" method="POST" id="edit-form"></form>
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="view">
@@ -109,10 +109,10 @@
         </div>
     </div>
 </div>
-<script src="./public/js/jquery.min.js"></script>
-<script src="./public/js/bootstrap.min.js"></script>
-<script src="./public/js/jquery.validate.min.js"></script>
-<script src="./public/js/layer/layer.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.validate.min.js"></script>
+<script src="js/layer/layer.js"></script>
 <script type="text/javascript">
     $(function () {
         // 查询数据库
