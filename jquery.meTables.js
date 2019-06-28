@@ -27,24 +27,27 @@
 
     // 获取数组信息
     $.getValue = function (arrValue, key, defaultValue) {
-        if (typeof key === "string") {
-            var index = key.lastIndexOf(".");
-            if (key.lastIndexOf(".") !== -1) {
-                arrValue = $.getValue(arrValue, key.substr(0, index), defaultValue);
-                key = key.substr(index + 1);
+
+        // 不是数组或者对象的话，直接返回默认值
+        if (!arrValue || typeof arrValue !== 'object') {
+            return defaultValue
+        }
+
+        // 判断类型
+        if (typeof key === 'string') {
+            var index = key.lastIndexOf('.')
+            if (key.lastIndexOf('.') !== -1) {
+                arrValue = $.getValue(arrValue, key.substr(0, index), defaultValue)
+                key = key.substr(index + 1)
             }
         }
 
-        if (!arrValue) {
-            return defaultValue;
-        }
-
         if (key in arrValue) {
-            return arrValue[key];
+            return arrValue[key]
         }
 
-        return arrValue[key] ? arrValue[key] : defaultValue;
-    };
+        return arrValue[key] ? arrValue[key] : defaultValue
+    }
 
     // 初始化处理
     var MeTables = function (options) {
@@ -468,12 +471,14 @@
 
             // 确定操作的表单和模型
             var t = $.getValue(MeTables.language, this.action === "create" ? "meTables.insert" : "meTables.update");
+
             $(this.options.modalSelector).find('h4').html(this.options.title + t);
             try {
                 $(this.options.formSelector).find(".has-error").removeClass("has-error");
                 $(this.options.formSelector).validate(this.options.formValidate).resetForm();
             } catch (e) {
             }
+
             MeTables.initForm(this.options.formSelector, data);
 
             // 显示之后的处理
@@ -1283,11 +1288,8 @@
             var $fm = $(select);
             objForm = $fm.get(0); // 获取表单对象
             if (objForm !== undefined) {
-                $fm.find('input[type=hidden]').val('');
-                $fm.find('input[type=checkbox]').each(function () {
-                    $(this).attr('checked', false);
-                    if ($(this).get(0)) $(this).get(0).checked = false;
-                });                                                                             // 多选菜单
+                $fm.find('input[type=hidden]').val('')
+                $fm.find('input[type=checkbox]').prop('checked', false)                                                                              // 多选菜单
                 objForm.reset();                                                                // 表单重置
                 if (data !== undefined) {
                     for (var i in data) {
@@ -1426,11 +1428,6 @@
         // 状态信息
         statusString: function (td, data) {
             $(td).html('<span class="label label-' + (parseInt(data) === 1 ? 'success">启用' : 'warning">禁用') + '</span>');
-        },
-
-        // 用户显示
-        adminString: function (td, data) {
-            $(td).html(aAdmins[data]);
         },
 
         // 显示标签
