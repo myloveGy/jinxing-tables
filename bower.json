@@ -20,7 +20,7 @@
     "gulpfile.js",
     "public",
     "includes",
-    "./*.php",
-    "./*.html"
+    "**/*.php",
+    "**/*.html"
   ]
 }
