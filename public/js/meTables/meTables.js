@@ -153,13 +153,13 @@
 
         // 判断初始化处理(搜索添加位置)
         if (this.options.searchType === 'middle') {
-          var formHtml = '';
+          var formHtml = ''
           if (this.options.searchHtml && $.trim(this.options.searchHtml)) {
             formHtml = '<form id="' + this.options.searchForm.replace('#', '') + '">' +
               '' + this.options.searchHtml + searchButtonHtml + '' +
               '</form>'
           }
-          $(this.options.sTable + '_filter').html(formHtml);
+          $(this.options.sTable + '_filter').html(formHtml)
           $(this.options.sTable + '_wrapper div.row div.col-xs-6:first')
             .removeClass('col-xs-6')
             .addClass('col-xs-2')
