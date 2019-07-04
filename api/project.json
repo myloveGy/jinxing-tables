@@ -28,11 +28,11 @@
       },
       {
         "title": "服务端返回",
-        "url": "/?page=module"
+        "url": "/?page=service"
       },
       {
         "title": "配置选项",
-        "url": "/?page=controller"
+        "url": "/?page=config"
       }
     ]
   },
