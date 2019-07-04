@@ -109,7 +109,7 @@ var m = $("#show-table").MeTables({
 
 ### 使用文档
 
-[请参考](https://mylovegy.github.io/jinxing-tables/?page=home) 
+[使用文档](https://mylovegy.github.io/jinxing-tables/?page=home) 
 
 [配置说明](https://mylovegy.github.io/jinxing-tables/?page=config)
 
