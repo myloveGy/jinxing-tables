@@ -1,0 +1,31 @@
+{
+  "draw": 1,
+  "recordsFiltered": 100,
+  "recordsTotal": 100,
+  "data": [
+    {
+      "id": 1,
+      "name": "中国",
+      "created_at": 1562236112,
+      "updated_at": 1562236112
+    },
+    {
+      "id": 2,
+      "name": "上海",
+      "created_at": 1562236112,
+      "updated_at": 1562236112
+    },
+    {
+      "id": 3,
+      "name": "上海测试1",
+      "created_at": 1562236112,
+      "updated_at": 1562236112
+    },
+    {
+      "id": 4,
+      "name": "上海测试2",
+      "created_at": 1562236112,
+      "updated_at": 1562236112
+    }
+  ]
+}

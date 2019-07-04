@@ -35,7 +35,6 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav pull-right">
         <li class="active"><a href="/">首页</a></li>
-        <li><a href="./create.html">创建视图文件</a></li>
       </ul>
     </div><!--/.nav-collapse -->
   </div>
@@ -45,7 +44,7 @@
   <div class="row">
     <div class="col-md-12">
       <div class="page-header">
-        <p><a href="./tables.html"> 切换到 meTables 版本 </a></a> </p>
+        <p><a href="/jinxing-tables/tables.html"> 切换到 meTables 版本 </a></a> </p>
         <h1> 简单例子 </h1>
         <p id="me-table-buttons-one"></p>
         <table class="table table-striped table-bordered table-hover" id="show-table"></table>
@@ -62,12 +61,19 @@
 <script src="/jinxing-tables/public/js/dataTables/dataTables.bootstrap.min.js"></script>
 <script src="/jinxing-tables/public/js/jquery.validate.min.js"></script>
 <script src="/jinxing-tables/public/js/layer/layer.min.js"></script>
-<script src="/jinxing-tables/public/js/meTables/jquery.meTables.js"></script>
+<script src="/jinxing-tables/dist/jquery.meTables.min.js"></script>
 <script type="text/javascript">
   // 自定义编辑类型
   $.fn.meTables.customizeCreate = function (params) {
     delete params.type
     return '<textarea ' + this.handleParams(params) + '></textarea>'
+  }
+
+  var url = {
+    search: '/jinxing-tables/api/search.json',
+    create: '/jinxing-tables/api/create.json',
+    update: '/jinxing-tables/api/update.json',
+    delete: '/jinxing-tables/api/delete.json',
   }
 
   $(function () {
@@ -80,14 +86,7 @@
         'name:like': 456,
       },
       checkbox: {width: '60px'},
-      url: {
-        search: './action.php?type=search',
-        create: './action.php?type=create',
-        update: './action.php?type=update',
-        delete: './action.php?type=delete',
-        deleteAll: './action.php?type=delete-all',
-        export: './action.php?type=export',
-      },
+      url: url,
       table: {
         columns: [
           {
@@ -146,7 +145,6 @@
       },
     })
 
-
     var m1 = $('#me-table').MeTables({
       buttonSelector: '#me-table-buttons-two',
       title: '示例',
@@ -156,14 +154,7 @@
         'name:like': 456,
       },
       checkbox: {width: '60px'},
-      url: {
-        search: './action.php?type=search',
-        create: './action.php?type=create',
-        update: './action.php?type=update',
-        delete: './action.php?type=delete',
-        deleteAll: './action.php?type=delete-all',
-        export: './action.php?type=export',
-      },
+      url: url,
 
       // 按钮配置说明
       buttons: {

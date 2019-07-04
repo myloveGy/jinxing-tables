@@ -9,9 +9,9 @@
     <meta name="author" content="">
     <title> meTables -- 使用示例 </title>
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/dataTables.bootstrap.css" rel="stylesheet">
+    <link href="/jinxing-tables/public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/jinxing-tables/public/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/jinxing-tables/public/css/dataTables.bootstrap.css" rel="stylesheet">
     <style type="text/css">
         div.main {
             margin-top: 50px;
@@ -56,14 +56,21 @@
     </div>
 </div>
 <!-- 加载公共js -->
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/dataTables/jquery.dataTables.min.js"></script>
-<script src="js/dataTables/dataTables.bootstrap.min.js"></script>
-<script src="js/jquery.validate.min.js"></script>
-<script src="js/layer/layer.min.js"></script>
-<script src="js/meTables/meTables.js"></script>
+<script src="/jinxing-tables/public/js/jquery.min.js"></script>
+<script src="/jinxing-tables/public/js/bootstrap.min.js"></script>
+<script src="/jinxing-tables/public/js/dataTables/jquery.dataTables.min.js"></script>
+<script src="/jinxing-tables/public/js/dataTables/dataTables.bootstrap.min.js"></script>
+<script src="/jinxing-tables/public/js/jquery.validate.min.js"></script>
+<script src="/jinxing-tables/public/js/layer/layer.min.js"></script>
+<script src="/jinxing-tables/dist/meTables.min.js"></script>
 <script type="text/javascript">
+    var url = {
+        search: '/jinxing-tables/api/search.json',
+        create: '/jinxing-tables/api/create.json',
+        update: '/jinxing-tables/api/update.json',
+        delete: '/jinxing-tables/api/delete.json',
+    }
+
     $(function () {
         meTables({
             title: "示例",
@@ -73,14 +80,7 @@
                 "name:like": 456
             },
             checkbox: {width: "60px"},
-            url: {
-                search: "./action.php?type=search",
-                create: "./action.php?type=create",
-                update: "./action.php?type=update",
-                delete: "./action.php?type=delete",
-                deleteAll: "./action.php?type=delete-all",
-                export: "./action.php?type=export"
-            },
+            url: url,
             table: {
                 columns: [
                     {
@@ -135,14 +135,7 @@
             sModal: "#me-table-modal1",
             sFormId: "#me-table-update1",
             checkbox: {width: "60px"},
-            url: {
-                search: "./action.php?type=search",
-                create: "./action.php?type=create",
-                update: "./action.php?type=update",
-                delete: "./action.php?type=delete",
-                deleteAll: "./action.php?type=delete-all",
-                export: "./action.php?type=export"
-            },
+            url: url,
 
             // 按钮配置说明
             buttons: {
