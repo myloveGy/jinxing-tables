@@ -105,12 +105,12 @@ var m = $("#show-table").MeTables({
 
 #### 后端返回
 
-[后端返回](https://mylovegy.github.io/jinxing-tables/?page=service)
+[后端返回请参考](https://mylovegy.github.io/jinxing-tables/?page=service)
 
 ### 使用文档
 
-[使用文档](https://mylovegy.github.io/jinxing-tables/?page=home) 
+[使用文档请参考](https://mylovegy.github.io/jinxing-tables/?page=home) 
 
-[配置说明](https://mylovegy.github.io/jinxing-tables/?page=config)
+[配置说明请参考](https://mylovegy.github.io/jinxing-tables/?page=config)
 
 
