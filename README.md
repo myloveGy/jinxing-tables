@@ -1,5 +1,5 @@
 meTables.js 基于 jquery.dataTables.js 表格
-===================================
+=========================================
 
 ### 简介
 
@@ -12,7 +12,14 @@ meTables.js 基于 jquery.dataTables.js 表格
 * layer-v2.1
 * jQuery Validation Plugin - v1.14.0
 
+### 安装
+
+```bash
+bower install jinxing-tables
+```
+
 ### 简单使用
+
 #### html
 ```html
 <!-- 按钮信息 -->
@@ -94,7 +101,7 @@ var m = $("#show-table").MeTables({
 ```
 
 #### 生成视图
-![试图文件](./public/images/desc5.png)
+![试图文件](https://mylovegy.github.io/jinxing-tables/docs/images/data.png)
 
 #### 关于搜索条件和排序字段的处理
 
