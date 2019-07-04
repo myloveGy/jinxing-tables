@@ -95,7 +95,7 @@ var m = $("#show-table").MeTables({
 ```
 
 #### 生成视图
-![试图文件](./public/images/desc5.png)
+![试图文件](./images/data.png)
 
 #### 关于搜索条件和排序字段的处理
 
