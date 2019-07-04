@@ -27,20 +27,12 @@
         "url": "/?page=home"
       },
       {
-        "title": "模块配置说明",
+        "title": "服务端返回",
         "url": "/?page=module"
       },
       {
-        "title": "控制器配置说明",
+        "title": "配置选项",
         "url": "/?page=controller"
-      },
-      {
-        "title": "MeTable配置说明",
-        "url": "/?page=me-table"
-      },
-      {
-        "title": "常见问题说明",
-        "url": "/?page=faq"
       }
     ]
   },
