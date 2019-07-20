@@ -1434,7 +1434,7 @@
     editFormParams: {				// 编辑表单配置
       bMultiCols: false,          // 是否多列
       iColsLength: 1,             // 几列
-      aCols: [3, 8],              // label 和 input 栅格化设置
+      aCols: [3, 9],              // label 和 input 栅格化设置
       sModalClass: '',			// 弹出模块框配置
       sModalDialogClass: '',		// 弹出模块的class
     },
