@@ -1139,7 +1139,7 @@
           if (objForm[i] !== undefined && objForm[i].type !== 'password') {
             var obj = $(objForm[i]), tmp = data[i]
             // 时间处理
-            if (obj.hasClass('time-format')) {
+            if (obj.hasClass('time-format') || obj.data('time-format')) {
               tmp = meTables.timeFormat(parseInt(tmp), obj.attr('time-format') ? obj.attr('time-format') : 'yyyy-MM-dd hh:mm:ss')
             }
             objForm[i].value = tmp
@@ -1195,29 +1195,43 @@
   meTables.detailTable = function (object, data, tClass, row) {
     // 循环处理显示信息
     object.forEach(function (k) {
-      var tmpKey = k.data, tmpValue = data[tmpKey], dataInfo = $(tClass + tmpKey)
+      var tmpKey = k.data,
+        tmpValue = $.getValue(data, tmpKey),
+        dataInfo = $(tClass + (tmpKey ? tmpKey.replace('.', '-') : tmpKey))
       if (k.edit !== undefined && k.edit.type === 'password') {
         tmpValue = '******'
       }
 
-      (k.createdCell !== undefined && typeof k.createdCell === 'function') ? k.createdCell(dataInfo, tmpValue, data, row, undefined) : dataInfo.html(tmpValue)
+      // createdCell 函数处理
+      if (k.createdCell !== undefined && typeof k.createdCell === 'function') {
+        k.createdCell(dataInfo, tmpValue, data, row, undefined)
+        return
+      }
+
+      // render 函数处理
+      if (k.render && typeof k.render === 'function') {
+        tmpValue = k.render(tmpValue, true, data)
+      }
+
+      dataInfo.html(tmpValue)
     })
   }
 
   meTables.detailTableCreate = function (title, data, iKey, aParams) {
     html = ''
+    var className = data && typeof data === 'string' ? data.replace('.', '-') : data
     if (aParams && aParams.bMultiCols) {
       if (aParams.iColsLength > 1 && iKey % aParams.iColsLength === 0) {
         html += '<tr>'
       }
 
-      html += '<td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td>'
+      html += '<td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + className + '"></td>'
 
       if (aParams.iColsLength > 1 && iKey % aParams.iColsLength === (aParams.iColsLength - 1)) {
         html += '</tr>'
       }
     } else {
-      html += '<tr><td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td></tr>'
+      html += '<tr><td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + className + '"></td></tr>'
     }
 
     return html
@@ -1434,7 +1448,7 @@
     editFormParams: {				// 编辑表单配置
       bMultiCols: false,          // 是否多列
       iColsLength: 1,             // 几列
-      aCols: [3, 9],              // label 和 input 栅格化设置
+      aCols: [3, 8],              // label 和 input 栅格化设置
       sModalClass: '',			// 弹出模块框配置
       sModalDialogClass: '',		// 弹出模块的class
     },
