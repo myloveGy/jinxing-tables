@@ -492,9 +492,20 @@
             views += meTables.detailTableCreate(k.title, k.data, v, self.options.detailTable)
           }
 
-          if (k.edit !== undefined) form += meTables.formCreate(k, self.options.editFormParams)	// 编辑表单信息
-          if (k.search !== undefined) self.options.searchHtml += meTables.searchInputCreate(k, v, self.options.searchType)  // 搜索信息
-          if (k.defaultOrder) aOrders.push([v, k.defaultOrder])							// 默认排序
+          // 编辑表单信息
+          if (k.edit !== undefined) {
+            form += meTables.formCreate(k, self.options.editFormParams)
+          }
+
+          // 搜索表单
+          if (k.search !== undefined) {
+            self.options.searchHtml += meTables.searchInputCreate(k, v, self.options.searchType)
+          }
+
+          // 默认排序
+          if (k.defaultOrder && (k.defaultOrder === 'asc' || k.defaultOrder === 'desc')) {
+            aOrders.push([v, k.defaultOrder])
+          }
 
           // 是否隐藏
           if (k.isHide || k.bHide || k.hide) {
