@@ -1007,50 +1007,72 @@
   }
 
   meTables.formCreate = function (k, oParams, self) {
-    var form = ''
-    if (!oParams.index) oParams.index = 0
-
-    // 处理其他参数
-    if (!k.edit.type) k.edit.type = 'text'
-    if (!k.edit.name) k.edit.name = k.data
-
-    self.editColumns.push(k.edit)
-    if (k.edit.type === 'hidden') {
-      form += this.inputCreate(k.edit)
-    } else {
-      k.edit['class'] = 'form-control ' + (k.edit['class'] ? k.edit['class'] : '')
-      // 处理多列
-      if (oParams.iMultiCols > 1 && !oParams.aCols) {
-        oParams.aCols = []
-        var iLength = Math.ceil(12 / oParams.iMultiCols)
-        oParams.aCols[0] = Math.floor(iLength * 0.3)
-        oParams.aCols[1] = iLength - oParams.aCols[0]
-      }
-
-      if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === 0)) {
-        form += '<div class="form-group">'
-      }
-
-      var div_name = k.edit.name.replace('[]', '')
-      form += this.labelCreate(k.title, {'class': 'col-sm-' + oParams.aCols[0] + ' control-label div-left-' + div_name})
-      form += '<div class="col-sm-' + oParams.aCols[1] + ' div-right-' + div_name + '">'
-
-      // 使用函数
-      try {
-        form += this[k.edit.type + 'Create'](k.edit, k.value)
-      } catch (e) {
-        k.edit.type = 'text'
-        form += this['inputCreate'](k.edit)
-      }
-
-      form += '</div>'
-
-      if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === (oParams.iColsLength - 1))) {
-        form += '</div>'
-      }
-
-      oParams.index++
+    if (!oParams.index) {
+      oParams.index = 0
     }
+
+    // 处理默认类型
+    if (!k.edit.type) {
+      k.edit.type = 'text'
+    }
+
+    // 处理表单名称
+    if (!k.edit.name) {
+      if (k.data.indexOf('.')) {
+        var tmpName = k.data.split('.')
+        k.edit.name = tmpName.shift()
+        tmpName.forEach(function (v) {
+          k.edit.name += '[' + v + ']'
+        })
+      } else {
+        k.edit.name = k.data
+      }
+    }
+
+    self.editColumns.push({
+      name: k.edit.name,
+      index: k.data || k.edit.name,
+    })
+
+    // 隐藏表单
+    if (k.edit.type === 'hidden') {
+      return this.inputCreate(k.edit)
+    }
+
+    var form = ''
+    k.edit['class'] = 'form-control ' + (k.edit['class'] ? k.edit['class'] : '')
+    // 处理多列
+    if (oParams.iMultiCols > 1 && !oParams.aCols) {
+      oParams.aCols = []
+      var iLength = Math.ceil(12 / oParams.iMultiCols)
+      oParams.aCols[0] = Math.floor(iLength * 0.3)
+      oParams.aCols[1] = iLength - oParams.aCols[0]
+    }
+
+    if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === 0)) {
+      form += '<div class="form-group">'
+    }
+
+    var div_name = k.edit.name.replace('[]', '')
+    form += this.labelCreate(k.title, {'class': 'col-sm-' + oParams.aCols[0] + ' control-label div-left-' + div_name})
+    form += '<div class="col-sm-' + oParams.aCols[1] + ' div-right-' + div_name + '">'
+
+    // 使用函数
+    try {
+      form += this[k.edit.type + 'Create'](k.edit, k.value)
+    } catch (e) {
+      k.edit.type = 'text'
+      form += this['inputCreate'](k.edit)
+    }
+
+    form += '</div>'
+
+    if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === (oParams.iColsLength - 1))) {
+      form += '</div>'
+    }
+
+    oParams.index++
+
 
     return form
   }
@@ -1149,13 +1171,8 @@
       objForm.reset()                                                                // 表单重置
       if (data !== undefined && columns && columns.length > 0) {
         columns.forEach(function (v) {
-          var keyName = v.name
-          if (keyName.indexOf('[') > 0) {
-            keyName = keyName.replace(/(\[)|(\]\[)/ig, '.').slice(0, -1)
-          }
-
-          var tmpValue = $.getValue(data, keyName)
-
+          var tmpValue = $.getValue(data, v.index)
+          console.info(tmpValue, v.index, $.getValue(data, v.name))
           // 其他除密码的以外的数据
           if (objForm[v.name] !== undefined && objForm[v.name].type !== 'password') {
             var obj = $(objForm[v.name])
