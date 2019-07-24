@@ -1041,6 +1041,7 @@
 
     var form = ''
     k.edit['class'] = 'form-control ' + (k.edit['class'] ? k.edit['class'] : '')
+
     // 处理多列
     if (oParams.iMultiCols > 1 && !oParams.aCols) {
       oParams.aCols = []
@@ -1053,8 +1054,16 @@
       form += '<div class="form-group">'
     }
 
+    // 处理连接的 className 名称
     var div_name = k.edit.name.replace('[]', '')
-    form += this.labelCreate(k.title, {'class': 'col-sm-' + oParams.aCols[0] + ' control-label div-left-' + div_name})
+    if (div_name.indexOf('[')) {
+      div_name = div_name.replace(/(\[)|(\]\[)/ig, '-').replace(']', '')
+    }
+
+    form += this.labelCreate(k.title, {
+      'class': 'col-sm-' + oParams.aCols[0] + ' control-label div-left-' + div_name + ' ' + ($.getValue(k.edit, 'required') ? 'required' : ''),
+    })
+
     form += '<div class="col-sm-' + oParams.aCols[1] + ' div-right-' + div_name + '">'
 
     // 使用函数
@@ -1168,11 +1177,14 @@
     if (objForm !== undefined) {
       $fm.find('input[type=hidden]').val('')
       $fm.find('input[type=checkbox]').prop('checked', false)                                                                              // 多选菜单
-      objForm.reset()                                                                // 表单重置
+
+      // 表单重置
+      objForm.reset()
+
+      // 表单重新赋值
       if (data !== undefined && columns && columns.length > 0) {
         columns.forEach(function (v) {
           var tmpValue = $.getValue(data, v.index)
-          console.info(tmpValue, v.index, $.getValue(data, v.name))
           // 其他除密码的以外的数据
           if (objForm[v.name] !== undefined && objForm[v.name].type !== 'password') {
             var obj = $(objForm[v.name])
