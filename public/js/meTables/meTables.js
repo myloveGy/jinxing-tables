@@ -212,6 +212,8 @@
 
       var self = this
 
+      self.editColumns = []
+
       // 搜索
       this.search = function (params) {
         this.action = 'search'
@@ -494,7 +496,7 @@
 
           // 编辑表单信息
           if (k.edit !== undefined) {
-            form += meTables.formCreate(k, self.options.editFormParams)
+            form += meTables.formCreate(k, self.options.editFormParams, self)
           }
 
           // 搜索表单
@@ -614,7 +616,7 @@
         } catch (e) {
         }
 
-        meTables.initForm(f, data)
+        meTables.initForm(f, data, this.editColumns)
 
         // 显示之后的处理
         if (typeof this.afterShow === 'function' && this.afterShow(data) === false) {
@@ -1004,7 +1006,7 @@
     return div1 + '</div>' + div2 + '</ul></div></div>'
   }
 
-  meTables.formCreate = function (k, oParams) {
+  meTables.formCreate = function (k, oParams, self) {
     var form = ''
     if (!oParams.index) oParams.index = 0
 
@@ -1012,6 +1014,7 @@
     if (!k.edit.type) k.edit.type = 'text'
     if (!k.edit.name) k.edit.name = k.data
 
+    self.editColumns.push(k.edit)
     if (k.edit.type === 'hidden') {
       form += this.inputCreate(k.edit)
     } else {
@@ -1137,25 +1140,33 @@
   }
 
   // 初始化表单信息
-  meTables.initForm = function (select, data) {
+  meTables.initForm = function (select, data, columns) {
     var $fm = $(select)
     objForm = $fm.get(0) // 获取表单对象
     if (objForm !== undefined) {
       $fm.find('input[type=hidden]').val('')
       $fm.find('input[type=checkbox]').prop('checked', false)                                                                              // 多选菜单
       objForm.reset()                                                                // 表单重置
-      if (data !== undefined) {
-        for (var i in data) {
+      if (data !== undefined && columns && columns.length > 0) {
+        columns.forEach(function (v) {
+          var keyName = v.name
+          if (keyName.indexOf('[') > 0) {
+            keyName = keyName.replace(/(\[)|(\]\[)/ig, '.').slice(0, -1)
+          }
+
+          var tmpValue = $.getValue(data, keyName)
+
           // 其他除密码的以外的数据
-          if (objForm[i] !== undefined && objForm[i].type !== 'password') {
-            var obj = $(objForm[i]), tmp = data[i]
+          if (objForm[v.name] !== undefined && objForm[v.name].type !== 'password') {
+            var obj = $(objForm[v.name])
             // 时间处理
             if (obj.hasClass('time-format') || obj.data('time-format')) {
-              tmp = meTables.timeFormat(parseInt(tmp), obj.attr('time-format') ? obj.attr('time-format') : 'yyyy-MM-dd hh:mm:ss')
+              tmpValue = meTables.timeFormat(parseInt(tmpValue), obj.attr('time-format') || 'yyyy-MM-dd hh:mm:ss')
             }
-            objForm[i].value = tmp
+
+            objForm[v.name].value = tmpValue
           }
-        }
+        })
       }
     }
   }

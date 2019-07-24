@@ -64,8 +64,7 @@
 <script src="js/layer/layer.min.js"></script>
 <script src="js/meTables/meTables.js"></script>
 <script type="text/javascript">
-  $(function () {
-    meTables({
+    var v1 = meTables({
       title: '示例',
       buttonSelector: '#me-table-buttons-one',
       defaultFilters: {
@@ -119,7 +118,7 @@
             },
             edit: {
               required: true,
-              name: 'user[name]',
+              // name: 'user[age]',
             },
           },
           {
@@ -148,7 +147,7 @@
       },
     }).init()
 
-    meTables({
+    var v2 = meTables({
       sTable: '#me-table',
       buttonSelector: '#me-table-buttons-two',
       title: '示例',
@@ -258,7 +257,6 @@
         ],
       },
     }).init()
-  })
 </script>
 </body>
 </html>
