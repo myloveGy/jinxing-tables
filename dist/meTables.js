@@ -212,6 +212,8 @@
 
       var self = this
 
+      self.editColumns = []
+
       // 搜索
       this.search = function (params) {
         this.action = 'search'
@@ -492,9 +494,20 @@
             views += meTables.detailTableCreate(k.title, k.data, v, self.options.detailTable)
           }
 
-          if (k.edit !== undefined) form += meTables.formCreate(k, self.options.editFormParams)	// 编辑表单信息
-          if (k.search !== undefined) self.options.searchHtml += meTables.searchInputCreate(k, v, self.options.searchType)  // 搜索信息
-          if (k.defaultOrder) aOrders.push([v, k.defaultOrder])							// 默认排序
+          // 编辑表单信息
+          if (k.edit !== undefined) {
+            form += meTables.formCreate(k, self.options.editFormParams, self)
+          }
+
+          // 搜索表单
+          if (k.search !== undefined) {
+            self.options.searchHtml += meTables.searchInputCreate(k, v, self.options.searchType)
+          }
+
+          // 默认排序
+          if (k.defaultOrder && (k.defaultOrder === 'asc' || k.defaultOrder === 'desc')) {
+            aOrders.push([v, k.defaultOrder])
+          }
 
           // 是否隐藏
           if (k.isHide || k.bHide || k.hide) {
@@ -603,7 +616,7 @@
         } catch (e) {
         }
 
-        meTables.initForm(f, data)
+        meTables.initForm(f, data, this.editColumns)
 
         // 显示之后的处理
         if (typeof this.afterShow === 'function' && this.afterShow(data) === false) {
@@ -993,50 +1006,82 @@
     return div1 + '</div>' + div2 + '</ul></div></div>'
   }
 
-  meTables.formCreate = function (k, oParams) {
-    var form = ''
-    if (!oParams.index) oParams.index = 0
-
-    // 处理其他参数
-    if (!k.edit.type) k.edit.type = 'text'
-    if (!k.edit.name) k.edit.name = k.data
-
-    if (k.edit.type === 'hidden') {
-      form += this.inputCreate(k.edit)
-    } else {
-      k.edit['class'] = 'form-control ' + (k.edit['class'] ? k.edit['class'] : '')
-      // 处理多列
-      if (oParams.iMultiCols > 1 && !oParams.aCols) {
-        oParams.aCols = []
-        var iLength = Math.ceil(12 / oParams.iMultiCols)
-        oParams.aCols[0] = Math.floor(iLength * 0.3)
-        oParams.aCols[1] = iLength - oParams.aCols[0]
-      }
-
-      if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === 0)) {
-        form += '<div class="form-group">'
-      }
-
-      var div_name = k.edit.name.replace('[]', '')
-      form += this.labelCreate(k.title, {'class': 'col-sm-' + oParams.aCols[0] + ' control-label div-left-' + div_name})
-      form += '<div class="col-sm-' + oParams.aCols[1] + ' div-right-' + div_name + '">'
-
-      // 使用函数
-      try {
-        form += this[k.edit.type + 'Create'](k.edit, k.value)
-      } catch (e) {
-        k.edit.type = 'text'
-        form += this['inputCreate'](k.edit)
-      }
-
-      form += '</div>'
-
-      if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === (oParams.iColsLength - 1))) {
-        form += '</div>'
-      }
-
-      oParams.index++
+  meTables.formCreate = function (k, oParams, self) {
+    if (!oParams.index) {
+      oParams.index = 0
     }
+
+    // 处理默认类型
+    if (!k.edit.type) {
+      k.edit.type = 'text'
+    }
+
+    // 处理表单名称
+    if (!k.edit.name) {
+      if (k.data.indexOf('.')) {
+        var tmpName = k.data.split('.')
+        k.edit.name = tmpName.shift()
+        tmpName.forEach(function (v) {
+          k.edit.name += '[' + v + ']'
+        })
+      } else {
+        k.edit.name = k.data
+      }
+    }
+
+    self.editColumns.push({
+      name: k.edit.name,
+      index: k.data || k.edit.name,
+    })
+
+    // 隐藏表单
+    if (k.edit.type === 'hidden') {
+      return this.inputCreate(k.edit)
+    }
+
+    var form = ''
+    k.edit['class'] = 'form-control ' + (k.edit['class'] ? k.edit['class'] : '')
+
+    // 处理多列
+    if (oParams.iMultiCols > 1 && !oParams.aCols) {
+      oParams.aCols = []
+      var iLength = Math.ceil(12 / oParams.iMultiCols)
+      oParams.aCols[0] = Math.floor(iLength * 0.3)
+      oParams.aCols[1] = iLength - oParams.aCols[0]
+    }
+
+    if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === 0)) {
+      form += '<div class="form-group">'
+    }
+
+    // 处理连接的 className 名称
+    var div_name = k.edit.name.replace('[]', '')
+    if (div_name.indexOf('[')) {
+      div_name = div_name.replace(/(\[)|(\]\[)/ig, '-').replace(']', '')
+    }
+
+    form += this.labelCreate(k.title, {
+      'class': 'col-sm-' + oParams.aCols[0] + ' control-label div-left-' + div_name + ' ' + ($.getValue(k.edit, 'required') ? 'required' : ''),
+    })
+
+    form += '<div class="col-sm-' + oParams.aCols[1] + ' div-right-' + div_name + '">'
+
+    // 使用函数
+    try {
+      form += this[k.edit.type + 'Create'](k.edit, k.value)
+    } catch (e) {
+      k.edit.type = 'text'
+      form += this['inputCreate'](k.edit)
+    }
+
+    form += '</div>'
+
+    if (!oParams.bMultiCols || (oParams.iColsLength > 1 && oParams.index % oParams.iColsLength === (oParams.iColsLength - 1))) {
+      form += '</div>'
+    }
+
+    oParams.index++
+
 
     return form
   }
@@ -1126,25 +1171,31 @@
   }
 
   // 初始化表单信息
-  meTables.initForm = function (select, data) {
+  meTables.initForm = function (select, data, columns) {
     var $fm = $(select)
     objForm = $fm.get(0) // 获取表单对象
     if (objForm !== undefined) {
       $fm.find('input[type=hidden]').val('')
       $fm.find('input[type=checkbox]').prop('checked', false)                                                                              // 多选菜单
-      objForm.reset()                                                                // 表单重置
-      if (data !== undefined) {
-        for (var i in data) {
+
+      // 表单重置
+      objForm.reset()
+
+      // 表单重新赋值
+      if (data !== undefined && columns && columns.length > 0) {
+        columns.forEach(function (v) {
+          var tmpValue = $.getValue(data, v.index)
           // 其他除密码的以外的数据
-          if (objForm[i] !== undefined && objForm[i].type !== 'password') {
-            var obj = $(objForm[i]), tmp = data[i]
+          if (objForm[v.name] !== undefined && objForm[v.name].type !== 'password') {
+            var obj = $(objForm[v.name])
             // 时间处理
-            if (obj.hasClass('time-format')) {
-              tmp = meTables.timeFormat(parseInt(tmp), obj.attr('time-format') ? obj.attr('time-format') : 'yyyy-MM-dd hh:mm:ss')
+            if (obj.hasClass('time-format') || obj.data('time-format')) {
+              tmpValue = meTables.timeFormat(parseInt(tmpValue), obj.attr('time-format') || 'yyyy-MM-dd hh:mm:ss')
             }
-            objForm[i].value = tmp
+
+            objForm[v.name].value = tmpValue
           }
-        }
+        })
       }
     }
   }
@@ -1195,29 +1246,43 @@
   meTables.detailTable = function (object, data, tClass, row) {
     // 循环处理显示信息
     object.forEach(function (k) {
-      var tmpKey = k.data, tmpValue = data[tmpKey], dataInfo = $(tClass + tmpKey)
+      var tmpKey = k.data,
+        tmpValue = $.getValue(data, tmpKey),
+        dataInfo = $(tClass + (tmpKey ? tmpKey.replace('.', '-') : tmpKey))
       if (k.edit !== undefined && k.edit.type === 'password') {
         tmpValue = '******'
       }
 
-      (k.createdCell !== undefined && typeof k.createdCell === 'function') ? k.createdCell(dataInfo, tmpValue, data, row, undefined) : dataInfo.html(tmpValue)
+      // createdCell 函数处理
+      if (k.createdCell !== undefined && typeof k.createdCell === 'function') {
+        k.createdCell(dataInfo, tmpValue, data, row, undefined)
+        return
+      }
+
+      // render 函数处理
+      if (k.render && typeof k.render === 'function') {
+        tmpValue = k.render(tmpValue, true, data)
+      }
+
+      dataInfo.html(tmpValue)
     })
   }
 
   meTables.detailTableCreate = function (title, data, iKey, aParams) {
     html = ''
+    var className = data && typeof data === 'string' ? data.replace('.', '-') : data
     if (aParams && aParams.bMultiCols) {
       if (aParams.iColsLength > 1 && iKey % aParams.iColsLength === 0) {
         html += '<tr>'
       }
 
-      html += '<td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td>'
+      html += '<td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + className + '"></td>'
 
       if (aParams.iColsLength > 1 && iKey % aParams.iColsLength === (aParams.iColsLength - 1)) {
         html += '</tr>'
       }
     } else {
-      html += '<tr><td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + data + '"></td></tr>'
+      html += '<tr><td class="text-right" width="25%">' + title + '</td><td class="views-info data-detail-' + className + '"></td></tr>'
     }
 
     return html
@@ -1434,7 +1499,7 @@
     editFormParams: {				// 编辑表单配置
       bMultiCols: false,          // 是否多列
       iColsLength: 1,             // 几列
-      aCols: [3, 9],              // label 和 input 栅格化设置
+      aCols: [3, 8],              // label 和 input 栅格化设置
       sModalClass: '',			// 弹出模块框配置
       sModalDialogClass: '',		// 弹出模块的class
     },
