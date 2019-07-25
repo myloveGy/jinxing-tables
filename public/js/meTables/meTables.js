@@ -1182,7 +1182,7 @@
       objForm.reset()
 
       // 表单重新赋值
-      if (data !== undefined && columns && columns.length > 0) {
+      if (data && columns && columns.length > 0) {
         columns.forEach(function (v) {
           var tmpValue = $.getValue(data, v.index)
           // 其他除密码的以外的数据
