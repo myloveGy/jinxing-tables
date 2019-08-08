@@ -1088,15 +1088,21 @@
 
   meTables.selectInput = function (params, value, defaultObject) {
     html = ''
+    var defaultValue = $.getValue(params, 'default') || $.getValue(params, 'value')
+    delete params.default
+    delete params.value
+
     if (defaultObject) {
       for (i in defaultObject) {
-        html += '<option value="' + i + '" selected="selected">' + defaultObject[i] + '</option>'
+        html += '<option value="' + i + '" ' + (
+          defaultValue === null || defaultValue === undefined ? 'selected="selected"' : ''
+        ) + '>' + defaultObject[i] + '</option>'
       }
     }
 
     if (value) {
       for (i in value) {
-        html += '<option value="' + i + '">' + value[i] + '</option>'
+        html += '<option value="' + i + ' " '+ (defaultValue === i ? 'selected="selected"' : '') +'>' + value[i] + '</option>'
       }
     }
 
