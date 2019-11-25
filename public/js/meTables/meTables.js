@@ -1102,7 +1102,7 @@
 
     if (value) {
       for (i in value) {
-        html += '<option value="' + i + ' " '+ (defaultValue === i ? 'selected="selected"' : '') +'>' + value[i] + '</option>'
+        html += '<option value="' + i + '" ' + (defaultValue === i ? 'selected="selected"' : '') + '>' + value[i] + '</option>'
       }
     }
 
