@@ -74,6 +74,13 @@
 <script src="js/layer/layer.min.js"></script>
 <script src="js/meTables/meTables.js"></script>
 <script type="text/javascript">
+  const selectValue = [
+    {label: '请选择', value: ''},
+    {label: '我的', value: 0},
+    {label: '你的', value: 1},
+    {label: '他的', value: 2},
+  ]
+
   var v1 = meTables({
     title: '示例',
     buttonSelector: '#me-table-buttons-one',
@@ -102,14 +109,15 @@
           title: '名称',
           data: 'name',
           edit: {
+            type: 'select',
             required: true,
             rangelength: '[2, 40]',
           },
           render: function (data) {
             return 'name:' + data
           },
-          value: ['我的', '你的', '他的'],
-          search: {type: 'select', value: '1'},
+          value: selectValue,
+          search: {type: 'select', value: '1', hideAll: true},
           sortable: false,
         },
         {
@@ -228,7 +236,7 @@
             required: true,
             rangelength: '[2, 40]',
           },
-          value: ['我的', '你的', '他的'],
+          value: selectValue,
           search: {type: 'select'},
           sortable: false,
         },

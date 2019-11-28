@@ -811,8 +811,14 @@
     return value === undefined || value === '' || value === null
   }
 
+  // 是否为对象
   meTables.isObject = function (value) {
     return typeof value === 'object'
+  }
+
+  // 是否为数组
+  meTables.isArray = function (value) {
+    return Object.prototype.toString.call(value) == '[object Array]'
   }
 
   // 处理参数
@@ -912,9 +918,18 @@
         params.name += '[]'
       }
       html += '<select ' + this.handleParams(params) + '>'
-      for (i in d) {
-        html += '<option value="' + i + '" ' + (i == c ? ' selected="selected" ' : '') + ' >' + d[i] + '</option>'
+
+      // 如果是数组、那么就用数组的方式
+      if (this.isArray(d)) {
+        for (i in d) {
+          html += '<option value="' + d[i].value + '" ' + (d[i].value == c ? ' selected="selected" ' : '') + ' >' + d[i].label + '</option>'
+        }
+      } else {
+        for (i in d) {
+          html += '<option value="' + i + '" ' + (i == c ? ' selected="selected" ' : '') + ' >' + d[i] + '</option>'
+        }
       }
+
 
       html += '</select>'
     }
@@ -1089,10 +1104,12 @@
   meTables.selectInput = function (params, value, defaultObject) {
     html = ''
     var defaultValue = $.getValue(params, 'default') || $.getValue(params, 'value')
+    var hideAll = $.getValue(params, 'hideAll')
     delete params.default
     delete params.value
+    delete params.hideAll
 
-    if (defaultObject) {
+    if (defaultObject && !hideAll) {
       for (i in defaultObject) {
         html += '<option value="' + i + '" ' + (
           defaultValue === null || defaultValue === undefined ? 'selected="selected"' : ''
@@ -1101,9 +1118,16 @@
     }
 
     if (value) {
-      for (i in value) {
-        html += '<option value="' + i + '" ' + (defaultValue === i ? 'selected="selected"' : '') + '>' + value[i] + '</option>'
+      if (this.isArray(value)) {
+        for (i in value) {
+          html += '<option value="' + value[i].value + '" ' + (defaultValue === value[i].value ? 'selected="selected"' : '') + '>' + value[i].label + '</option>'
+        }
+      } else {
+        for (i in value) {
+          html += '<option value="' + i + '" ' + (defaultValue === i ? 'selected="selected"' : '') + '>' + value[i] + '</option>'
+        }
       }
+
     }
 
     if (params.multiple) params.name += '[]'
