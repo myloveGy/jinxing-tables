@@ -1549,16 +1549,16 @@
     },
 
     // 表单编辑其他信息
-    editFormParams: {				// 编辑表单配置
-      bMultiCols: false,          // 是否多列
-      iColsLength: 1,             // 几列
-      aCols: [3, 8],              // label 和 input 栅格化设置
-      modalClass: '',			// 弹出模块框配置
+    editFormParams: {				  // 编辑表单配置
+      bMultiCols: false,      // 是否多列
+      iColsLength: 1,         // 几列
+      aCols: [3, 8],          // label 和 input 栅格化设置
+      modalClass: '',			    // 弹出模块框配置
       modalDialogClass: '',		// 弹出模块的class
     },
 
     // 关于详情的配置
-    bViewFull: false, // 详情打开的方式 1 2 打开全屏
+    bViewFull: false,         // 详情打开的方式 1 2 打开全屏
     oViewConfig: {
       type: 1,
       shade: 0.3,
@@ -1567,7 +1567,7 @@
       area: ['50%', 'auto'],
     },
 
-    detailTable: {                   // 查看详情配置信息
+    detailTable: {            // 查看详情配置信息
       bMultiCols: false,
       iColsLength: 1,
     },
@@ -1590,18 +1590,18 @@
     table: {
       // "fnServerData": fnServerData,		// 获取数据的处理函数
       // "sAjaxSource":      "search",		// 获取数据地址
-      'bLengthChange': true, 			// 是否可以调整分页
-      'bAutoWidth': false,           	// 是否自动计算列宽
-      'bPaginate': true,			    // 是否使用分页
+      'bLengthChange': true, 			        // 是否可以调整分页
+      'bAutoWidth': false,           	    // 是否自动计算列宽
+      'bPaginate': true,			            // 是否使用分页
       'iDisplayStart': 0,
       'iDisplayLength': 10,
-      'bServerSide': true,		 	// 是否开启从服务器端获取数据
+      'bServerSide': true,		 	          // 是否开启从服务器端获取数据
       'bRetrieve': true,
       'bDestroy': true,
-      // "processing": true,		    // 是否使用加载进度条
+      // "processing": true,		          // 是否使用加载进度条
       // "searching": false,
-      'sPaginationType': 'full_numbers',     // 分页样式
-      // "order": [[1, "desc"]]       // 默认排序，
+      'sPaginationType': 'full_numbers',  // 分页样式
+      // "order": [[1, "desc"]]           // 默认排序，
       // sDom: "t<'row'<'col-xs-6'li><'col-xs-6'p>>"
     },
 
