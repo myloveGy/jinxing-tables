@@ -81,6 +81,13 @@
     {label: '他的', value: 2},
   ]
 
+  const selectObject = {
+    '': '请选择',
+    '0': '我的',
+    '1': '你的',
+    '2': '他的',
+  }
+
   var v1 = meTables({
     title: '示例',
     buttonSelector: '#me-table-buttons-one',
@@ -96,6 +103,10 @@
       delete: './action.php?type=delete',
       deleteAll: './action.php?type=delete-all',
       export: './action.php?type=export',
+    },
+    // 表单编辑其他信息
+    editFormParams: {                // 编辑表单配置
+      modalDialogClass: 'modal-lg',        // 弹出模块的class
     },
     table: {
       columns: [
@@ -236,7 +247,7 @@
             required: true,
             rangelength: '[2, 40]',
           },
-          value: {"0": "你的", "1": "我的"},
+          value: {'0': '你的', '1': '我的'},
           search: {type: 'select'},
           sortable: false,
         },

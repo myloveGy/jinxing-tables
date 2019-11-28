@@ -4,13 +4,14 @@ Jinxing-tables 更新记录
 v1.0.6 2019-11-28
 -----------------
 
-- feat: 编辑和搜索下拉选项支持数组方式定义
+- feat: 编辑select、radio、checkbox、和搜索select支持数组方式定义
 ```json
 [
   {"label": "显示值1", "value": "提交值1"}, 
   {"label": "显示值2", "value": "提交值2"}
 ]
 ```
+-- fix: 修改默认配置错误 modalDialogClass, 
 
 v1.0.5 2019-11-25
 -----------------

@@ -811,8 +811,14 @@
     return value === undefined || value === '' || value === null
   }
 
+  // 是否为对象
   meTables.isObject = function (value) {
     return typeof value === 'object'
+  }
+
+  // 是否为数组
+  meTables.isArray = function (value) {
+    return Object.prototype.toString.call(value) == '[object Array]'
   }
 
   // 处理参数
@@ -863,12 +869,22 @@
       params['class'] = 'ace valid'
       var c = params.default
       params = this.handleParams(params)
-      for (i in d) {
-        html += '<label class="line-height-1 blue"> ' +
-          '<input type="radio" ' + params + (c == i ? ' checked="checked" ' : '') + ' value="' + i + '"  /> ' +
-          '<span class="lbl"> ' + d[i] + ' </span> ' +
-          '</label>　 '
+      if (this.isArray(d)) {
+        for (i in d) {
+          html += '<label class="line-height-1 blue"> ' +
+            '<input type="radio" ' + params + (c == d[i].value ? ' checked="checked" ' : '') + ' value="' + d[i].value + '"  /> ' +
+            '<span class="lbl"> ' + d[i].label + ' </span> ' +
+            '</label>　 '
+        }
+      } else {
+        for (i in d) {
+          html += '<label class="line-height-1 blue"> ' +
+            '<input type="radio" ' + params + (c == i ? ' checked="checked" ' : '') + ' value="' + i + '"  /> ' +
+            '<span class="lbl"> ' + d[i] + ' </span> ' +
+            '</label>　 '
+        }
       }
+
     }
 
     return html
@@ -890,14 +906,27 @@
           '</label>' +
           '</div>'
       }
-      for (i in d) {
-        html += '<div class="checkbox ' + c + '">' +
-          '<label>' +
-          '<input type="checkbox" ' + params + ' value="' + i + '" />' +
-          '<span class="lbl"> ' + d[i] + ' </span>' +
-          '</label>' +
-          '</div>'
+
+      if (this.isArray(d)) {
+        for (i in d) {
+          html += '<div class="checkbox ' + c + '">' +
+            '<label>' +
+            '<input type="checkbox" ' + params + ' value="' + d[i].value + '" />' +
+            '<span class="lbl"> ' + d[i].label + ' </span>' +
+            '</label>' +
+            '</div>'
+        }
+      } else {
+        for (i in d) {
+          html += '<div class="checkbox ' + c + '">' +
+            '<label>' +
+            '<input type="checkbox" ' + params + ' value="' + i + '" />' +
+            '<span class="lbl"> ' + d[i] + ' </span>' +
+            '</label>' +
+            '</div>'
+        }
       }
+
     }
 
     return html
@@ -912,9 +941,18 @@
         params.name += '[]'
       }
       html += '<select ' + this.handleParams(params) + '>'
-      for (i in d) {
-        html += '<option value="' + i + '" ' + (i == c ? ' selected="selected" ' : '') + ' >' + d[i] + '</option>'
+
+      // 如果是数组、那么就用数组的方式
+      if (this.isArray(d)) {
+        for (i in d) {
+          html += '<option value="' + d[i].value + '" ' + (d[i].value == c ? ' selected="selected" ' : '') + ' >' + d[i].label + '</option>'
+        }
+      } else {
+        for (i in d) {
+          html += '<option value="' + i + '" ' + (i == c ? ' selected="selected" ' : '') + ' >' + d[i] + '</option>'
+        }
       }
+
 
       html += '</select>'
     }
@@ -1089,10 +1127,12 @@
   meTables.selectInput = function (params, value, defaultObject) {
     html = ''
     var defaultValue = $.getValue(params, 'default') || $.getValue(params, 'value')
+    var hideAll = $.getValue(params, 'hideAll')
     delete params.default
     delete params.value
+    delete params.hideAll
 
-    if (defaultObject) {
+    if (defaultObject && !hideAll) {
       for (i in defaultObject) {
         html += '<option value="' + i + '" ' + (
           defaultValue === null || defaultValue === undefined ? 'selected="selected"' : ''
@@ -1101,9 +1141,16 @@
     }
 
     if (value) {
-      for (i in value) {
-        html += '<option value="' + i + '" ' + (defaultValue === i ? 'selected="selected"' : '') + '>' + value[i] + '</option>'
+      if (this.isArray(value)) {
+        for (i in value) {
+          html += '<option value="' + value[i].value + '" ' + (defaultValue === value[i].value ? 'selected="selected"' : '') + '>' + value[i].label + '</option>'
+        }
+      } else {
+        for (i in value) {
+          html += '<option value="' + i + '" ' + (defaultValue === i ? 'selected="selected"' : '') + '>' + value[i] + '</option>'
+        }
       }
+
     }
 
     if (params.multiple) params.name += '[]'
@@ -1506,8 +1553,8 @@
       bMultiCols: false,          // 是否多列
       iColsLength: 1,             // 几列
       aCols: [3, 8],              // label 和 input 栅格化设置
-      sModalClass: '',			// 弹出模块框配置
-      sModalDialogClass: '',		// 弹出模块的class
+      modalClass: '',			// 弹出模块框配置
+      modalDialogClass: '',		// 弹出模块的class
     },
 
     // 关于详情的配置

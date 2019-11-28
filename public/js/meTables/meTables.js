@@ -869,12 +869,22 @@
       params['class'] = 'ace valid'
       var c = params.default
       params = this.handleParams(params)
-      for (i in d) {
-        html += '<label class="line-height-1 blue"> ' +
-          '<input type="radio" ' + params + (c == i ? ' checked="checked" ' : '') + ' value="' + i + '"  /> ' +
-          '<span class="lbl"> ' + d[i] + ' </span> ' +
-          '</label>　 '
+      if (this.isArray(d)) {
+        for (i in d) {
+          html += '<label class="line-height-1 blue"> ' +
+            '<input type="radio" ' + params + (c == d[i].value ? ' checked="checked" ' : '') + ' value="' + d[i].value + '"  /> ' +
+            '<span class="lbl"> ' + d[i].label + ' </span> ' +
+            '</label>　 '
+        }
+      } else {
+        for (i in d) {
+          html += '<label class="line-height-1 blue"> ' +
+            '<input type="radio" ' + params + (c == i ? ' checked="checked" ' : '') + ' value="' + i + '"  /> ' +
+            '<span class="lbl"> ' + d[i] + ' </span> ' +
+            '</label>　 '
+        }
       }
+
     }
 
     return html
@@ -896,14 +906,27 @@
           '</label>' +
           '</div>'
       }
-      for (i in d) {
-        html += '<div class="checkbox ' + c + '">' +
-          '<label>' +
-          '<input type="checkbox" ' + params + ' value="' + i + '" />' +
-          '<span class="lbl"> ' + d[i] + ' </span>' +
-          '</label>' +
-          '</div>'
+
+      if (this.isArray(d)) {
+        for (i in d) {
+          html += '<div class="checkbox ' + c + '">' +
+            '<label>' +
+            '<input type="checkbox" ' + params + ' value="' + d[i].value + '" />' +
+            '<span class="lbl"> ' + d[i].label + ' </span>' +
+            '</label>' +
+            '</div>'
+        }
+      } else {
+        for (i in d) {
+          html += '<div class="checkbox ' + c + '">' +
+            '<label>' +
+            '<input type="checkbox" ' + params + ' value="' + i + '" />' +
+            '<span class="lbl"> ' + d[i] + ' </span>' +
+            '</label>' +
+            '</div>'
+        }
       }
+
     }
 
     return html
@@ -1530,8 +1553,8 @@
       bMultiCols: false,          // 是否多列
       iColsLength: 1,             // 几列
       aCols: [3, 8],              // label 和 input 栅格化设置
-      sModalClass: '',			// 弹出模块框配置
-      sModalDialogClass: '',		// 弹出模块的class
+      modalClass: '',			// 弹出模块框配置
+      modalDialogClass: '',		// 弹出模块的class
     },
 
     // 关于详情的配置
