@@ -1018,7 +1018,11 @@
           continue
         }
 
-        div1 += ' <button class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + '-' + unique + ' btn-xs" data-row="' + index + '">'
+        var params = data[i]['buttonParams'] ? data[i]['buttonParams'] : {
+          title: data[i]['title'],
+        }
+
+        div1 += ' <button ' + this.handleParams(params) + 'class="btn ' + data[i]['className'] + ' ' + data[i]['cClass'] + '-' + unique + ' btn-xs" data-row="' + index + '">'
 
         // 存在icon
         if (data[i]['icon']) {
