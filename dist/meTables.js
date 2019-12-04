@@ -821,6 +821,11 @@
     return Object.prototype.toString.call(value) == '[object Array]'
   }
 
+  // 对象是一个数组、并且第一个元素也是对象
+  meTables.isArrayFirstObject = function(value) {
+    return this.isArray(value) && value.length > 0 && (typeof value[0] === 'object')
+  }
+
   // 处理参数
   meTables.handleParams = function (params, prefix) {
     other = ''
@@ -869,7 +874,7 @@
       params['class'] = 'ace valid'
       var c = params.default
       params = this.handleParams(params)
-      if (this.isArray(d)) {
+      if (this.isArrayFirstObject(d)) {
         for (i in d) {
           html += '<label class="line-height-1 blue"> ' +
             '<input type="radio" ' + params + (c == d[i].value ? ' checked="checked" ' : '') + ' value="' + d[i].value + '"  /> ' +
@@ -907,7 +912,7 @@
           '</div>'
       }
 
-      if (this.isArray(d)) {
+      if (this.isArrayFirstObject(d)) {
         for (i in d) {
           html += '<div class="checkbox ' + c + '">' +
             '<label>' +
@@ -943,7 +948,7 @@
       html += '<select ' + this.handleParams(params) + '>'
 
       // 如果是数组、那么就用数组的方式
-      if (this.isArray(d)) {
+      if (this.isArrayFirstObject(d)) {
         for (i in d) {
           html += '<option value="' + d[i].value + '" ' + (d[i].value == c ? ' selected="selected" ' : '') + ' >' + d[i].label + '</option>'
         }
@@ -1145,7 +1150,7 @@
     }
 
     if (value) {
-      if (this.isArray(value)) {
+      if (this.isArrayFirstObject(value)) {
         for (i in value) {
           html += '<option value="' + value[i].value + '" ' + (defaultValue === value[i].value ? 'selected="selected"' : '') + '>' + value[i].label + '</option>'
         }
