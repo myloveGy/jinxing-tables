@@ -74,19 +74,22 @@
 <script src="js/layer/layer.min.js"></script>
 <script src="js/meTables/meTables.js"></script>
 <script type="text/javascript">
-  const selectValue = [
+
+  const selectArrayValue = [
     {label: '请选择', value: ''},
     {label: '我的', value: 0},
     {label: '你的', value: 1},
     {label: '他的', value: 2},
   ]
 
-  const selectObject = {
+  const selectObjectValue = {
     '': '请选择',
     '0': '我的',
     '1': '你的',
     '2': '他的',
   }
+
+  const selectArray = ['请选择', '你的', '我的']
 
   var v1 = meTables({
     title: '示例',
@@ -127,13 +130,15 @@
           render: function (data) {
             return 'name:' + data
           },
-          value: selectValue,
-          search: {type: 'select', value: '1', hideAll: true},
+          value: selectArrayValue,
+          search: {type: 'select', value: 1, hideAll: true},
           sortable: false,
         },
         {
           title: '用户名称',
           data: 'user.name',
+          value: selectArray,
+          search: {type: 'select', value: '1', hideAll: true},
           edit: {
             required: true,
             name: 'user[name]',
@@ -247,7 +252,7 @@
             required: true,
             rangelength: '[2, 40]',
           },
-          value: {'0': '你的', '1': '我的'},
+          value: selectObjectValue,
           search: {type: 'select'},
           sortable: false,
         },
