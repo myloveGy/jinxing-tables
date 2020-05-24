@@ -1,6 +1,6 @@
 {
   "name": "me-tables",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "gulp",
   "main": "gulpfile.js",
   "scripts": {
