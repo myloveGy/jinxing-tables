@@ -1167,18 +1167,18 @@
   }
 
   meTables.textSearchMiddleCreate = function (params) {
-    params['id'] = 'search-' + params.name
+    params['id'] = params.id || ('search-' + params.name)
     return '<label for="search-' + params.name + '"> ' + params.title + ': ' + this.inputCreate(params) + '</label>'
   }
 
   meTables.selectSearchMiddleCreate = function (params, value, defaultObject) {
-    params['id'] = 'search-' + params.name
+    params['id'] = params.id || ('search-' + params.name)
     return '<label for="search-' + params.name + '"> ' + params.title + ': ' + this.selectInput(params, value, defaultObject) + '</label>'
   }
 
   meTables.searchParams = function (params) {
     var defaultParams = {
-      'id': 'search-' + params.name,
+      'id': params.id || ('search-' + params.name),
       'name': params.name,
       // "placeholder": meGrid.fn.getLanguage("pleaseInput") + params.title,
       'class': 'form-control',
