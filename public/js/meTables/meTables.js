@@ -153,12 +153,17 @@
         if (this.options.search && this.options.search.render) {
           // 头部显示搜索表单的处理
           if (this.options.searchType === 'top') {
+            // 样式替换
+            if (this.options.search.button.submit.style) {
+              this.options.search.button.submit.style = this.options.search.button.submit.style.replace('margin-left: 5px', '')
+            }
+
             if (this.options.search.button.submit.class) {
-              this.options.search.button.submit.class = this.options.search.button.submit.class.replace('btn-xs', '')
+              this.options.search.button.submit.class = this.options.search.button.submit.class.replace('btn-xs', 'btn-sm')
             }
 
             if (this.options.search.button.reset.class) {
-              this.options.search.button.reset.class = this.options.search.button.reset.class.replace('btn-xs', '')
+              this.options.search.button.reset.class = this.options.search.button.reset.class.replace('btn-xs', 'btn-sm')
             }
           }
 
@@ -1196,7 +1201,7 @@
   }
 
   meTables.topSearchRender = function (params, render) {
-    return '<div class="col-md-3"><div class="input-group"><span class="input-group-addon">' + params.title + '</span>' + render + '</div></div>'
+    return '<div class="col-md-3 table-search-col"><div class="input-group"><span class="input-group-addon">' + params.title + '</span>' + render + '</div></div>'
   }
 
   meTables.textSearchTopCreate = function (params) {
@@ -1206,7 +1211,7 @@
 
   meTables.selectSearchTopCreate = function (params, value, defaultObject) {
     params = this.topHandleParams(params)
-    return this.topSearchRender(params, this.searchInputCreate(props, value, defaultObject))
+    return this.topSearchRender(params, this.selectInput(params, value, defaultObject))
   }
 
   meTables.searchParams = function (params) {
@@ -1559,8 +1564,8 @@
         },
         reset: {
           class: 'btn btn-warning btn-xs',
-          style: 'margin-left: 10px;',
           icon: 'ace-icon fa fa-undo bigger-110',
+          style: 'margin-left: 5px;',
           text: meTables.getLanguage('reset'),
         },
       },
