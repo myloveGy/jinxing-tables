@@ -52,6 +52,11 @@
     return arrValue[key] ? arrValue[key] : defaultValue
   }
 
+  // 首字符大写
+  $.firstToUpper = function (v) {
+    return v && typeof v === 'string' ? v.slice(0, 1).toUpperCase() + v.slice(1) : ''
+  }
+
   var other, html, i, mixLoading = null,
     meTables = function (options) {
       // 绑定事件
@@ -146,6 +151,17 @@
         var searchButtonHtml = ''
         // 需要添加搜索表单
         if (this.options.search && this.options.search.render) {
+          // 头部显示搜索表单的处理
+          if (this.options.searchType === 'top') {
+            if (this.options.search.button.submit.class) {
+              this.options.search.button.submit.class = this.options.search.button.submit.class.replace('btn-xs', '')
+            }
+
+            if (this.options.search.button.reset.class) {
+              this.options.search.button.reset.class = this.options.search.button.reset.class.replace('btn-xs', '')
+            }
+          }
+
           searchButtonHtml = meTables.createButtonHtml(this.options.search.button)
           this.options.searchInputEvent = false
           this.options.searchSelectEvent = false
@@ -170,7 +186,7 @@
         } else {
           // 添加搜索表单信息
           if (this.options.search.render) {
-            this.options.searchHtml += searchButtonHtml
+            this.options.searchHtml += (this.options.searchType === 'top' ? '<div class="col-md-3">' + searchButtonHtml + '</div>' : searchButtonHtml)
             try {
               $(this.options.searchForm)[this.options.search.type](this.options.searchHtml)
             } catch (e) {
@@ -822,7 +838,7 @@
   }
 
   // 对象是一个数组、并且第一个元素也是对象
-  meTables.isArrayFirstObject = function(value) {
+  meTables.isArrayFirstObject = function (value) {
     return this.isArray(value) && value.length > 0 && (typeof value[0] === 'object')
   }
 
@@ -991,12 +1007,9 @@
 
     // select 默认选中
     var defaultObject = k.search.type === 'select' ? {'All': meTables.getLanguage('all')} : null,
-      func = k.search.type + 'SearchMiddleCreate',
-      defaultFunc = 'textSearchMiddleCreate'
-    if (searchType !== 'middle') {
-      func = func.replace('Middle', '')
-      defaultFunc = defaultFunc.replace('Middle', '')
-    }
+      firstToUpperType = $.firstToUpper(searchType),
+      func = k.search.type + 'Search' + firstToUpperType + 'Create',
+      defaultFunc = 'textSearch' + firstToUpperType + 'Create'
 
     try {
       html = this[func](k.search, k.value, defaultObject)
@@ -1174,6 +1187,26 @@
   meTables.selectSearchMiddleCreate = function (params, value, defaultObject) {
     params['id'] = params.id || ('search-' + params.name)
     return '<label for="search-' + params.name + '"> ' + params.title + ': ' + this.selectInput(params, value, defaultObject) + '</label>'
+  }
+
+  meTables.topHandleParams = function (params) {
+    params['id'] = params.id || ('search-' + params.name)
+    params['class'] = 'form-control ' + (params.class || '')
+    return params
+  }
+
+  meTables.topSearchRender = function (params, render) {
+    return '<div class="col-md-3"><div class="input-group"><span class="input-group-addon">' + params.title + '</span>' + render + '</div></div>'
+  }
+
+  meTables.textSearchTopCreate = function (params) {
+    params = this.topHandleParams(params)
+    return this.topSearchRender(params, this.inputCreate(params))
+  }
+
+  meTables.selectSearchTopCreate = function (params, value, defaultObject) {
+    params = this.topHandleParams(params)
+    return this.topSearchRender(params, this.searchInputCreate(props, value, defaultObject))
   }
 
   meTables.searchParams = function (params) {
@@ -1519,14 +1552,14 @@
       // 搜索表单按钮信息
       button: {
         submit: {
-          class: 'btn btn-info btn-sm',
+          class: 'btn btn-info btn-xs',
           icon: 'ace-icon fa fa-search bigger-110',
-          style: 'margin-left: 5px;padding-top: 1px; padding-bottom:1px',
+          style: 'margin-left: 5px;',
           text: meTables.getLanguage('search'),
         },
         reset: {
-          class: 'btn btn-warning btn-sm',
-          style: 'margin-left: 10px;padding-top: 1px; padding-bottom:1px',
+          class: 'btn btn-warning btn-xs',
+          style: 'margin-left: 10px;',
           icon: 'ace-icon fa fa-undo bigger-110',
           text: meTables.getLanguage('reset'),
         },

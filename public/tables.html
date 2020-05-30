@@ -26,6 +26,11 @@
       line-height: 1;
       content: "*";
     }
+
+    form div[class^='col-'] {
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
   </style>
 </head>
 <body role="document">
@@ -60,6 +65,11 @@
         <p id="me-table-buttons-one"></p>
         <table class="table table-striped table-bordered table-hover" id="show-table"></table>
         <p id="me-table-buttons-two"></p>
+        <div class="well">
+          <div class="row">
+            <form id="two-search-form"></form>
+          </div>
+        </div>
         <table class="table table-striped table-bordered table-hover" id="me-table"></table>
       </div>
     </div>
@@ -131,7 +141,7 @@
             return 'name:' + data
           },
           value: selectArrayValue,
-          search: {type: 'select', value: 1, hideAll: true},
+          search: {type: 'select', id: 'my-search-name', value: 1, hideAll: true},
           sortable: false,
         },
         {
@@ -186,7 +196,15 @@
     buttonSelector: '#me-table-buttons-two',
     title: '示例',
     number: false,
-    searchForm: '#me-table-search',
+    // 搜索相关
+    searchForm: '#two-search-form',
+    searchType: 'top',
+    search: {
+      button: {
+        submit: {style: ''},
+      },
+    },
+
     sModal: '#me-table-modal1',
     sFormId: '#me-table-update1',
     checkbox: {width: '60px'},
@@ -265,6 +283,7 @@
             name: 'text1',
             type: 'customize',
           },
+          search: {'id': '123', name: '123'},
         },
         {
           title: '测试数据2',
@@ -275,12 +294,14 @@
             name: 'text2',
             type: 'customize',
           },
+          search: {name: 'text2'},
         },
         {
           title: '创建时间',
           data: 'created_at',
           sortable: false,
           createdCell: MeTables.dateTimeString,
+          search: {},
         },
         {
           title: '修改时间',
