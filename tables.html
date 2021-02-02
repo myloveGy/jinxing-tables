@@ -1,64 +1,64 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title> meTables -- 使用示例 </title>
-    <!-- Bootstrap core CSS -->
-    <link href="/jinxing-tables/public/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/jinxing-tables/public/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/jinxing-tables/public/css/dataTables.bootstrap.css" rel="stylesheet">
-    <style type="text/css">
-        div.main {
-            margin-top: 50px;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title> meTables -- 使用示例 </title>
+  <!-- Bootstrap core CSS -->
+  <link href="/jinxing-tables/public/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/jinxing-tables/public/css/font-awesome.min.css" rel="stylesheet">
+  <link href="/jinxing-tables/public/css/dataTables.bootstrap.css" rel="stylesheet">
+  <style type="text/css">
+      div.main {
+          margin-top: 50px;
+      }
+  </style>
 </head>
 <body role="document">
 <!-- Fixed navbar -->
 <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/"> meTables -- 使用示例 </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav pull-right">
-                <li><a href="/jinxing-tables/">首页</a></li>
-                <li><a href="./jquery.html">jQuery.MeTables</a></li>
-                <li class="active"><a href="/jinxing-tables/tables.html">MeTables</a></li>
-                <li><a href="https://github.com/myloveGy/jinxing-tables" target="_blank">GitHub</a></li>
-                <li><a href="https://mylovegy.github.io/blog/" target="_blank">作者博客</a></li>
-            </ul>
-        </div><!--/.nav-collapse -->
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+              aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/"> meTables -- 使用示例 </a>
     </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav pull-right">
+        <li><a href="/jinxing-tables/">首页</a></li>
+        <li><a href="./jquery.html">jQuery.MeTables</a></li>
+        <li class="active"><a href="/jinxing-tables/tables.html">MeTables</a></li>
+        <li><a href="https://github.com/myloveGy/jinxing-tables" target="_blank">GitHub</a></li>
+        <li><a href="https://mylovegy.github.io/blog/" target="_blank">作者博客</a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
 </nav>
 
 <div class="container theme-showcase main" role="main">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="page-header">
-                <p><a href="./jquery.html"> 切换到 jquery 版本 </a></p>
-                <h1> 简单例子 </h1>
-            </div>
-            <div class="content">
-                <p id="me-table-buttons-one"></p>
-                <table class="table table-striped table-bordered table-hover" id="show-table"></table>
-                <p id="me-table-buttons-two"></p>
-                <table class="table table-striped table-bordered table-hover" id="me-table"></table>
-            </div>
-        </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="page-header">
+        <p><a href="./jquery.html"> 切换到 jquery 版本 </a></p>
+        <h1> 简单例子 </h1>
+      </div>
+      <div class="content">
+        <p id="me-table-buttons-one"></p>
+        <table class="table table-striped table-bordered table-hover" id="show-table"></table>
+        <p id="me-table-buttons-two"></p>
+        <table class="table table-striped table-bordered table-hover" id="me-table"></table>
+      </div>
     </div>
+  </div>
 </div>
 <!-- 加载公共js -->
 <script src="/jinxing-tables/public/js/jquery.min.js"></script>
@@ -69,172 +69,175 @@
 <script src="/jinxing-tables/public/js/layer/layer.min.js"></script>
 <script src="/jinxing-tables/dist/meTables.min.js"></script>
 <script type="text/javascript">
-    var url = {
-        search: '/jinxing-tables/api/search.json',
-        create: '/jinxing-tables/api/operation.json',
-        update: '/jinxing-tables/api/operation.json',
-        delete: '/jinxing-tables/api/operation.json',
-    }
+  var url = {
+    search: '/jinxing-tables/api/search.json',
+    create: '/jinxing-tables/api/operation.json',
+    update: '/jinxing-tables/api/operation.json',
+    delete: '/jinxing-tables/api/operation.json',
+  }
 
-    $(function () {
-        meTables({
-            title: "示例",
-            buttonSelector: "#me-table-buttons-one",
-            defaultFilters: {
-                "url:like": 123,
-                "name:like": 456
-            },
-            checkbox: {width: "60px"},
-            url: url,
-            table: {
-                columns: [
-                    {
-                        title: "id",
-                        data: "id",
-                        defaultOrder: "desc", // 默认一个排序
-                        edit: {type: "hidden"}
-                    },
-                    {
-                        title: "名称",
-                        data: "name",
-                        edit: {
-                            required: true,
-                            rangelength: "[2, 40]"
-                        },
-                        value: ['我的', '你的', '他的'],
-                        search: {type: "select"},
-                        sortable: false
-                    },
-                    {
-                        title: "测试数据",
-                        data: null,
-                        view: false, // 导出不显示
-                        hide: true,   // 列表不显示处理
-                        edit: {
-                            name: "text",
-                            type: "customize"
-                        }
-                    },
-                    {
-                        title: "创建时间",
-                        data: "created_at",
-                        sortable: false,
-                        createdCell: MeTables.dateTimeString
-                    },
-                    {
-                        title: "修改时间",
-                        data: "updated_at",
-                        sortable: false,
-                        createdCell: MeTables.dateTimeString
-                    }
-                ]
-            }
-        }).init();
+  var m1 = meTables({
+    title: '示例',
+    buttonSelector: '#me-table-buttons-one',
+    defaultFilters: {
+      'url:like': 123,
+      'name:like': 456,
+    },
+    checkbox: {width: '60px'},
+    url: url,
+    table: {
+      columns: [
+        {
+          title: 'id',
+          data: 'id',
+          defaultOrder: 'desc', // 默认一个排序
+          edit: {type: 'hidden'},
+        },
+        {
+          title: '名称',
+          data: 'name',
+          edit: {
+            required: true,
+            rangelength: '[2, 40]',
+          },
+          value: ['我的', '你的', '他的'],
+          search: {type: 'select'},
+          sortable: false,
+        },
+        {
+          title: '测试数据',
+          data: null,
+          view: false, // 导出不显示
+          hide: true,   // 列表不显示处理
+          edit: {
+            name: 'text',
+            type: 'customize',
+          },
+        },
+        {
+          title: '创建时间',
+          data: 'created_at',
+          sortable: false,
+          createdCell: MeTables.dateTimeString,
+        },
+        {
+          title: '修改时间',
+          data: 'updated_at',
+          sortable: false,
+          createdCell: MeTables.dateTimeString,
+        },
+      ],
+    },
+  })
 
-        meTables({
-            sTable: "#me-table",
-            buttonSelector: "#me-table-buttons-two",
-            title: "示例",
-            number: false,
-            searchForm: "#me-table-search",
-            sModal: "#me-table-modal1",
-            sFormId: "#me-table-update1",
-            checkbox: {width: "60px"},
-            url: url,
+  var m2 = meTables({
+    sTable: '#me-table',
+    buttonSelector: '#me-table-buttons-two',
+    title: '示例',
+    number: false,
+    searchForm: '#me-table-search',
+    sModal: '#me-table-modal1',
+    sFormId: '#me-table-update1',
+    checkbox: {width: '60px'},
+    url: url,
 
-            // 按钮配置说明
-            buttons: {
-                // 关闭之前存在按钮
-                create: null,
+    // 按钮配置说明
+    buttons: {
+      // 关闭之前存在按钮
+      create: null,
 
-                updateAll: null,
+      updateAll: null,
 
-                // 自定义添加按钮
-                other: {
-                    text: "其他按钮",
-                    icon: "fa fa-list",
-                    class: "btn btn-success other-class"
-                },
+      // 自定义添加按钮
+      other: {
+        text: '其他按钮',
+        icon: 'fa fa-list',
+        class: 'btn btn-success other-class',
+      },
 
-                test: {
-                    text: "测试按钮",
-                    icon: "fa fa-users",
-                    class: "btn btn-info test-class"
-                }
-            },
+      test: {
+        text: '测试按钮',
+        icon: 'fa fa-users',
+        class: 'btn btn-info test-class',
+      },
+    },
 
-            operations: {
-                buttons: {
-                    update: {
-                        show: function (data) {
-                            return data.id === 11;
-                        }
-                    },
-                    other: {
-                        title: "其他信息",
-                        btnClass: "btn-warning",
-                        operationClass: "me-table-other",
-                        icon: "fa fa-user",
-                        colorClass: "red"
-                    }
-                }
-            },
+    operations: {
+      buttons: {
+        update: {
+          show: function (data) {
+            return data.id === 11
+          },
+        },
+        other: {
+          title: '其他信息',
+          btnClass: 'btn-warning',
+          operationClass: 'me-table-other',
+          icon: 'fa fa-user',
+          colorClass: 'red',
+        },
+      },
+    },
 
-            table: {
-                columns: [
-                    {
-                        title: "id",
-                        data: "id",
-                        defaultOrder: "desc", // 默认一个排序
-                        edit: {type: "hidden"}
-                    },
-                    {
-                        title: "名称",
-                        data: "name",
-                        edit: {
-                            required: true,
-                            rangelength: "[2, 40]"
-                        },
-                        value: ['我的', '你的', '他的'],
-                        search: {type: "select"},
-                        sortable: false
-                    },
-                    {
-                        title: "测试数据1",
-                        data: null,
-                        view: false, // 导出不显示
-                        hide: true,   // 列表不显示处理
-                        edit: {
-                            name: "text1",
-                            type: "customize"
-                        }
-                    },
-                    {
-                        title: "测试数据2",
-                        data: null,
-                        view: false, // 导出不显示
-                        hide: true,   // 列表不显示处理
-                        edit: {
-                            name: "text2",
-                            type: "customize"
-                        }
-                    },
-                    {
-                        title: "创建时间",
-                        data: "created_at",
-                        sortable: false,
-                        createdCell: MeTables.dateTimeString
-                    },
-                    {
-                        title: "修改时间",
-                        data: "updated_at",
-                        sortable: false,
-                        createdCell: MeTables.dateTimeString
-                    }
-                ]
-            }
-        }).init();
-    });
+    table: {
+      columns: [
+        {
+          title: 'id',
+          data: 'id',
+          defaultOrder: 'desc', // 默认一个排序
+          edit: {type: 'hidden'},
+        },
+        {
+          title: '名称',
+          data: 'name',
+          edit: {
+            required: true,
+            rangelength: '[2, 40]',
+          },
+          value: ['我的', '你的', '他的'],
+          search: {type: 'select'},
+          sortable: false,
+        },
+        {
+          title: '测试数据1',
+          data: null,
+          view: false, // 导出不显示
+          hide: true,   // 列表不显示处理
+          edit: {
+            name: 'text1',
+            type: 'customize',
+          },
+        },
+        {
+          title: '测试数据2',
+          data: null,
+          view: false, // 导出不显示
+          hide: true,   // 列表不显示处理
+          edit: {
+            name: 'text2',
+            type: 'customize',
+          },
+        },
+        {
+          title: '创建时间',
+          data: 'created_at',
+          sortable: false,
+          createdCell: MeTables.dateTimeString,
+        },
+        {
+          title: '修改时间',
+          data: 'updated_at',
+          sortable: false,
+          createdCell: MeTables.dateTimeString,
+        },
+      ],
+    },
+  })
+
+  $(function () {
+    m1.init()
+    m2.init()
+  })
 </script>
 </body>
 </html>
